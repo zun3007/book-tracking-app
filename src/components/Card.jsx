@@ -1,4 +1,6 @@
 import Avatar from './Avatar';
+import Button from './Button';
+import ButtonGroup from './ButtonGroup';
 import CardContent from './CardContent';
 
 export default function Card({ person }) {
@@ -13,6 +15,11 @@ export default function Card({ person }) {
         licenseId={licenseId}
         role={role}
       />
+      <ButtonGroup>
+        <Button content='Follow' />
+        <Button content='Send Mail' />
+        <Button content='Show Phone Number' />
+      </ButtonGroup>
     </div>
   );
 }
