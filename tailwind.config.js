@@ -4,5 +4,9 @@ export default {
   theme: {
     extend: {},
   },
-  plugins: ['tailwindcss-animate', 'prettier-plugin-tailwindcss'],
+  plugins: [
+    'tailwindcss-animate',
+    'prettier-plugin-tailwindcss',
+    '@tailwindcss/typography',
+  ],
 };

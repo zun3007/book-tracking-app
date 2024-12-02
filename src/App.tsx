@@ -1,18 +1,18 @@
 import { createBrowserRouter, RouterProvider } from 'react-router-dom';
 
 import State from './pages/State';
-import Homepage from './pages/Homepage';
 import Form from './pages/Form';
 import RenderList from './pages/RenderList';
 import SignIn from './pages/SignIn';
+import LandingPage from './pages/LandingPage';
 
 const router = createBrowserRouter([
   {
     index: true,
-    element: <Homepage />,
+    element: <LandingPage />,
   },
   {
-    path: '/sign-in',
+    path: '/login',
     element: <SignIn />,
   },
   {

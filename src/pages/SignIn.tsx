@@ -1,5 +1,9 @@
+import { motion } from 'framer-motion';
 import { useForm, SubmitHandler } from 'react-hook-form';
-import { GoogleIcon } from '../ui/CustomIcons';
+import { Particles } from 'react-tsparticles';
+import { loadFull } from 'tsparticles';
+import InputForm from '../ui/InputForm'; // Adjust import based on your file structure
+import { GoogleIcon } from '../ui/CustomIcons'; // Adjust import based on your file structure
 
 interface IFormInput {
   email: string;
@@ -7,53 +11,101 @@ interface IFormInput {
 }
 
 export default function SignIn() {
-  const { register, handleSubmit } = useForm<IFormInput>();
-  const onSubmit: SubmitHandler<IFormInput> = function (data) {
+  const {
+    register,
+    formState: { errors },
+    handleSubmit,
+  } = useForm<IFormInput>();
+
+  const onSubmit: SubmitHandler<IFormInput> = async (data) => {
     console.log(data);
   };
 
   return (
-    <section className='container text-center mx-auto flex align-middle flex-col justify-center max-w-md gap-8 text-neutral-900 shadow-xl rounded-xl px-12 py-16 mt-28 shadow-neutral-300'>
-      <h1 className='text-3xl sm:text-4xl antialiased hover:subpixel-antialiased font-semibold tracking-normal mb-6'>
-        Welcome back
-      </h1>
-      <form onSubmit={handleSubmit(onSubmit)} className='flex flex-col gap-3'>
-        <input
-          className='shadow appearance-none border rounded w-full py-2 px-3 text-neutral-700 leading-tight focus:outline-double focus:shadow-outline'
-          type='email'
-          placeholder='Email'
-          {...(register('email'), { required: true })}
-        />
-        <input
-          className='shadow appearance-none border rounded w-full py-2 px-3 text-neutral-700 leading-tight focus:outline-double focus:shadow-outline'
-          type='password'
-          placeholder='Password'
-          {...(register('password'), { required: true, minLength: 8 })}
-        />
-        <a className='text-sm text-blue-500' href='#'>
-          Forgot Password
-        </a>
-        <button
-          type='submit'
-          className='w-full py-2 text-lg rounded-lg bg-neutral-800 text-neutral-100 my-4'
-        >
-          Login
-        </button>
-        <p className='text-sm'>
-          Don't have an account?{' '}
-          <a className='text-blue-500' href='#'>
-            Register
-          </a>
-        </p>
-      </form>
-      <p>OR</p>
-      <button
-        type='button'
-        className='flex items-center justify-center w-full py-2 text-lg rounded-lg bg-neutral-800 text-neutral-100'
+    <div className='relative h-screen flex items-center justify-center'>
+      <Particles
+        init={loadFull}
+        options={{
+          particles: {
+            number: { value: 50 },
+            color: { value: '#ffffff' },
+            shape: { type: 'circle' },
+            opacity: { value: 0.3 },
+            size: { value: 3 },
+            move: { enable: true, speed: 1 },
+          },
+          background: { color: { value: '#ffffff' } },
+        }}
+        className='absolute inset-0'
+      />
+      <motion.section
+        initial={{ opacity: 0, scale: 0.9 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{ duration: 0.6 }}
+        className='relative z-10 bg-white rounded-3xl shadow-2xl p-8 max-w-md w-full'
       >
-        <GoogleIcon className='h-6 w-6 mr-2' />
-        Continue with Google
-      </button>
-    </section>
+        <motion.h1
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8, delay: 0.2 }}
+          className='text-4xl font-bold text-slate-800 mb-6 text-center'
+        >
+          Welcome Back
+        </motion.h1>
+        <motion.form
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 1 }}
+          onSubmit={handleSubmit(onSubmit)}
+          className='flex flex-col gap-4'
+        >
+          <InputForm
+            type='email'
+            placeholder='Email'
+            error={errors.email}
+            {...register('email', { required: 'Email is required' })}
+          />
+          <InputForm
+            type='password'
+            placeholder='Password'
+            error={errors.password}
+            {...register('password', {
+              required: 'Password is required',
+              minLength: { value: 8, message: 'At least 8 characters' },
+            })}
+          />
+          <a
+            className='text-sm text-blue-500 hover:underline mt-2 self-start'
+            href='#'
+          >
+            Forgot Password?
+          </a>
+          <motion.button
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            type='submit'
+            className='w-full py-3 text-lg rounded-lg bg-blue-600 text-white mt-4 shadow-lg hover:bg-blue-500 transition-all'
+          >
+            Login
+          </motion.button>
+          <p className='text-sm text-center'>
+            Don’t have an account?{' '}
+            <a className='text-blue-500 hover:underline' href='#'>
+              Register
+            </a>
+          </p>
+        </motion.form>
+        <div className='text-center mt-4'>OR</div>
+        <motion.button
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
+          type='button'
+          className='flex items-center justify-center w-full py-3 text-lg rounded-lg bg-slate-800 text-white mt-4 shadow-lg hover:bg-slate-700 transition-all'
+        >
+          <GoogleIcon className='h-6 w-6 mr-2' />
+          Continue with Google
+        </motion.button>
+      </motion.section>
+    </div>
   );
 }
