@@ -12,6 +12,7 @@ import AllBooksPage from './pages/AllBooks';
 import FavoritesPage from './pages/Favorites';
 import SettingsPage from './pages/Settings';
 import { Suspense } from 'react';
+import Register from './pages/Register';
 
 // Initialize React Query client
 const queryClient = new QueryClient();
@@ -24,6 +25,10 @@ const router = createBrowserRouter([
   {
     path: '/login',
     element: <SignInPage />,
+  },
+  {
+    path: '/register',
+    element: <Register />,
   },
   {
     path: '/dashboard',

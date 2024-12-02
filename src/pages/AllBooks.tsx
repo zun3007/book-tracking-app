@@ -1,42 +1,40 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import { useQuery } from '@tanstack/react-query';
 import { useSpring, animated } from '@react-spring/web';
+import { supabase } from '../utils/supabaseClient';
+import { setBooks } from '../slices/bookSlice';
 
 function AllBooksPage() {
-  const [books, setBooks] = useState([]);
-  const [genres, setGenres] = useState(['All']);
+  const dispatch = useDispatch();
+  const books = useSelector((state) => state.books.items);
+  const genres = useSelector((state) => state.books.genres);
+
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedGenre, setSelectedGenre] = useState('All');
   const [currentPage, setCurrentPage] = useState(1);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
   const booksPerPage = 8;
 
-  useEffect(() => {
-    const fetchData = async () => {
-      setLoading(true);
-      try {
-        const bookResponse = await fetch('/api/books');
-        const genreResponse = await fetch('/api/genres');
+  // Fetch books and genres from Supabase
+  const { isLoading, error } = useQuery(['books', 'genres'], async () => {
+    const bookData = await supabase.from('books').select('*');
+    const genreData = await supabase.from('genres').select('*');
 
-        if (!bookResponse.ok || !genreResponse.ok) {
-          throw new Error('Failed to fetch data');
-        }
+    if (bookData.error || genreData.error) {
+      throw new Error('Failed to fetch data');
+    }
 
-        const bookData = await bookResponse.json();
-        const genreData = await genreResponse.json();
+    // Dispatch books and genres to Redux store
+    dispatch(
+      setBooks({
+        books: bookData.data,
+        genres: ['All', ...genreData.data.map((g) => g.name)],
+      })
+    );
+    return { books: bookData.data, genres: genreData.data };
+  });
 
-        setBooks(bookData);
-        setGenres(['All', ...genreData]);
-      } catch (err) {
-        setError(err.message);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchData();
-  }, []);
-
+  // Filter books based on search query and genre
   const filteredBooks = books.filter(
     (book) =>
       (selectedGenre === 'All' || book.genres.includes(selectedGenre)) &&
@@ -46,12 +44,13 @@ function AllBooksPage() {
         ))
   );
 
+  // Pagination logic
   const indexOfLastBook = currentPage * booksPerPage;
   const indexOfFirstBook = indexOfLastBook - booksPerPage;
   const currentBooks = filteredBooks.slice(indexOfFirstBook, indexOfLastBook);
-
   const totalPages = Math.ceil(filteredBooks.length / booksPerPage);
 
+  // Animations
   const navbarAnimation = useSpring({
     from: { opacity: 0, transform: 'translateY(-20px)' },
     to: { opacity: 1, transform: 'translateY(0)' },
@@ -145,10 +144,10 @@ function AllBooksPage() {
 
       {/* Books Grid */}
       <main className='py-10 px-8'>
-        {loading ? (
+        {isLoading ? (
           <p className='text-center text-slate-500'>Loading books...</p>
         ) : error ? (
-          <p className='text-center text-red-500'>{error}</p>
+          <p className='text-center text-red-500'>{error.message}</p>
         ) : filteredBooks.length > 0 ? (
           <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6'>
             {currentBooks.map((book) => (
