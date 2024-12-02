@@ -139,12 +139,6 @@ We welcome contributions to improve this project!
 
 ---
 
-## 📜 License
-
-This project is released under the MIT License. See the [LICENSE](LICENSE) file for details.
-
----
-
 ## 👩‍💻 Author
 
 - **Zun3007** - [GitHub Profile](https://github.com/zun3007)
