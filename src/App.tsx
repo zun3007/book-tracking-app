@@ -1,11 +1,9 @@
 import { createBrowserRouter, RouterProvider } from 'react-router-dom';
 
-import State from './pages/State';
-import Form from './pages/Form';
-import RenderList from './pages/RenderList';
 import SignIn from './pages/SignIn';
 import LandingPage from './pages/LandingPage';
-import ProtectedRoutes from './components/ProtectedRoutes';
+import UserDashboard from './pages/UserDashboard';
+import AllBooksPage from './pages/AllBooks';
 
 const router = createBrowserRouter([
   {
@@ -25,29 +23,11 @@ const router = createBrowserRouter([
     element: <h1>Hello World!</h1>,
   },
   {
-    path: '/app',
-    element: (
-      <ProtectedRoutes>
-        <h1>hello user</h1>
-      </ProtectedRoutes>
-    ),
-    children: [],
+    path: '/forgot-password/:id',
+    element: <h1>Hello World!</h1>,
   },
-  {
-    path: '/admin',
-  },
-  {
-    path: '/state',
-    element: <State />,
-  },
-  {
-    path: '/form',
-    element: <Form />,
-  },
-  {
-    path: '/render-list',
-    element: <RenderList />,
-  },
+  { path: '/dashboard', element: <UserDashboard /> },
+  { path: '/all-books', element: <AllBooksPage /> },
 ]);
 
 export default function App() {
