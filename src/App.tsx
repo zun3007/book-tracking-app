@@ -5,6 +5,7 @@ import Form from './pages/Form';
 import RenderList from './pages/RenderList';
 import SignIn from './pages/SignIn';
 import LandingPage from './pages/LandingPage';
+import ProtectedRoutes from './components/ProtectedRoutes';
 
 const router = createBrowserRouter([
   {
@@ -18,6 +19,22 @@ const router = createBrowserRouter([
   {
     path: '/sign-up',
     element: <h1>Hello World!</h1>,
+  },
+  {
+    path: '/forgot-password',
+    element: <h1>Hello World!</h1>,
+  },
+  {
+    path: '/app',
+    element: (
+      <ProtectedRoutes>
+        <h1>hello user</h1>
+      </ProtectedRoutes>
+    ),
+    children: [],
+  },
+  {
+    path: '/admin',
   },
   {
     path: '/state',

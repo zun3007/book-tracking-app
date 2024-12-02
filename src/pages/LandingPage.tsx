@@ -1,7 +1,16 @@
 import { useSpring, animated } from '@react-spring/web';
+import { useEffect } from 'react';
 import { useInView } from 'react-intersection-observer';
 
 function LandingPage() {
+  useEffect(() => {
+    document.title = 'StoryTrack | Login';
+
+    return () => {
+      document.title = 'StoryTrack';
+    };
+  }, []);
+
   // Hero Animations
   const heroAnimation = useSpring({
     from: { opacity: 0, transform: 'translateY(50px)' },

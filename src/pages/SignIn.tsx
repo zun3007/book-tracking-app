@@ -2,8 +2,9 @@ import { motion } from 'framer-motion';
 import { useForm, SubmitHandler } from 'react-hook-form';
 import { Particles } from 'react-tsparticles';
 import { loadFull } from 'tsparticles';
-import InputForm from '../ui/InputForm'; // Adjust import based on your file structure
-import { GoogleIcon } from '../ui/CustomIcons'; // Adjust import based on your file structure
+import InputForm from '../ui/InputForm';
+import { GoogleIcon } from '../ui/CustomIcons';
+import { useLayoutEffect } from 'react';
 
 interface IFormInput {
   email: string;
@@ -11,6 +12,15 @@ interface IFormInput {
 }
 
 export default function SignIn() {
+  useLayoutEffect(() => {
+    document.title =
+      'StoryTrack | The only service you need to manage your Story';
+
+    return () => {
+      document.title = 'StoryTrack';
+    };
+  }, []);
+
   const {
     register,
     formState: { errors },
