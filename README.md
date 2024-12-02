@@ -90,22 +90,6 @@ src/
 
 ---
 
-## 📸 Screenshots
-
-### Sign-In Page
-
-A responsive, animated page for user authentication with form validation.
-
-![Sign-In Page](https://via.placeholder.com/800x400)
-
-### Dashboard
-
-Track your reading journey, organize shelves, and view recommendations.
-
-![Dashboard](https://via.placeholder.com/800x400)
-
----
-
 ## 🛡️ Security and Validation
 
 - **User Authentication**: Relies on Supabase for secure user accounts.
