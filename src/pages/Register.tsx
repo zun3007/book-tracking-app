@@ -1,4 +1,4 @@
-import React from 'react';
+import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -7,8 +7,16 @@ import { useNavigate } from 'react-router-dom';
 import { supabase } from '../utils/supabaseClient';
 import InputForm from '../ui/InputForm';
 import { motion } from 'framer-motion';
+import { Link } from 'react-router-dom';
 
-// Validation schema using Zod
+const generateCaptcha = () => {
+  const characters =
+    'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+  return Array.from({ length: 6 }, () =>
+    characters.charAt(Math.floor(Math.random() * characters.length))
+  ).join('');
+};
+
 const RegisterSchema = z
   .object({
     email: z
@@ -20,6 +28,7 @@ const RegisterSchema = z
       .min(6, 'Password must be at least 6 characters')
       .nonempty('Password is required'),
     confirmPassword: z.string().nonempty('Confirm Password is required'),
+    captcha: z.string().nonempty('CAPTCHA is required'),
   })
   .refine((data) => data.password === data.confirmPassword, {
     path: ['confirmPassword'],
@@ -30,7 +39,7 @@ type RegisterFormInputs = z.infer<typeof RegisterSchema>;
 
 export default function Register() {
   const navigate = useNavigate();
-
+  const [captcha, setCaptcha] = useState(generateCaptcha());
   const {
     register,
     handleSubmit,
@@ -40,6 +49,11 @@ export default function Register() {
   });
 
   const onSubmit = async (data: RegisterFormInputs) => {
+    if (data.captcha !== captcha) {
+      toast.error('CAPTCHA does not match.');
+      return;
+    }
+
     const { email, password } = data;
 
     try {
@@ -80,46 +94,50 @@ export default function Register() {
         </motion.h1>
         <form onSubmit={handleSubmit(onSubmit)} className='space-y-6'>
           {/* Email Input */}
-          <motion.div
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ delay: 0.4 }}
-          >
-            <InputForm
-              type='email'
-              placeholder='Email'
-              error={errors.email?.message}
-              {...register('email')}
-            />
-          </motion.div>
+          <InputForm
+            type='email'
+            placeholder='Email'
+            error={errors.email?.message}
+            {...register('email')}
+          />
 
           {/* Password Input */}
-          <motion.div
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ delay: 0.6 }}
-          >
-            <InputForm
-              type='password'
-              placeholder='Password'
-              error={errors.password?.message}
-              {...register('password')}
-            />
-          </motion.div>
+          <InputForm
+            type='password'
+            placeholder='Password'
+            error={errors.password?.message}
+            {...register('password')}
+          />
 
           {/* Confirm Password Input */}
-          <motion.div
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ delay: 0.8 }}
-          >
+          <InputForm
+            type='password'
+            placeholder='Confirm Password'
+            error={errors.confirmPassword?.message}
+            {...register('confirmPassword')}
+          />
+
+          {/* CAPTCHA */}
+          <div className='mt-4'>
+            <div className='flex items-center justify-between'>
+              <div className='bg-gray-200 px-4 py-2 rounded-md font-mono text-lg text-gray-800 tracking-wider'>
+                {captcha}
+              </div>
+              <button
+                type='button'
+                onClick={() => setCaptcha(generateCaptcha())}
+                className='text-blue-500 hover:text-blue-600 underline'
+              >
+                Refresh
+              </button>
+            </div>
             <InputForm
-              type='password'
-              placeholder='Confirm Password'
-              error={errors.confirmPassword?.message}
-              {...register('confirmPassword')}
+              type='text'
+              placeholder='Enter CAPTCHA'
+              error={errors.captcha?.message}
+              {...register('captcha')}
             />
-          </motion.div>
+          </div>
 
           {/* Submit Button */}
           <motion.div
@@ -144,9 +162,9 @@ export default function Register() {
           transition={{ delay: 1.2 }}
         >
           Already have an account?{' '}
-          <a href='/login' className='text-blue-500 font-bold hover:underline'>
+          <Link to='/login' className='text-blue-500 font-bold hover:underline'>
             Sign In
-          </a>
+          </Link>
         </motion.p>
       </motion.div>
     </motion.section>

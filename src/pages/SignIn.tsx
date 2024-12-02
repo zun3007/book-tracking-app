@@ -7,8 +7,16 @@ import InputForm from '../ui/InputForm';
 import { supabase } from '../utils/supabaseClient';
 import { useMutation } from '@tanstack/react-query';
 import { motion } from 'framer-motion';
+import { useState } from 'react';
 
-// Form validation schema using Zod
+const generateCaptcha = () => {
+  const characters =
+    'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+  return Array.from({ length: 6 }, () =>
+    characters.charAt(Math.floor(Math.random() * characters.length))
+  ).join('');
+};
+
 const SignInSchema = z.object({
   email: z
     .string()
@@ -18,12 +26,14 @@ const SignInSchema = z.object({
     .string()
     .min(6, 'Password must be at least 6 characters')
     .nonempty('Password is required'),
+  captcha: z.string().nonempty('CAPTCHA is required'),
 });
 
 type SignInFormInputs = z.infer<typeof SignInSchema>;
 
 export default function SignInPage() {
   const navigate = useNavigate();
+  const [captcha, setCaptcha] = useState(generateCaptcha());
 
   const {
     register,
@@ -33,7 +43,6 @@ export default function SignInPage() {
     resolver: zodResolver(SignInSchema),
   });
 
-  // React Query mutation for signing in
   const signInMutation = useMutation({
     mutationFn: async (data: SignInFormInputs) => {
       const { email, password } = data;
@@ -54,6 +63,10 @@ export default function SignInPage() {
   });
 
   const onSubmit = (data: SignInFormInputs) => {
+    if (data.captcha !== captcha) {
+      toast.error('CAPTCHA does not match.');
+      return;
+    }
     signInMutation.mutate(data);
   };
 
@@ -73,12 +86,7 @@ export default function SignInPage() {
         >
           Sign In
         </motion.h1>
-        <form
-          onSubmit={handleSubmit(onSubmit)}
-          className='space-y-6'
-          style={{ paddingBottom: '16px' }}
-        >
-          {/* Email Input */}
+        <form onSubmit={handleSubmit(onSubmit)} className='space-y-6'>
           <motion.div
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
@@ -92,7 +100,6 @@ export default function SignInPage() {
             />
           </motion.div>
 
-          {/* Password Input */}
           <motion.div
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
@@ -106,11 +113,35 @@ export default function SignInPage() {
             />
           </motion.div>
 
-          {/* Submit Button */}
           <motion.div
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ delay: 0.6 }}
+          >
+            <div className='flex items-center justify-between'>
+              <div className='bg-gray-200 px-4 py-2 rounded-md font-mono text-lg text-gray-800 tracking-wider'>
+                {captcha}
+              </div>
+              <button
+                type='button'
+                onClick={() => setCaptcha(generateCaptcha())}
+                className='text-blue-500 hover:text-blue-600 underline'
+              >
+                Refresh
+              </button>
+            </div>
+            <InputForm
+              type='text'
+              placeholder='Enter CAPTCHA'
+              error={errors.captcha?.message}
+              {...register('captcha')}
+            />
+          </motion.div>
+
+          <motion.div
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ delay: 0.8 }}
           >
             <button
               type='submit'
@@ -126,22 +157,20 @@ export default function SignInPage() {
           </motion.div>
         </form>
 
-        {/* Forgot Password */}
         <motion.p
           className='mt-4 text-center text-sm text-blue-500 hover:underline cursor-pointer'
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          transition={{ delay: 0.8 }}
+          transition={{ delay: 1 }}
         >
           Forgot Password?
         </motion.p>
 
-        {/* Register Navigation */}
         <motion.div
           className='mt-6 text-center'
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 1 }}
+          transition={{ delay: 1.2 }}
         >
           <p className='text-sm text-slate-600'>
             Don't have an account?{' '}
