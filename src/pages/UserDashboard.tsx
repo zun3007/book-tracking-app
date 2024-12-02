@@ -1,7 +1,6 @@
-import React from 'react';
 import { useSpring, animated } from '@react-spring/web';
 
-function UserDashboard() {
+function UserDashboardPage() {
   // Animations
   const navbarAnimation = useSpring({
     from: { opacity: 0, transform: 'translateY(-20px)' },
@@ -171,4 +170,4 @@ function UserDashboard() {
   );
 }
 
-export default UserDashboard;
+export default UserDashboardPage;

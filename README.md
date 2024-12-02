@@ -1,50 +1,166 @@
-# React + TypeScript + Vite
+# 📚 Book Tracking Application
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A user-friendly web app designed to help you manage and keep track of your book collection. This application allows users to categorize books, monitor reading progress, and receive tailored recommendations. Featuring a sleek **light slate theme**, it delivers a seamless experience with modern animations and intuitive functionality.
 
-Currently, two official plugins are available:
+---
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## 🌟 Highlights
 
-## Expanding the ESLint configuration
+- **Secure Authentication**: Powered by [Supabase](https://supabase.com) for login and registration.
+- **Book Categorization**: Create personalized bookshelves for better organization.
+- **Recommendations**: Get reading suggestions based on your interests.
+- **Progress Tracker**: Maintain your reading history and pick up where you left off.
+- **Drag-and-Drop**: Easily rearrange books within shelves or lists.
+- **Advanced Search**: Search books by title, author, or genre with filters.
+- **Responsive Design**: Works flawlessly across devices and screen sizes.
+- **Interactive Animations**: Enhanced UX with smooth motion effects using **Framer Motion**.
+- **Clean Theme**: A light and elegant design for a polished interface.
 
-If you are developing a production application, we recommend updating the configuration to enable type aware lint rules:
+---
 
-- Configure the top-level `parserOptions` property like this:
+## 🛠️ Technology Stack
 
-```js
-export default tseslint.config({
-  languageOptions: {
-    // other options...
-    parserOptions: {
-      project: ['./tsconfig.node.json', './tsconfig.app.json'],
-      tsconfigRootDir: import.meta.dirname,
-    },
-  },
-})
+### Frontend Tools
+
+- **React** (TypeScript) - For building the user interface.
+- **React Router v7** - Implements client-side routing.
+- **React Query** - Manages data fetching and caching.
+- **React Hook Form** - Simplifies form handling and validation.
+- **Zod** - Ensures data validation in forms.
+- **TailwindCSS** - Enables fast and responsive UI development.
+- **Framer Motion** - Adds modern and engaging animations.
+
+### Backend Framework
+
+- **Supabase** - Provides database, API, and authentication as a service.
+
+---
+
+## 🚀 Setup Instructions
+
+### Requirements
+
+- [Node.js](https://nodejs.org/) and npm or [pnpm](https://pnpm.io/)
+- An active Supabase project with API credentials.
+
+### Steps to Install
+
+1. Clone this repository:
+   ```bash
+   git clone https://github.com/your-username/book-tracking-app.git
+   ```
+2. Navigate to the project directory:
+   ```bash
+   cd book-tracking-app
+   ```
+3. Install all necessary dependencies:
+   ```bash
+   pnpm install
+   ```
+4. Configure Supabase:
+   - Create a `.env` file in the root directory.
+   - Add the following keys:
+     ```
+     VITE_SUPABASE_URL=https://your-supabase-url.supabase.co
+     VITE_SUPABASE_ANON_KEY=your-supabase-anon-key
+     ```
+
+### Run the Development Server
+
+1. Start the server locally:
+   ```bash
+   pnpm dev
+   ```
+2. Access the application at [http://localhost:5173](http://localhost:5173).
+
+---
+
+## 📂 Project Structure
+
+```
+src/
+├── components/        # Shared components (e.g., Navbar, Footer)
+├── pages/             # Application pages (SignIn, Dashboard, etc.)
+├── ui/                # UI-specific elements (e.g., InputForm, buttons)
+├── utils/             # Utility files (e.g., Supabase client, AuthContext)
+├── styles/            # Global CSS and Tailwind configuration
+├── App.tsx            # Main application entry point
+├── main.tsx           # React entry point
 ```
 
-- Replace `tseslint.configs.recommended` to `tseslint.configs.recommendedTypeChecked` or `tseslint.configs.strictTypeChecked`
-- Optionally add `...tseslint.configs.stylisticTypeChecked`
-- Install [eslint-plugin-react](https://github.com/jsx-eslint/eslint-plugin-react) and update the config:
+---
 
-```js
-// eslint.config.js
-import react from 'eslint-plugin-react'
+## 📸 Screenshots
 
-export default tseslint.config({
-  // Set the react version
-  settings: { react: { version: '18.3' } },
-  plugins: {
-    // Add the react plugin
-    react,
-  },
-  rules: {
-    // other rules...
-    // Enable its recommended rules
-    ...react.configs.recommended.rules,
-    ...react.configs['jsx-runtime'].rules,
-  },
-})
+### Sign-In Page
+
+A responsive, animated page for user authentication with form validation.
+
+![Sign-In Page](https://via.placeholder.com/800x400)
+
+### Dashboard
+
+Track your reading journey, organize shelves, and view recommendations.
+
+![Dashboard](https://via.placeholder.com/800x400)
+
+---
+
+## 🛡️ Security and Validation
+
+- **User Authentication**: Relies on Supabase for secure user accounts.
+- **Input Validation**: Utilizes Zod to ensure accurate data submission.
+
+---
+
+## 🧪 Testing
+
+### Unit Testing
+
+Execute tests for reliability and performance:
+
+```bash
+pnpm test
 ```
+
+### Linting and Code Formatting
+
+Ensure clean, maintainable code:
+
+```bash
+pnpm lint
+pnpm format
+```
+
+---
+
+## 🤝 Contributing Guidelines
+
+We welcome contributions to improve this project!
+
+1. Fork the repository.
+2. Create a feature branch:
+   ```bash
+   git checkout -b feature-name
+   ```
+3. Commit your changes:
+   ```bash
+   git commit -m "Describe your changes"
+   ```
+4. Push your branch:
+   ```bash
+   git push origin feature-name
+   ```
+5. Open a Pull Request.
+
+---
+
+## 📜 License
+
+This project is released under the MIT License. See the [LICENSE](LICENSE) file for details.
+
+---
+
+## 👩‍💻 Author
+
+- **Zun3007** - [GitHub Profile](https://github.com/zun3007)

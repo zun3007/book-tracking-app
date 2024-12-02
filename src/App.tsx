@@ -1,9 +1,20 @@
 import { createBrowserRouter, RouterProvider } from 'react-router-dom';
+import { Provider } from 'react-redux';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { Toaster } from 'react-hot-toast';
+import { ErrorBoundary } from 'react-error-boundary';
 
-import SignIn from './pages/SignIn';
+import store from './store';
+import SignInPage from './pages/SignIn';
 import LandingPage from './pages/LandingPage';
-import UserDashboard from './pages/UserDashboard';
+import UserDashboardPage from './pages/UserDashboard';
 import AllBooksPage from './pages/AllBooks';
+import FavoritesPage from './pages/Favorites';
+import SettingsPage from './pages/Settings';
+import { Suspense } from 'react';
+
+// Initialize React Query client
+const queryClient = new QueryClient();
 
 const router = createBrowserRouter([
   {
@@ -12,28 +23,46 @@ const router = createBrowserRouter([
   },
   {
     path: '/login',
-    element: <SignIn />,
+    element: <SignInPage />,
   },
   {
-    path: '/sign-up',
-    element: <h1>Hello World!</h1>,
+    path: '/dashboard',
+    element: <UserDashboardPage />,
   },
   {
-    path: '/forgot-password',
-    element: <h1>Hello World!</h1>,
+    path: '/books',
+    element: <AllBooksPage />,
   },
   {
-    path: '/forgot-password/:id',
-    element: <h1>Hello World!</h1>,
+    path: '/favorites',
+    element: <FavoritesPage />,
   },
-  { path: '/dashboard', element: <UserDashboard /> },
-  { path: '/all-books', element: <AllBooksPage /> },
+  {
+    path: '/settings',
+    element: <SettingsPage />,
+  },
 ]);
 
-export default function App() {
+const ErrorFallback = ({ error }: { error: Error }) => (
+  <div role='alert' className='p-4 bg-red-100 text-red-700'>
+    <p>Something went wrong:</p>
+    <pre>{error.message}</pre>
+  </div>
+);
+
+function App() {
   return (
-    <>
-      <RouterProvider router={router} />
-    </>
+    <Suspense fallback={<div>Loading...</div>}>
+      <ErrorBoundary FallbackComponent={ErrorFallback}>
+        <Provider store={store}>
+          <QueryClientProvider client={queryClient}>
+            <Toaster />
+            <RouterProvider router={router} />
+          </QueryClientProvider>
+        </Provider>
+      </ErrorBoundary>
+    </Suspense>
   );
 }
+
+export default App;
