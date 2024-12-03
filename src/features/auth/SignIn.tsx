@@ -1,14 +1,16 @@
+import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { toast } from 'react-hot-toast';
 import { useNavigate, Link } from 'react-router-dom';
-import InputForm from '../ui/InputForm';
-import { supabase } from '../utils/supabaseClient';
+import { supabase } from '../../utils/supabaseClient';
 import { useMutation } from '@tanstack/react-query';
 import { motion } from 'framer-motion';
-import { useState } from 'react';
 
+import InputForm from './../../ui/InputForm';
+
+// Function to generate a random CAPTCHA
 const generateCaptcha = () => {
   const characters =
     'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
@@ -17,6 +19,7 @@ const generateCaptcha = () => {
   ).join('');
 };
 
+// Form validation schema using Zod
 const SignInSchema = z.object({
   email: z
     .string()
@@ -43,6 +46,7 @@ export default function SignInPage() {
     resolver: zodResolver(SignInSchema),
   });
 
+  // React Query mutation for signing in
   const signInMutation = useMutation({
     mutationFn: async (data: SignInFormInputs) => {
       const { email, password } = data;
@@ -62,6 +66,7 @@ export default function SignInPage() {
     },
   });
 
+  // Submit handler
   const onSubmit = (data: SignInFormInputs) => {
     if (data.captcha !== captcha) {
       toast.error('CAPTCHA does not match.');
@@ -87,6 +92,7 @@ export default function SignInPage() {
           Sign In
         </motion.h1>
         <form onSubmit={handleSubmit(onSubmit)} className='space-y-6'>
+          {/* Email Input */}
           <motion.div
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
@@ -100,6 +106,7 @@ export default function SignInPage() {
             />
           </motion.div>
 
+          {/* Password Input */}
           <motion.div
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
@@ -113,15 +120,18 @@ export default function SignInPage() {
             />
           </motion.div>
 
+          {/* CAPTCHA */}
           <motion.div
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ delay: 0.6 }}
           >
             <div className='flex items-center justify-between'>
-              <div className='bg-gray-200 px-4 py-2 rounded-md font-mono text-lg text-gray-800 tracking-wider'>
+              {/* Styled CAPTCHA */}
+              <div className='bg-slate-200 px-6 py-3 rounded-md font-mono text-lg text-slate-800 tracking-wider shadow-lg hover:shadow-2xl transition-all duration-200'>
                 {captcha}
               </div>
+              {/* Refresh Button */}
               <button
                 type='button'
                 onClick={() => setCaptcha(generateCaptcha())}
@@ -135,9 +145,11 @@ export default function SignInPage() {
               placeholder='Enter CAPTCHA'
               error={errors.captcha?.message}
               {...register('captcha')}
+              className='mt-4 focus:ring-2 focus:ring-blue-500 rounded-md'
             />
           </motion.div>
 
+          {/* Submit Button */}
           <motion.div
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
@@ -157,6 +169,7 @@ export default function SignInPage() {
           </motion.div>
         </form>
 
+        {/* Forgot Password Link */}
         <motion.p
           className='mt-4 text-center text-sm text-blue-500 hover:underline cursor-pointer'
           initial={{ opacity: 0 }}
@@ -166,6 +179,7 @@ export default function SignInPage() {
           Forgot Password?
         </motion.p>
 
+        {/* Register Navigation */}
         <motion.div
           className='mt-6 text-center'
           initial={{ opacity: 0, y: 10 }}

@@ -4,47 +4,66 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Toaster } from 'react-hot-toast';
 import { ErrorBoundary } from 'react-error-boundary';
 
-import store from './store';
-import SignInPage from './pages/SignIn';
-import LandingPage from './pages/LandingPage';
-import UserDashboardPage from './pages/UserDashboard';
-import AllBooksPage from './pages/AllBooks';
-import FavoritesPage from './pages/Favorites';
-import SettingsPage from './pages/Settings';
+import LandingPage from './ui/LandingPage';
+import UserDashboardPage from './features/user/UserDashboard';
+import FavoritesPage from './features/books/Favorites';
+import SettingsPage from './features/user/Settings';
 import { Suspense } from 'react';
-import Register from './pages/Register';
+import SignInPage from './features/auth/SignIn';
+
+import store from './store';
+import AllBooksPage from './features/books/AllBooks';
+import Register from './features/auth/Register';
+import ProtectedRoute from './components/ProtectedRoute';
+import AuthProtectedRoute from './components/AuthProtectedRoute';
+import LogoutPage from './features/auth/Logout';
 
 // Initialize React Query client
 const queryClient = new QueryClient();
 
 const router = createBrowserRouter([
   {
-    index: true,
-    element: <LandingPage />,
+    element: <AuthProtectedRoute />,
+    children: [
+      {
+        index: true,
+        element: <LandingPage />,
+      },
+      {
+        path: '/login',
+        element: <SignInPage />,
+      },
+      {
+        path: '/register',
+        element: <Register />,
+      },
+    ],
   },
+
   {
-    path: '/login',
-    element: <SignInPage />,
-  },
-  {
-    path: '/register',
-    element: <Register />,
-  },
-  {
-    path: '/dashboard',
-    element: <UserDashboardPage />,
-  },
-  {
-    path: '/books',
-    element: <AllBooksPage />,
-  },
-  {
-    path: '/favorites',
-    element: <FavoritesPage />,
-  },
-  {
-    path: '/settings',
-    element: <SettingsPage />,
+    element: <ProtectedRoute />,
+    children: [
+      {
+        path: '/dashboard',
+        element: <UserDashboardPage />,
+      },
+      {
+        path: '/books',
+        element: <AllBooksPage />,
+      },
+      {
+        path: '/favorites',
+        element: <FavoritesPage />,
+      },
+      {
+        path: '/settings',
+        element: <SettingsPage />,
+      },
+      {
+        path: '/logout',
+        element: <LogoutPage />,
+      },
+    ],
   },
 ]);
 

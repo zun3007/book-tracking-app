@@ -1,14 +1,16 @@
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
-import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
 import { toast } from 'react-hot-toast';
 import { useNavigate } from 'react-router-dom';
-import { supabase } from '../utils/supabaseClient';
-import InputForm from '../ui/InputForm';
+import { supabase } from '../../utils/supabaseClient';
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
 
+import InputForm from './../../ui/InputForm';
+
+// Generate a custom CAPTCHA
 const generateCaptcha = () => {
   const characters =
     'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
@@ -17,6 +19,7 @@ const generateCaptcha = () => {
   ).join('');
 };
 
+// Form validation schema using Zod
 const RegisterSchema = z
   .object({
     email: z
@@ -40,6 +43,8 @@ type RegisterFormInputs = z.infer<typeof RegisterSchema>;
 export default function Register() {
   const navigate = useNavigate();
   const [captcha, setCaptcha] = useState(generateCaptcha());
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
   const {
     register,
     handleSubmit,
@@ -53,6 +58,8 @@ export default function Register() {
       toast.error('CAPTCHA does not match.');
       return;
     }
+
+    setIsSubmitting(true);
 
     const { email, password } = data;
 
@@ -68,6 +75,8 @@ export default function Register() {
       toast.error(
         error.message || 'An error occurred while creating your account.'
       );
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -117,10 +126,14 @@ export default function Register() {
             {...register('confirmPassword')}
           />
 
-          {/* CAPTCHA */}
-          <div className='mt-4'>
+          {/* Custom CAPTCHA */}
+          <motion.div
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ delay: 0.6 }}
+          >
             <div className='flex items-center justify-between'>
-              <div className='bg-gray-200 px-4 py-2 rounded-md font-mono text-lg text-gray-800 tracking-wider'>
+              <div className='bg-slate-200 px-6 py-3 rounded-md font-mono text-lg text-slate-800 tracking-wider shadow-md hover:shadow-lg transition-all duration-200'>
                 {captcha}
               </div>
               <button
@@ -137,7 +150,7 @@ export default function Register() {
               error={errors.captcha?.message}
               {...register('captcha')}
             />
-          </div>
+          </motion.div>
 
           {/* Submit Button */}
           <motion.div
@@ -147,9 +160,14 @@ export default function Register() {
           >
             <button
               type='submit'
-              className='w-full py-3 px-4 rounded-lg text-white bg-blue-500 hover:bg-blue-600 transition'
+              className={`w-full py-3 px-4 rounded-lg text-white ${
+                isSubmitting
+                  ? 'bg-gray-400 cursor-not-allowed'
+                  : 'bg-blue-500 hover:bg-blue-600 transition'
+              }`}
+              disabled={isSubmitting}
             >
-              Register
+              {isSubmitting ? 'Registering...' : 'Register'}
             </button>
           </motion.div>
         </form>

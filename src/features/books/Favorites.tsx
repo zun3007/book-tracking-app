@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react';
 import { useSpring, animated } from '@react-spring/web';
 import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
+import { supabase } from '../../utils/supabaseClient';
+import { toast } from 'react-hot-toast';
 
 function FavoritesPage() {
   const [favorites, setFavorites] = useState([]);
@@ -11,14 +13,26 @@ function FavoritesPage() {
     const fetchFavorites = async () => {
       setLoading(true);
       try {
-        const response = await fetch('/api/favorites'); // Replace with your API endpoint
-        if (!response.ok) {
-          throw new Error('Failed to fetch favorites');
-        }
-        const data = await response.json();
+        const {
+          data: { user },
+          error: userError,
+        } = await supabase.auth.getUser();
+
+        if (userError) throw userError;
+
+        const { data, error } = await supabase
+          .from('user_books')
+          .select('id, books(id, title, authors, thumbnail, genres)')
+          .eq('user_id', user.id)
+          .eq('read_status', 'favorite')
+          .order('order', { ascending: true });
+
+        if (error) throw error;
+
         setFavorites(data);
       } catch (err) {
         setError(err.message);
+        toast.error(err.message || 'Failed to fetch favorite books.');
       } finally {
         setLoading(false);
       }
@@ -27,68 +41,34 @@ function FavoritesPage() {
     fetchFavorites();
   }, []);
 
-  const handleDragEnd = (result) => {
+  const handleDragEnd = async (result) => {
     if (!result.destination) return;
 
     const reorderedFavorites = Array.from(favorites);
-    const [removed] = reorderedFavorites.splice(result.source.index, 1);
-    reorderedFavorites.splice(result.destination.index, 0, removed);
+    const [movedItem] = reorderedFavorites.splice(result.source.index, 1);
+    reorderedFavorites.splice(result.destination.index, 0, movedItem);
 
     setFavorites(reorderedFavorites);
+
+    try {
+      await Promise.all(
+        reorderedFavorites.map((favorite, index) =>
+          supabase
+            .from('user_books')
+            .update({ order: index })
+            .eq('id', favorite.id)
+        )
+      );
+      toast.success('Favorites reordered successfully.');
+    } catch {
+      toast.error('Failed to save the new order.');
+    }
   };
 
-  const navbarAnimation = useSpring({
-    from: { opacity: 0, transform: 'translateY(-20px)' },
-    to: { opacity: 1, transform: 'translateY(0)' },
-    config: { duration: 800 },
-  });
-
   return (
-    <div className='bg-slate-50 min-h-screen text-slate-800 font-sans'>
-      {/* Navbar */}
-      <animated.nav
-        style={navbarAnimation}
-        className='bg-white shadow-md py-4 px-8 fixed top-0 w-full z-10'
-      >
-        <div className='max-w-7xl mx-auto flex justify-between items-center'>
-          <h1 className='text-3xl font-extrabold text-blue-600'>StoryTrack</h1>
-          <div className='flex gap-6'>
-            <a
-              href='/'
-              className='text-slate-600 hover:text-blue-600 font-medium transition'
-            >
-              Home
-            </a>
-            <a
-              href='/books'
-              className='text-slate-600 hover:text-blue-600 font-medium transition'
-            >
-              All Books
-            </a>
-            <a
-              href='/favorites'
-              className='text-slate-600 hover:text-blue-600 font-medium transition'
-            >
-              Favorites
-            </a>
-            <a
-              href='/settings'
-              className='text-slate-600 hover:text-blue-600 font-medium transition'
-            >
-              Settings
-            </a>
-            <a
-              href='/logout'
-              className='text-red-500 hover:text-red-400 font-medium transition'
-            >
-              Logout
-            </a>
-          </div>
-        </div>
-      </animated.nav>
-
+    <div className='bg-slate-50 min-h-screen text-slate-800 font-sans mt-4'>
       {/* Header */}
-      <header className='bg-gradient-to-r from-blue-50 to-slate-100 py-16 px-8 text-center shadow-sm mt-20'>
+      <header className='bg-gradient-to-r from-blue-50 to-slate-100 py-16 px-8 text-center shadow-sm'>
         <h1 className='text-4xl font-bold text-slate-800'>
           Your Favorite Books
         </h1>
@@ -112,10 +92,10 @@ function FavoritesPage() {
                   ref={provided.innerRef}
                   className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6'
                 >
-                  {favorites.map((book, index) => (
+                  {favorites.map((favorite, index) => (
                     <Draggable
-                      key={book.id}
-                      draggableId={book.id.toString()}
+                      key={favorite.id}
+                      draggableId={favorite.id.toString()}
                       index={index}
                     >
                       {(provided) => (
@@ -123,25 +103,21 @@ function FavoritesPage() {
                           {...provided.draggableProps}
                           {...provided.dragHandleProps}
                           ref={provided.innerRef}
-                          style={{
-                            ...provided.draggableProps.style,
-                            ...bookAnimation,
-                          }}
                           className='bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition transform hover:-translate-y-2 hover:scale-105'
                         >
                           <img
-                            src={book.thumbnail || '/placeholder.jpg'}
-                            alt={book.title}
+                            src={favorite.books.thumbnail || '/placeholder.jpg'}
+                            alt={favorite.books.title}
                             className='w-full h-40 object-cover rounded-md shadow'
                           />
                           <h3 className='text-lg font-bold text-slate-800 mt-4'>
-                            {book.title}
+                            {favorite.books.title}
                           </h3>
                           <p className='text-slate-600 text-sm'>
-                            {book.authors.join(', ')}
+                            {favorite.books.authors.join(', ')}
                           </p>
                           <p className='text-slate-500 text-sm mt-2 italic'>
-                            {book.genres.join(', ')}
+                            {favorite.books.genres.join(', ')}
                           </p>
                         </animated.div>
                       )}
