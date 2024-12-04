@@ -71,14 +71,14 @@ export default function BookDescription() {
 
   if (loading) {
     return (
-      <div className='min-h-screen bg-slate-50 py-12 mt-16'>
+      <div className='min-h-screen bg-gray-50 dark:bg-gray-900 py-12 mt-16'>
         <div className='container mx-auto px-4'>
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             className='flex justify-center'
           >
-            <div className='animate-spin rounded-full h-12 w-12 border-b-2 border-slate-600' />
+            <div className='animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 dark:border-blue-400' />
           </motion.div>
         </div>
       </div>
@@ -87,12 +87,12 @@ export default function BookDescription() {
 
   if (error) {
     return (
-      <div className='min-h-screen bg-slate-50 py-12 mt-16'>
+      <div className='min-h-screen bg-gray-50 dark:bg-gray-900 py-12 mt-16'>
         <div className='container mx-auto px-4'>
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            className='bg-red-50 border border-red-200 text-red-700 px-6 py-4 rounded-lg shadow-sm'
+            className='bg-red-50 dark:bg-red-900/50 border border-red-200 dark:border-red-800 text-red-700 dark:text-red-200 px-6 py-4 rounded-lg shadow-sm'
           >
             <p className='font-medium'>{error}</p>
           </motion.div>
@@ -103,12 +103,12 @@ export default function BookDescription() {
 
   if (!book) {
     return (
-      <div className='min-h-screen bg-slate-50 py-12 mt-16'>
+      <div className='min-h-screen bg-gray-50 dark:bg-gray-900 py-12 mt-16'>
         <div className='container mx-auto px-4'>
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            className='bg-slate-100 border border-slate-200 text-slate-700 px-6 py-4 rounded-lg shadow-sm'
+            className='bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 px-6 py-4 rounded-lg shadow-sm'
           >
             <p className='font-medium'>Book not found</p>
           </motion.div>
@@ -120,12 +120,12 @@ export default function BookDescription() {
   const isFavorite = favorites.some((f) => f.id === book.id);
 
   return (
-    <div className='min-h-screen bg-slate-50 py-12 mt-16'>
+    <div className='min-h-screen bg-gray-50 dark:bg-gray-900 py-12 mt-16'>
       <div className='container mx-auto px-4'>
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className='bg-white rounded-xl shadow-sm overflow-hidden max-w-5xl mx-auto'
+          className='bg-white dark:bg-gray-800 rounded-xl shadow-sm overflow-hidden max-w-5xl mx-auto'
         >
           <div className='md:flex'>
             <motion.div
@@ -147,10 +147,10 @@ export default function BookDescription() {
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: 0.3 }}
             >
-              <h1 className='text-3xl font-bold text-slate-800 mb-2'>
+              <h1 className='text-3xl font-bold text-gray-800 dark:text-gray-100 mb-2'>
                 {book.title}
               </h1>
-              <p className='text-lg text-slate-600 mb-6'>
+              <p className='text-lg text-gray-600 dark:text-gray-300 mb-6'>
                 {book.authors?.join(', ')}
               </p>
 
@@ -164,7 +164,7 @@ export default function BookDescription() {
                       className={`w-8 h-8 ${
                         rating <= (book.userRating || 0)
                           ? 'text-amber-400'
-                          : 'text-slate-300'
+                          : 'text-gray-300 dark:text-gray-600'
                       } hover:text-amber-500 transition-colors disabled:cursor-not-allowed`}
                     >
                       ⭐
@@ -175,45 +175,59 @@ export default function BookDescription() {
                 <button
                   onClick={handleToggleFavorite}
                   disabled={!user}
-                  className='flex items-center space-x-2 px-4 py-2 rounded-lg border border-slate-200 hover:bg-slate-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed'
+                  className='flex items-center space-x-2 px-4 py-2 rounded-lg border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed'
                 >
                   {isFavorite ? (
                     <HeartSolidIcon className='w-5 h-5 text-red-500' />
                   ) : (
-                    <HeartIcon className='w-5 h-5 text-slate-400' />
+                    <HeartIcon className='w-5 h-5 text-gray-400 dark:text-gray-500' />
                   )}
-                  <span className='text-slate-600'>
+                  <span className='text-gray-600 dark:text-gray-300'>
                     {isFavorite ? 'Remove from Favorites' : 'Add to Favorites'}
                   </span>
                 </button>
               </div>
 
-              <div className='prose prose-slate max-w-none'>
-                <p className='text-slate-600 mb-6'>{book.description}</p>
+              <div className='prose prose-gray dark:prose-invert max-w-none mt-6'>
+                <p className='text-gray-600 dark:text-gray-300'>
+                  {book.description}
+                </p>
 
-                <div className='border-t border-slate-100 pt-6'>
-                  <h2 className='text-lg font-semibold text-slate-800 mb-4'>
+                <div className='border-t border-gray-200 dark:border-gray-700 pt-6'>
+                  <h2 className='text-lg font-semibold text-gray-800 dark:text-gray-100 mb-4'>
                     Book Details
                   </h2>
-                  <dl className='grid grid-cols-2 gap-4'>
+                  <dl className='grid grid-cols-2 gap-4 text-sm'>
                     <div>
-                      <dt className='text-sm text-slate-500'>ISBN</dt>
-                      <dd className='text-slate-700'>{book.isbn}</dd>
+                      <dt className='text-sm text-gray-500 dark:text-gray-400'>
+                        ISBN
+                      </dt>
+                      <dd className='text-gray-700 dark:text-gray-300'>
+                        {book.isbn}
+                      </dd>
                     </div>
                     <div>
-                      <dt className='text-sm text-slate-500'>Published</dt>
-                      <dd className='text-slate-700'>{book.published_date}</dd>
+                      <dt className='text-sm text-gray-500 dark:text-gray-400'>
+                        Published
+                      </dt>
+                      <dd className='text-gray-700 dark:text-gray-300'>
+                        {book.published_date}
+                      </dd>
                     </div>
                     <div>
-                      <dt className='text-sm text-slate-500'>Rating</dt>
-                      <dd className='text-slate-700'>
+                      <dt className='text-sm text-gray-500 dark:text-gray-400'>
+                        Rating
+                      </dt>
+                      <dd className='text-gray-700 dark:text-gray-300'>
                         ⭐ {book.average_rating.toFixed(1)} (
                         {book.ratings_count.toLocaleString()} ratings)
                       </dd>
                     </div>
                     <div>
-                      <dt className='text-sm text-slate-500'>Genres</dt>
-                      <dd className='text-slate-700'>
+                      <dt className='text-sm text-gray-500 dark:text-gray-400'>
+                        Genres
+                      </dt>
+                      <dd className='text-gray-700 dark:text-gray-300'>
                         {book.genres?.join(', ')}
                       </dd>
                     </div>

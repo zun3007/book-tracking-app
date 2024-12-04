@@ -31,7 +31,13 @@ interface BookData {
 
 interface UserBookData {
   id: number;
-  books: BookData;
+  books: {
+    id: number;
+    title: string;
+    authors: string[];
+    thumbnail: string;
+    average_rating: number;
+  };
   order: number;
 }
 
@@ -72,7 +78,7 @@ export default function FavoritesPage() {
 
       if (error) throw error;
 
-      const formattedFavorites = data.map((item: UserBookData) => ({
+      const formattedFavorites = (data as any[]).map((item) => ({
         id: item.id,
         book: item.books,
         order: item.order || 0,
@@ -149,10 +155,12 @@ export default function FavoritesPage() {
     <motion.div
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
-      className='container mx-auto px-4 py-8 mt-16'
+      className='container mx-auto px-4 py-8 mt-16 min-h-screen bg-gray-50 dark:bg-gray-900'
     >
       <div className='mb-8'>
-        <h1 className='text-3xl font-bold text-gray-800 mb-4'>My Favorites</h1>
+        <h1 className='text-3xl font-bold text-gray-800 dark:text-gray-100 mb-4'>
+          My Favorites
+        </h1>
 
         {/* Search Bar */}
         <div className='relative'>
@@ -160,7 +168,7 @@ export default function FavoritesPage() {
           <input
             type='text'
             placeholder='Search favorites...'
-            className='w-full pl-10 pr-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent'
+            className='w-full pl-10 pr-4 py-2 rounded-lg border dark:border-gray-700 dark:bg-gray-700 dark:text-gray-100 focus:ring-2 focus:ring-blue-500'
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
           />
@@ -196,7 +204,7 @@ export default function FavoritesPage() {
                           initial={{ opacity: 0 }}
                           animate={{ opacity: 1 }}
                           exit={{ opacity: 0 }}
-                          className={`bg-white rounded-lg shadow-md overflow-hidden 
+                          className={`bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden 
                             ${snapshot.isDragging ? 'shadow-lg' : ''}`}
                         >
                           <div className='relative aspect-[3/4] overflow-hidden'>
@@ -211,20 +219,20 @@ export default function FavoritesPage() {
                             />
                             <div
                               {...provided.dragHandleProps}
-                              className='absolute top-2 right-2 p-1 rounded-full bg-white/90 cursor-grab'
+                              className='absolute top-2 right-2 p-1 rounded-full bg-white/90 dark:bg-gray-800/90 cursor-grab'
                             >
-                              <GripIcon className='w-5 h-5 text-gray-600' />
+                              <GripIcon className='w-5 h-5 text-gray-600 dark:text-gray-400' />
                             </div>
                           </div>
 
                           <div className='p-4'>
-                            <h3 className='font-semibold text-lg mb-1 truncate'>
+                            <h3 className='font-semibold text-gray-800 dark:text-gray-100 text-lg mb-1 truncate'>
                               {favorite.book.title}
                             </h3>
-                            <p className='text-sm text-gray-600 mb-2'>
+                            <p className='text-sm text-gray-600 dark:text-gray-300 mb-2'>
                               {favorite.book.authors?.join(', ')}
                             </p>
-                            <div className='flex items-center text-sm text-gray-500'>
+                            <div className='flex items-center text-sm text-gray-500 dark:text-gray-400'>
                               <span className='flex items-center'>
                                 ⭐ {favorite.book.average_rating?.toFixed(1)}
                               </span>

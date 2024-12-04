@@ -37,30 +37,54 @@ export const fetchAllBooks = createAsyncThunk(
     searchQuery: string;
   }) => {
     try {
-      // First, get the total count
-      const countQuery = supabase
-        .from('books')
-        .select('id', { count: 'exact' });
+      // Build base query
+      let query = supabase.from('books').select('*', { count: 'exact' });
 
-      // Apply the same filters to the count query
-      // ... apply filters same as main query ...
+      // Apply search filter
+      if (searchQuery) {
+        query = query.or(
+          `title.ilike.%${searchQuery}%,authors.cs.{%${searchQuery}%}`
+        );
+      }
 
-      const { count } = await countQuery;
+      // Apply genre filter
+      if (filters.genre.length > 0) {
+        query = query.contains('genres', filters.genre);
+      }
 
-      // Then get the actual data
-      let query = supabase
-        .from('books')
-        .select('*')
-        .range((page - 1) * 8, page * 8 - 1);
+      // Apply rating filter
+      if (filters.minRating > 0) {
+        query = query.gte('average_rating', filters.minRating);
+      }
 
-      // ... rest of the existing query logic ...
+      // Apply sorting
+      switch (filters.sortBy) {
+        case 'rating':
+          query = query.order('average_rating', { ascending: false });
+          break;
+        case 'title':
+          query = query.order('title');
+          break;
+        default: // 'latest'
+          query = query.order('published_date', { ascending: false });
+      }
 
-      const { data, error } = await query;
+      // Get total count of filtered results first
+      const { count } = await query;
+
+      // Then get paginated results
+      const { data, error } = await query.range((page - 1) * 8, page * 8 - 1);
 
       if (error) throw error;
-      return { data, totalCount: count };
+
+      return {
+        data: data || [],
+        totalCount: count || 0,
+      };
     } catch (error) {
-      return rejectWithValue(error.message);
+      return rejectWithValue(
+        error instanceof Error ? error.message : 'Failed to fetch books'
+      );
     }
   }
 );

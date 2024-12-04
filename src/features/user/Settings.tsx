@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { useSpring, animated } from '@react-spring/web';
 import { toast } from 'react-hot-toast';
 import { supabase } from '../../utils/supabaseClient';
+import { useAppDispatch, useAppSelector } from '../../app/hooks';
+import { setTheme } from '../theme/themeSlice';
 
 interface SupabaseError extends Error {
   message: string;
@@ -9,9 +11,10 @@ interface SupabaseError extends Error {
 }
 
 function SettingsPage() {
+  const dispatch = useAppDispatch();
+  const theme = useAppSelector((state) => state.theme.mode);
   const [email, setEmail] = useState('');
   const [notifications, setNotifications] = useState(true);
-  const [theme, setTheme] = useState('Light');
   const [isLoading, setIsLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [passwords, setPasswords] = useState({
@@ -105,6 +108,11 @@ function SettingsPage() {
     setPasswords((prev) => ({ ...prev, [name]: value }));
   };
 
+  // Update theme handler
+  const handleThemeChange = (newTheme: 'light' | 'dark') => {
+    dispatch(setTheme(newTheme));
+  };
+
   if (isLoading) {
     return (
       <div className='flex items-center justify-center min-h-screen'>
@@ -116,19 +124,21 @@ function SettingsPage() {
   return (
     <animated.div
       style={pageAnimation}
-      className='bg-slate-50 min-h-screen text-slate-800 font-sans mt-10'
+      className='bg-slate-50 dark:bg-gray-900 min-h-screen text-slate-800 dark:text-slate-100 font-sans mt-10'
     >
       {/* Header */}
-      <header className='bg-gradient-to-r from-slate-100 to-slate-200 py-16 px-8 text-center shadow-sm'>
-        <h1 className='text-4xl font-bold text-slate-800'>Settings</h1>
-        <p className='text-lg text-slate-600 mt-4'>
+      <header className='bg-gradient-to-r from-slate-100 to-slate-200 dark:from-gray-800 dark:to-gray-700 py-16 px-8 text-center shadow-sm'>
+        <h1 className='text-4xl font-bold text-slate-800 dark:text-white'>
+          Settings
+        </h1>
+        <p className='text-lg text-slate-600 dark:text-slate-300 mt-4'>
           Manage your account and preferences.
         </p>
       </header>
 
       {/* Settings Form */}
       <main className='py-10 px-8'>
-        <div className='max-w-4xl mx-auto bg-white shadow-md rounded-lg p-8'>
+        <div className='max-w-4xl mx-auto bg-white dark:bg-gray-800 shadow-md rounded-lg p-8'>
           <h2 className='text-2xl font-bold text-slate-800 mb-6'>
             Account Settings
           </h2>
@@ -176,18 +186,33 @@ function SettingsPage() {
 
           {/* Theme */}
           <div className='mb-6'>
-            <label className='block text-slate-600 font-medium mb-2'>
+            <label className='block text-slate-600 dark:text-slate-300 font-medium mb-2'>
               Theme
             </label>
-            <select
-              value={theme}
-              onChange={(e) => setTheme(e.target.value)}
-              aria-label='Select theme'
-              className='w-full px-4 py-3 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500'
-            >
-              <option value='Light'>Light</option>
-              <option value='Dark'>Dark</option>
-            </select>
+            <div className='flex items-center gap-4'>
+              <button
+                onClick={() => handleThemeChange('light')}
+                className={`px-4 py-2 rounded-lg flex items-center gap-2 ${
+                  theme === 'light'
+                    ? 'bg-blue-500 text-white'
+                    : 'bg-slate-200 dark:bg-gray-700 text-slate-700 dark:text-slate-300'
+                }`}
+              >
+                <span>🌞</span>
+                Light
+              </button>
+              <button
+                onClick={() => handleThemeChange('dark')}
+                className={`px-4 py-2 rounded-lg flex items-center gap-2 ${
+                  theme === 'dark'
+                    ? 'bg-blue-500 text-white'
+                    : 'bg-slate-200 dark:bg-gray-700 text-slate-700 dark:text-slate-300'
+                }`}
+              >
+                <span>🌙</span>
+                Dark
+              </button>
+            </div>
           </div>
 
           {/* Password Change */}

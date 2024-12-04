@@ -1,3 +1,4 @@
+import { Suspense } from 'react';
 import { createBrowserRouter, RouterProvider } from 'react-router-dom';
 import { Provider } from 'react-redux';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
@@ -8,10 +9,8 @@ import LandingPage from './ui/LandingPage';
 import UserDashboardPage from './features/user/UserDashboard';
 import FavoritesPage from './features/books/Favorites';
 import SettingsPage from './features/user/Settings';
-import { Suspense } from 'react';
 import SignInPage from './features/auth/SignIn';
 
-import store from './store';
 import AllBooksPage from './features/books/AllBooks';
 import Register from './features/auth/Register';
 import ProtectedRoute from './components/ProtectedRoute';
@@ -20,6 +19,9 @@ import LogoutPage from './features/auth/Logout';
 import ForgotPasswordPage from './features/auth/ForgotPassword';
 import ResetPasswordPage from './features/auth/ResetPassword';
 import BookDescriptionPage from './features/books/BookDescription';
+import ThemeProvider from './features/theme/ThemeProvider';
+
+import store from './store';
 
 // Initialize React Query client
 const queryClient = new QueryClient();
@@ -94,10 +96,12 @@ function App() {
     <Suspense fallback={<div>Loading...</div>}>
       <ErrorBoundary FallbackComponent={ErrorFallback}>
         <Provider store={store}>
-          <QueryClientProvider client={queryClient}>
-            <Toaster />
-            <RouterProvider router={router} />
-          </QueryClientProvider>
+          <ThemeProvider>
+            <QueryClientProvider client={queryClient}>
+              <Toaster />
+              <RouterProvider router={router} />
+            </QueryClientProvider>
+          </ThemeProvider>
         </Provider>
       </ErrorBoundary>
     </Suspense>
