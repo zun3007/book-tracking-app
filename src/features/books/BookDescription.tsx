@@ -1,12 +1,18 @@
 import { useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { useAppDispatch, useAppSelector } from '../../app/hooks';
-import { toggleFavorite, updateBookRating, setSelectedBook } from './bookSlice';
+import {
+  toggleFavorite,
+  updateBookRating,
+  setSelectedBook,
+  fetchFavorites,
+} from './bookSlice';
 import { useAuth } from '../../hooks/useAuth';
 import { bookService } from '../../services/bookService';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { HeartIcon } from '@heroicons/react/24/outline';
 import { HeartIcon as HeartSolidIcon } from '@heroicons/react/24/solid';
+import OptimizedImage from '../../components/ui/OptimizedImage';
 
 export default function BookDescription() {
   const { bookId } = useParams<{ bookId: string }>();
@@ -20,22 +26,25 @@ export default function BookDescription() {
   const { user } = useAuth();
 
   useEffect(() => {
-    const fetchBook = async () => {
-      if (bookId) {
+    const initializeData = async () => {
+      if (bookId && user?.id) {
         try {
           const bookData = await bookService.getBookById(parseInt(bookId, 10));
           dispatch(setSelectedBook(bookData));
+
+          dispatch(fetchFavorites(user.id));
         } catch (err) {
-          console.error('Error fetching book:', err);
+          console.error('Error fetching data:', err);
         }
       }
     };
 
-    fetchBook();
+    initializeData();
+
     return () => {
       dispatch(setSelectedBook(null));
     };
-  }, [bookId, dispatch]);
+  }, [bookId, user?.id, dispatch]);
 
   const handleRatingChange = async (newRating: number) => {
     if (!user?.id || !book?.id) return;
@@ -120,12 +129,12 @@ export default function BookDescription() {
         >
           <div className='md:flex'>
             <motion.div
-              className='md:w-1/3 relative aspect-[3/4] md:aspect-auto'
+              className='md:w-1/3 relative aspect-[3/4] md:aspect-auto overflow-hidden'
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: 0.2 }}
             >
-              <img
+              <OptimizedImage
                 src={book.thumbnail || '/placeholder-book.jpg'}
                 alt={book.title}
                 className='w-full h-full object-cover'

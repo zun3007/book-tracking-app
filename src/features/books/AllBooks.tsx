@@ -3,7 +3,7 @@ import { debounce } from 'lodash';
 import { useAppDispatch, useAppSelector } from '../../app/hooks';
 import { fetchAllBooks } from './bookSlice';
 import BookCard from './components/BookCard';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 
 interface FilterState {
   genre: string[];
@@ -28,6 +28,7 @@ export default function AllBooks() {
     year: '',
     sortBy: 'latest',
   });
+  const [isLoading, setIsLoading] = useState(false);
 
   // Debounced search handler
   const debouncedSearch = useCallback(
@@ -67,20 +68,37 @@ export default function AllBooks() {
 
   // Fetch data with filters
   useEffect(() => {
+    setIsLoading(true);
     dispatch(
       fetchAllBooks({
         page,
         filters,
         searchQuery,
       })
-    );
+    ).finally(() => {
+      setIsLoading(false);
+    });
   }, [page, filters, searchQuery, dispatch]);
+
+  const container = {
+    hidden: { opacity: 0 },
+    show: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.1,
+      },
+    },
+  };
 
   return (
     <div className='min-h-screen bg-slate-50 py-8 mt-16'>
       <div className='container mx-auto px-4'>
         {/* Search and Filters Section */}
-        <div className='mb-8 space-y-4'>
+        <motion.div
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className='mb-8 space-y-4 bg-slate-50 p-4 rounded-lg shadow-sm'
+        >
           {/* Search Box */}
           <div className='relative'>
             <input
@@ -137,24 +155,24 @@ export default function AllBooks() {
             <option value='rating'>Highest Rated</option>
             <option value='title'>Title A-Z</option>
           </select>
-        </div>
+        </motion.div>
 
         {/* Books Grid */}
-        <div className='grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 mb-8'>
-          {books.map((book, index) => (
-            <motion.div
-              key={book.id}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: index * 0.1 }}
-            >
-              <BookCard book={book} />
-            </motion.div>
-          ))}
-        </div>
+        <motion.div
+          variants={container}
+          initial='hidden'
+          animate='show'
+          className='grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 mb-8'
+        >
+          <AnimatePresence mode='popLayout'>
+            {books.map((book, index) => (
+              <BookCard key={book.id} book={book} index={index} />
+            ))}
+          </AnimatePresence>
+        </motion.div>
 
         {/* Pagination Controls */}
-        {status !== 'loading' && books.length > 0 && (
+        {!isLoading && books.length > 0 && (
           <div className='flex justify-center items-center space-x-2 py-4'>
             <button
               onClick={() => handlePageChange(page - 1)}
@@ -169,7 +187,6 @@ export default function AllBooks() {
               {Array.from({ length: Math.ceil(totalBooks / itemsPerPage) }).map(
                 (_, index) => {
                   const pageNumber = index + 1;
-                  // Show only nearby pages
                   if (
                     pageNumber === 1 ||
                     pageNumber === Math.ceil(totalBooks / itemsPerPage) ||
@@ -188,11 +205,6 @@ export default function AllBooks() {
                         {pageNumber}
                       </button>
                     );
-                  } else if (
-                    pageNumber === page - 3 ||
-                    pageNumber === page + 3
-                  ) {
-                    return <span key={pageNumber}>...</span>;
                   }
                   return null;
                 }
@@ -209,8 +221,7 @@ export default function AllBooks() {
           </div>
         )}
 
-        {/* Loading State */}
-        {status === 'loading' && (
+        {isLoading && (
           <div className='flex justify-center p-4'>
             <div className='animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500' />
           </div>

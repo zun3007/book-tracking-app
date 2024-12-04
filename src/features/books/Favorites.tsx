@@ -7,6 +7,7 @@ import { supabase } from '../../utils/supabaseClient';
 import { RootState } from '../../store';
 import { SearchIcon, GripIcon } from 'lucide-react';
 import { useSelector } from 'react-redux';
+import OptimizedImage from '../../components/ui/OptimizedImage';
 
 interface FavoriteBook {
   id: number;
@@ -198,14 +199,14 @@ export default function FavoritesPage() {
                           className={`bg-white rounded-lg shadow-md overflow-hidden 
                             ${snapshot.isDragging ? 'shadow-lg' : ''}`}
                         >
-                          <div className='relative'>
-                            <img
+                          <div className='relative aspect-[3/4] overflow-hidden'>
+                            <OptimizedImage
                               src={
                                 favorite.book.thumbnail ||
                                 '/placeholder-book.jpg'
                               }
                               alt={favorite.book.title}
-                              className='w-full h-48 object-cover cursor-pointer'
+                              className='w-full h-full object-cover cursor-pointer'
                               onClick={() => handleBookClick(favorite.book.id)}
                             />
                             <div

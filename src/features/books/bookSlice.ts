@@ -103,6 +103,25 @@ export const toggleFavorite = createAsyncThunk(
   }
 );
 
+export const fetchFavorites = createAsyncThunk(
+  'books/fetchFavorites',
+  async (userId: string, { rejectWithValue }) => {
+    try {
+      const { data, error } = await supabase
+        .from('user_books')
+        .select('*, books(*)')
+        .eq('user_id', userId)
+        .eq('read_status', 'favorite');
+
+      if (error) throw error;
+
+      return data.map((item: any) => item.books);
+    } catch (error: any) {
+      return rejectWithValue(error.message);
+    }
+  }
+);
+
 const bookSlice = createSlice({
   name: 'books',
   initialState,
@@ -157,6 +176,9 @@ const bookSlice = createSlice({
             state.favorites.push(book);
           }
         }
+      })
+      .addCase(fetchFavorites.fulfilled, (state, action) => {
+        state.favorites = action.payload;
       });
   },
 });
