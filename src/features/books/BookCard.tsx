@@ -1,60 +1,71 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { motion, AnimatePresence } from 'framer-motion';
-import {
-  MoreVertical,
-  Heart,
-  BookOpen,
-  CheckCircle2,
-  Clock,
-} from 'lucide-react';
+import { motion } from 'framer-motion';
+import { Heart } from 'lucide-react';
 import { useAppDispatch, useAppSelector } from '../../app/hooks';
-import { toggleFavorite, updateReadStatus } from './bookSlice';
+import { toggleFavorite } from './bookSlice';
 import type { Book } from '../../types/supabase';
 import { supabase } from '../../config/supabaseClient';
 import { toast } from 'react-hot-toast';
 import OptimizedImage from '../../components/ui/OptimizedImage';
-import ReadStatusButton from '../../components/ui/ReadStatusButton';
 import { animations } from '../../config/animations';
+
+const statusConfig = {
+  reading: {
+    label: 'Reading',
+    color: 'blue',
+    animation: {
+      y: [-1, 1, -1],
+      transition: { repeat: Infinity, duration: 2, ease: 'easeInOut' },
+    },
+  },
+  finished: {
+    label: 'Finished',
+    color: 'green',
+    animation: {
+      scale: [1, 1.05, 1],
+      transition: { repeat: Infinity, duration: 2, ease: 'easeInOut' },
+    },
+  },
+} as const;
 
 interface BookCardProps {
   book: Book;
   index?: number;
   onFavoriteToggle?: () => void;
-  showReadStatus?: boolean;
-  onReadStatusChange?: (newStatus: 'none' | 'reading' | 'finished') => void;
 }
 
 export default function BookCard({
   book,
   index = 0,
   onFavoriteToggle,
-  showReadStatus = false,
-  onReadStatusChange,
 }: BookCardProps) {
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
-  const [showDropdown, setShowDropdown] = useState(false);
   const user = useAppSelector((state) => state.auth.user);
   const [isFavorite, setIsFavorite] = useState(false);
+  const [readStatus, setReadStatus] = useState<'none' | 'reading' | 'finished'>(
+    'none'
+  );
 
   useEffect(() => {
-    const checkFavoriteStatus = async () => {
+    const fetchBookStatus = async () => {
       if (!user?.id) return;
 
       const { data, error } = await supabase
         .from('user_books')
-        .select('favorite')
+        .select('favorite, read_status')
         .eq('user_id', user.id)
         .eq('book_id', book.id)
         .single();
 
       if (!error && data) {
         setIsFavorite(data.favorite);
+        setReadStatus(data.read_status || 'none');
       }
     };
 
-    checkFavoriteStatus();
+    fetchBookStatus();
   }, [book.id, user?.id]);
 
   const handleToggleFavorite = async (e: React.MouseEvent) => {
@@ -69,50 +80,11 @@ export default function BookCard({
         })
       ).unwrap();
 
-      // Update local state
       setIsFavorite(!isFavorite);
       onFavoriteToggle?.();
     } catch (error) {
       console.error('Error toggling favorite:', error);
       toast.error('Failed to update favorite status');
-    }
-    setShowDropdown(false);
-  };
-
-  const handleReadStatusClick = async (e: React.MouseEvent) => {
-    e.stopPropagation();
-    if (!user?.id) return;
-
-    const currentStatus = book.read_status || 'none';
-    const nextStatus =
-      currentStatus === 'none'
-        ? 'reading'
-        : currentStatus === 'reading'
-        ? 'finished'
-        : 'none';
-
-    try {
-      await dispatch(
-        updateReadStatus({
-          bookId: book.id,
-          userId: user.id,
-          status: nextStatus,
-        })
-      ).unwrap();
-
-      onReadStatusChange?.(nextStatus);
-      toast.success(
-        `Book marked as ${
-          nextStatus === 'none'
-            ? 'not started'
-            : nextStatus === 'reading'
-            ? 'currently reading'
-            : 'finished'
-        }`
-      );
-    } catch (error) {
-      console.error('Error updating read status:', error);
-      toast.error('Failed to update reading status');
     }
   };
 
@@ -143,18 +115,27 @@ export default function BookCard({
             className='absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent'
           />
 
-          {/* Status Badge */}
-          {showReadStatus && (
+          {/* Reading Status Badge */}
+          {readStatus !== 'none' && (
             <motion.div
               initial={{ opacity: 0, scale: 0.8 }}
               animate={{ opacity: 1, scale: 1 }}
               className='absolute top-2 left-2'
             >
-              <ReadStatusButton
-                status={book.read_status || 'none'}
-                onClick={handleReadStatusClick}
-                size='sm'
-              />
+              <motion.div
+                className={`
+                  px-2 py-1 rounded-full text-xs font-medium
+                  backdrop-blur-sm shadow-sm
+                  ${
+                    readStatus === 'reading'
+                      ? 'bg-blue-100/80 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400'
+                      : 'bg-green-100/80 text-green-600 dark:bg-green-900/30 dark:text-green-400'
+                  }
+                `}
+                animate={statusConfig[readStatus].animation}
+              >
+                {statusConfig[readStatus].label}
+              </motion.div>
             </motion.div>
           )}
 
@@ -168,7 +149,7 @@ export default function BookCard({
               whileHover={{ scale: 1.1 }}
               whileTap={{ scale: 0.9 }}
               onClick={handleToggleFavorite}
-              className='p-2 rounded-full bg-white/90 dark:bg-gray-800/90'
+              className='p-2 rounded-full bg-white/90 dark:bg-gray-800/90 shadow-lg'
             >
               <Heart
                 className={`w-5 h-5 ${
