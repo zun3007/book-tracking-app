@@ -3,6 +3,15 @@ import { Book, UserBook, LoadingState } from '../../types';
 import { bookService } from '../../services/bookService';
 import { supabase } from '../../utils/supabaseClient';
 
+// Add FilterState interface
+interface FilterState {
+  genre: string[];
+  minRating: number;
+  author: string;
+  year: string;
+  sortBy: 'latest' | 'rating' | 'title';
+}
+
 interface BookState {
   books: Book[];
   selectedBook: Book | null;
@@ -27,15 +36,18 @@ const initialState: BookState = {
 
 export const fetchAllBooks = createAsyncThunk(
   'books/fetchAllBooks',
-  async ({
-    page,
-    filters,
-    searchQuery,
-  }: {
-    page: number;
-    filters: FilterState;
-    searchQuery: string;
-  }) => {
+  async (
+    {
+      page,
+      filters,
+      searchQuery,
+    }: {
+      page: number;
+      filters: FilterState;
+      searchQuery: string;
+    },
+    { rejectWithValue }
+  ) => {
     try {
       // Build base query
       let query = supabase.from('books').select('*', { count: 'exact' });
@@ -139,9 +151,17 @@ export const fetchFavorites = createAsyncThunk(
 
       if (error) throw error;
 
-      return data.map((item: any) => item.books);
-    } catch (error: any) {
-      return rejectWithValue(error.message);
+      // Add proper type for the response
+      interface FavoriteResponse {
+        books: Book;
+      }
+
+      return (data as FavoriteResponse[]).map((item) => item.books);
+    } catch (error) {
+      if (error instanceof Error) {
+        return rejectWithValue(error.message);
+      }
+      return rejectWithValue('Failed to fetch favorites');
     }
   }
 );

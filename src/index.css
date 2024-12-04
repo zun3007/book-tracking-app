@@ -9,9 +9,25 @@
 }
 
 body {
-  @apply bg-gray-50 dark:bg-gray-900 transition-colors duration-300;
+  @apply bg-gray-50 dark:bg-dark-900 transition-colors duration-300;
 }
 
 .dark {
   color-scheme: dark;
+}
+
+.container {
+  @apply bg-white dark:bg-dark-800 shadow-md rounded-lg;
+}
+
+.text-primary {
+  @apply text-primary-600 dark:text-primary-400;
+}
+
+.text-secondary {
+  @apply text-gray-600 dark:text-gray-300;
+}
+
+.button {
+  @apply bg-primary-500 text-white hover:bg-primary-600 dark:bg-primary-700 dark:hover:bg-primary-600;
 }

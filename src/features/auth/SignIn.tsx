@@ -45,28 +45,47 @@ export default function SignInPage() {
     setIsSubmitting(true);
 
     try {
-      const { data: sessionData, error } =
-        await supabase.auth.signInWithPassword({
-          email: data.email,
-          password: data.password,
-        });
+      const { email, password } = data;
+      const { data: authData, error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
 
       if (error) throw error;
 
-      // Use `sessionData.user` to access the user information
-      const userEmail = sessionData?.user?.email;
+      const user = authData.user;
+      if (user) {
+        const { data: profileData, error: profileError } = await supabase
+          .from('profiles')
+          .select('user_id')
+          .eq('user_id', user.id)
+          .single();
 
-      if (userEmail) {
-        toast.success(`Welcome back, ${userEmail}!`);
-        navigate('/dashboard');
-      } else {
-        toast.error('Failed to retrieve user information.');
+        if (profileError) {
+          // Insert profile if it doesn't exist
+          const { error: insertError } = await supabase
+            .from('profiles')
+            .insert({
+              user_id: user.id,
+              email: user.email,
+            });
+
+          if (insertError) throw insertError;
+        } else {
+          // Update profile if it exists
+          const { error: updateError } = await supabase
+            .from('profiles')
+            .update({ email: user.email })
+            .eq('user_id', user.id);
+
+          if (updateError) throw updateError;
+        }
       }
+
+      toast.success('Logged in successfully!');
+      navigate('/dashboard');
     } catch (error: any) {
-      toast.error(
-        error.message ||
-          'Sign-in failed. Please check your credentials and try again.'
-      );
+      toast.error(error.message || 'Failed to log in. Please try again.');
     } finally {
       setIsSubmitting(false);
     }
@@ -115,7 +134,7 @@ export default function SignInPage() {
             }`}
             disabled={isSubmitting}
           >
-            {isSubmitting ? 'Signing In...' : 'Sign In'}
+            {isSubmitting ? 'Signing in...' : 'Sign In'}
           </button>
         </form>
 
@@ -130,7 +149,7 @@ export default function SignInPage() {
           Forgot Password?
         </motion.p>
 
-        {/* Register Navigation */}
+        {/* Navigation */}
         <motion.div
           className='mt-6 text-center'
           initial={{ opacity: 0, y: 10 }}

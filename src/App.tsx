@@ -1,27 +1,29 @@
-import { Suspense } from 'react';
+import { Suspense, lazy } from 'react';
 import { createBrowserRouter, RouterProvider } from 'react-router-dom';
 import { Provider } from 'react-redux';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Toaster } from 'react-hot-toast';
 import { ErrorBoundary } from 'react-error-boundary';
 
-import LandingPage from './ui/LandingPage';
-import UserDashboardPage from './features/user/UserDashboard';
-import FavoritesPage from './features/books/Favorites';
-import SettingsPage from './features/user/Settings';
-import SignInPage from './features/auth/SignIn';
-
-import AllBooksPage from './features/books/AllBooks';
-import Register from './features/auth/Register';
 import ProtectedRoute from './components/ProtectedRoute';
 import AuthProtectedRoute from './components/AuthProtectedRoute';
-import LogoutPage from './features/auth/Logout';
-import ForgotPasswordPage from './features/auth/ForgotPassword';
-import ResetPasswordPage from './features/auth/ResetPassword';
-import BookDescriptionPage from './features/books/BookDescription';
 import ThemeProvider from './features/theme/ThemeProvider';
-
 import store from './store';
+
+// Lazy load pages
+const LandingPage = lazy(() => import('./ui/LandingPage'));
+const UserDashboardPage = lazy(() => import('./features/user/UserDashboard'));
+const FavoritesPage = lazy(() => import('./features/books/Favorites'));
+const SettingsPage = lazy(() => import('./features/user/Settings'));
+const SignInPage = lazy(() => import('./features/auth/SignIn'));
+const AllBooksPage = lazy(() => import('./features/books/AllBooks'));
+const Register = lazy(() => import('./features/auth/Register'));
+const LogoutPage = lazy(() => import('./features/auth/Logout'));
+const ForgotPasswordPage = lazy(() => import('./features/auth/ForgotPassword'));
+const ResetPasswordPage = lazy(() => import('./features/auth/ResetPassword'));
+const BookDescriptionPage = lazy(
+  () => import('./features/books/BookDescription')
+);
 
 // Initialize React Query client
 const queryClient = new QueryClient();
@@ -48,7 +50,6 @@ const router = createBrowserRouter([
       },
     ],
   },
-
   {
     element: <ProtectedRoute />,
     children: [
@@ -93,13 +94,15 @@ const ErrorFallback = ({ error }: { error: Error }) => (
 
 function App() {
   return (
-    <Suspense fallback={<div>Loading...</div>}>
+    <Suspense fallback={<div className='text-secondary'>Loading...</div>}>
       <ErrorBoundary FallbackComponent={ErrorFallback}>
         <Provider store={store}>
           <ThemeProvider>
             <QueryClientProvider client={queryClient}>
               <Toaster />
-              <RouterProvider router={router} />
+              <div className='container mx-auto'>
+                <RouterProvider router={router} />
+              </div>
             </QueryClientProvider>
           </ThemeProvider>
         </Provider>

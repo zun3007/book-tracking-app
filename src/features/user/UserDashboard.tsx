@@ -1,8 +1,63 @@
 import { useSpring, animated } from '@react-spring/web';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '../../utils/supabaseClient';
+import { useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { toast } from 'react-hot-toast';
 
 function UserDashboardPage() {
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const updateProfile = async () => {
+      const {
+        data: { user },
+        error: userError,
+      } = await supabase.auth.getUser();
+
+      if (userError) {
+        console.error('Error fetching user:', userError);
+        navigate('/login');
+        return;
+      }
+
+      if (user) {
+        const { data: profileData, error: profileError } = await supabase
+          .from('profiles')
+          .select('user_id')
+          .eq('user_id', user.id)
+          .single();
+
+        if (!profileData && profileError) {
+          // Insert profile if it doesn't exist
+          const { error: insertError } = await supabase
+            .from('profiles')
+            .insert({
+              user_id: user.id,
+              email: user.email,
+            });
+
+          if (insertError) throw insertError;
+        } else if (profileData) {
+          // Update profile if it exists
+          const { error: updateError } = await supabase
+            .from('profiles')
+            .update({ email: user.email })
+            .eq('user_id', user.id);
+
+          if (updateError) throw updateError;
+        }
+      } else {
+        navigate('/login');
+      }
+    };
+
+    updateProfile().catch((error) => {
+      toast.error('Failed to update profile. Please try again.');
+      console.error(error);
+    });
+  }, [navigate]);
+
   const sectionAnimation = useSpring({
     from: { opacity: 0, transform: 'translateY(20px)' },
     to: { opacity: 1, transform: 'translateY(0)' },

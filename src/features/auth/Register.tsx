@@ -43,9 +43,22 @@ export default function Register() {
     setIsSubmitting(true);
     try {
       const { email, password } = data;
-      const { error } = await supabase.auth.signUp({ email, password });
+      const { data: authData, error } = await supabase.auth.signUp({
+        email,
+        password,
+      });
 
       if (error) throw error;
+
+      const user = authData.user;
+      if (user) {
+        const { error: profileError } = await supabase.from('profiles').insert({
+          user_id: user.id,
+          email: user.email,
+        });
+
+        if (profileError) throw profileError;
+      }
 
       toast.success(
         'Account created successfully! Check your email to confirm.'
@@ -75,7 +88,6 @@ export default function Register() {
           Register
         </motion.h1>
         <form onSubmit={handleSubmit(onSubmit)} className='space-y-6'>
-          {/* Email Input */}
           <InputForm
             type='email'
             placeholder='Email'
@@ -83,7 +95,6 @@ export default function Register() {
             {...register('email')}
           />
 
-          {/* Password Input */}
           <InputForm
             type='password'
             placeholder='Password'
@@ -91,7 +102,6 @@ export default function Register() {
             {...register('password')}
           />
 
-          {/* Confirm Password Input */}
           <InputForm
             type='password'
             placeholder='Confirm Password'
@@ -99,7 +109,6 @@ export default function Register() {
             {...register('confirmPassword')}
           />
 
-          {/* Submit Button */}
           <button
             type='submit'
             className={`w-full py-3 px-4 rounded-lg text-white ${
@@ -113,7 +122,6 @@ export default function Register() {
           </button>
         </form>
 
-        {/* Navigation */}
         <motion.div
           className='mt-6 text-center'
           initial={{ opacity: 0, y: 10 }}

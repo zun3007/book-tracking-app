@@ -1,48 +1,22 @@
-import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useState, useEffect, useCallback } from 'react';
 import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
 import { motion, AnimatePresence } from 'framer-motion';
 import { toast } from 'react-hot-toast';
 import { supabase } from '../../utils/supabaseClient';
 import { RootState } from '../../store';
-import { SearchIcon, GripIcon } from 'lucide-react';
+import { SearchIcon } from 'lucide-react';
 import { useSelector } from 'react-redux';
-import OptimizedImage from '../../components/ui/OptimizedImage';
+import type { Book } from '../../types';
+import type { DropResult } from '@hello-pangea/dnd';
+import BookCard from './BookCard';
 
 interface FavoriteBook {
   id: number;
-  book: {
-    id: number;
-    title: string;
-    authors: string[];
-    thumbnail: string;
-    average_rating: number;
-  };
-  order: number;
-}
-
-interface BookData {
-  id: number;
-  title: string;
-  authors: string[];
-  thumbnail: string;
-  average_rating: number;
-}
-
-interface UserBookData {
-  id: number;
-  books: {
-    id: number;
-    title: string;
-    authors: string[];
-    thumbnail: string;
-    average_rating: number;
-  };
+  book: Book;
   order: number;
 }
 
 export default function FavoritesPage() {
-  const navigate = useNavigate();
   const [favorites, setFavorites] = useState<FavoriteBook[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [loading, setLoading] = useState(true);
@@ -53,7 +27,7 @@ export default function FavoritesPage() {
     fetchFavorites();
   }, [userId]);
 
-  const fetchFavorites = async () => {
+  const fetchFavorites = useCallback(async () => {
     if (!userId) return;
 
     try {
@@ -68,7 +42,12 @@ export default function FavoritesPage() {
             title,
             authors,
             thumbnail,
-            average_rating
+            average_rating,
+            ratings_count,
+            description,
+            isbn,
+            published_date,
+            genres
           )
         `
         )
@@ -78,9 +57,9 @@ export default function FavoritesPage() {
 
       if (error) throw error;
 
-      const formattedFavorites = (data as any[]).map((item) => ({
+      const formattedFavorites = data.map((item) => ({
         id: item.id,
-        book: item.books,
+        book: item.books as Book,
         order: item.order || 0,
       }));
 
@@ -91,7 +70,7 @@ export default function FavoritesPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [userId]);
 
   const handleDragEnd = async (result: DropResult) => {
     if (!result.destination || !userId) return;
@@ -100,15 +79,12 @@ export default function FavoritesPage() {
     const destinationIndex = result.destination.index;
 
     try {
-      // Create a new array with updated orders
       const updatedFavorites = Array.from(favorites);
       const [movedItem] = updatedFavorites.splice(sourceIndex, 1);
       updatedFavorites.splice(destinationIndex, 0, movedItem);
 
-      // Optimistically update UI
       setFavorites(updatedFavorites);
 
-      // Prepare batch updates with new orders
       const updates = updatedFavorites.map((item, index) => ({
         id: item.id,
         user_id: userId,
@@ -123,12 +99,16 @@ export default function FavoritesPage() {
         });
 
       if (upsertError) throw upsertError;
-    } catch (error: unknown) {
+    } catch (error) {
       if (error instanceof Error) {
         toast.error(error.message);
       }
       fetchFavorites();
     }
+  };
+
+  const handleFavoriteToggle = () => {
+    fetchFavorites();
   };
 
   const filteredFavorites = favorites.filter(
@@ -138,10 +118,6 @@ export default function FavoritesPage() {
         author.toLowerCase().includes(searchQuery.toLowerCase())
       )
   );
-
-  const handleBookClick = (bookId: number) => {
-    navigate(`/book/${bookId}`);
-  };
 
   if (loading) {
     return (
@@ -155,20 +131,17 @@ export default function FavoritesPage() {
     <motion.div
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
-      className='container mx-auto px-4 py-8 mt-16 min-h-screen bg-gray-50 dark:bg-gray-900'
+      className='container mx-auto px-4 py-8 mt-16 min-h-screen bg-gray-50 dark:bg-dark-900'
     >
       <div className='mb-8'>
-        <h1 className='text-3xl font-bold text-gray-800 dark:text-gray-100 mb-4'>
-          My Favorites
-        </h1>
+        <h1 className='text-3xl font-bold text-primary mb-4'>My Favorites</h1>
 
-        {/* Search Bar */}
         <div className='relative'>
-          <SearchIcon className='absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5' />
+          <SearchIcon className='absolute left-3 top-1/2 transform -translate-y-1/2 text-secondary w-5 h-5' />
           <input
             type='text'
             placeholder='Search favorites...'
-            className='w-full pl-10 pr-4 py-2 rounded-lg border dark:border-gray-700 dark:bg-gray-700 dark:text-gray-100 focus:ring-2 focus:ring-blue-500'
+            className='w-full pl-10 pr-4 py-2 rounded-lg border dark:border-gray-700 dark:bg-dark-700 dark:text-gray-100 focus:ring-2 focus:ring-primary-500'
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
           />
@@ -177,7 +150,7 @@ export default function FavoritesPage() {
 
       {favorites.length === 0 ? (
         <div className='text-center py-12'>
-          <p className='text-gray-500 text-lg'>
+          <p className='text-secondary text-lg'>
             You haven't added any favorites yet.
           </p>
         </div>
@@ -189,6 +162,7 @@ export default function FavoritesPage() {
                 {...provided.droppableProps}
                 ref={provided.innerRef}
                 className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6'
+                aria-label='Favorites List'
               >
                 <AnimatePresence>
                   {filteredFavorites.map((favorite, index) => (
@@ -198,47 +172,19 @@ export default function FavoritesPage() {
                       index={index}
                     >
                       {(provided, snapshot) => (
-                        <motion.div
+                        <div
                           ref={provided.innerRef}
                           {...provided.draggableProps}
-                          initial={{ opacity: 0 }}
-                          animate={{ opacity: 1 }}
-                          exit={{ opacity: 0 }}
-                          className={`bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden 
-                            ${snapshot.isDragging ? 'shadow-lg' : ''}`}
+                          {...provided.dragHandleProps}
+                          className={snapshot.isDragging ? 'z-50' : ''}
+                          aria-roledescription='Draggable item'
                         >
-                          <div className='relative aspect-[3/4] overflow-hidden'>
-                            <OptimizedImage
-                              src={
-                                favorite.book.thumbnail ||
-                                '/placeholder-book.jpg'
-                              }
-                              alt={favorite.book.title}
-                              className='w-full h-full object-cover cursor-pointer'
-                              onClick={() => handleBookClick(favorite.book.id)}
-                            />
-                            <div
-                              {...provided.dragHandleProps}
-                              className='absolute top-2 right-2 p-1 rounded-full bg-white/90 dark:bg-gray-800/90 cursor-grab'
-                            >
-                              <GripIcon className='w-5 h-5 text-gray-600 dark:text-gray-400' />
-                            </div>
-                          </div>
-
-                          <div className='p-4'>
-                            <h3 className='font-semibold text-gray-800 dark:text-gray-100 text-lg mb-1 truncate'>
-                              {favorite.book.title}
-                            </h3>
-                            <p className='text-sm text-gray-600 dark:text-gray-300 mb-2'>
-                              {favorite.book.authors?.join(', ')}
-                            </p>
-                            <div className='flex items-center text-sm text-gray-500 dark:text-gray-400'>
-                              <span className='flex items-center'>
-                                ⭐ {favorite.book.average_rating?.toFixed(1)}
-                              </span>
-                            </div>
-                          </div>
-                        </motion.div>
+                          <BookCard
+                            book={favorite.book}
+                            index={index}
+                            onFavoriteToggle={handleFavoriteToggle}
+                          />
+                        </div>
                       )}
                     </Draggable>
                   ))}

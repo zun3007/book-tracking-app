@@ -1,9 +1,9 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useLayoutEffect } from 'react';
 import { debounce } from 'lodash';
 import { useAppDispatch, useAppSelector } from '../../app/hooks';
-import { fetchAllBooks } from './bookSlice';
-import BookCard from './components/BookCard';
+import { fetchAllBooks, fetchFavorites } from './bookSlice';
 import { motion, AnimatePresence } from 'framer-motion';
+import BookCard from './BookCard';
 
 interface FilterState {
   genre: string[];
@@ -27,6 +27,7 @@ export default function AllBooks() {
     sortBy: 'latest',
   });
   const [isLoading, setIsLoading] = useState(false);
+  const user = useAppSelector((state) => state.auth.user);
 
   // Reset filters
   const resetFilters = () => {
@@ -89,7 +90,7 @@ export default function AllBooks() {
   };
 
   // Fetch data with filters
-  useEffect(() => {
+  useLayoutEffect(() => {
     setIsLoading(true);
     dispatch(
       fetchAllBooks({
@@ -101,6 +102,12 @@ export default function AllBooks() {
       setIsLoading(false);
     });
   }, [page, filters, searchQuery, dispatch]);
+
+  useLayoutEffect(() => {
+    if (user?.id) {
+      dispatch(fetchFavorites(user.id));
+    }
+  }, [user?.id, dispatch]);
 
   // Update container animation for grid
   const container = {
@@ -241,7 +248,15 @@ export default function AllBooks() {
                 animate='show'
                 exit={{ opacity: 0, y: -10 }}
               >
-                <BookCard book={book} index={index} />
+                <BookCard
+                  book={book}
+                  index={index}
+                  onFavoriteToggle={() => {
+                    if (user?.id) {
+                      dispatch(fetchFavorites(user.id));
+                    }
+                  }}
+                />
               </motion.div>
             ))}
           </AnimatePresence>
