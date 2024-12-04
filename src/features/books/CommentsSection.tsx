@@ -5,32 +5,132 @@ import { toast } from 'react-hot-toast';
 import type { Comment } from '../../types/supabase';
 import { useAppSelector } from '../../app/hooks';
 import RichTextEditor from '../../components/ui/RichTextEditor';
-import { Heart, MessageCircle, Share2 } from 'lucide-react';
+import {
+  Heart,
+  MessageCircle,
+  Share2,
+  MoreVertical,
+  Edit2,
+  Trash2,
+} from 'lucide-react';
+import { Menu } from '@headlessui/react';
+import { formatDistanceToNow } from 'date-fns';
+import { Dialog, Transition } from '@headlessui/react';
+import { Fragment } from 'react';
+import { AlertTriangle } from 'lucide-react';
 
 interface CommentsSectionProps {
   bookId: string;
 }
 
-interface CommentAction {
-  commentId: number;
-  userId: string;
-  type: 'like' | 'reply';
+interface DeleteModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  onConfirm: () => void;
+  commentAuthor: string;
 }
+
+const DeleteConfirmationModal = ({
+  isOpen,
+  onClose,
+  onConfirm,
+  commentAuthor,
+}: DeleteModalProps) => {
+  return (
+    <Transition appear show={isOpen} as={Fragment}>
+      <Dialog as='div' className='relative z-50' onClose={onClose}>
+        <Transition.Child
+          as={Fragment}
+          enter='ease-out duration-300'
+          enterFrom='opacity-0'
+          enterTo='opacity-100'
+          leave='ease-in duration-200'
+          leaveFrom='opacity-100'
+          leaveTo='opacity-0'
+        >
+          <div className='fixed inset-0 bg-black/25 backdrop-blur-sm' />
+        </Transition.Child>
+
+        <div className='fixed inset-0 overflow-y-auto'>
+          <div className='flex min-h-full items-center justify-center p-4 text-center'>
+            <Transition.Child
+              as={Fragment}
+              enter='ease-out duration-300'
+              enterFrom='opacity-0 scale-95'
+              enterTo='opacity-100 scale-100'
+              leave='ease-in duration-200'
+              leaveFrom='opacity-100 scale-100'
+              leaveTo='opacity-0 scale-95'
+            >
+              <Dialog.Panel className='w-full max-w-md transform overflow-hidden rounded-2xl bg-white dark:bg-gray-800 p-6 text-left align-middle shadow-xl transition-all'>
+                <div className='flex items-center gap-3 text-yellow-500'>
+                  <AlertTriangle className='h-6 w-6' />
+                  <Dialog.Title
+                    as='h3'
+                    className='text-lg font-medium leading-6'
+                  >
+                    Delete Comment
+                  </Dialog.Title>
+                </div>
+
+                <div className='mt-4'>
+                  <p className='text-gray-600 dark:text-gray-300'>
+                    Are you sure you want to delete this comment by{' '}
+                    <span className='font-semibold'>{commentAuthor}</span>? This
+                    action cannot be undone.
+                  </p>
+                </div>
+
+                <div className='mt-6 flex justify-end gap-3'>
+                  <button
+                    type='button'
+                    className='inline-flex justify-center rounded-lg border border-gray-300 dark:border-gray-600 px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500'
+                    onClick={onClose}
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type='button'
+                    className='inline-flex justify-center rounded-lg border border-transparent bg-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-red-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-500'
+                    onClick={() => {
+                      onConfirm();
+                      onClose();
+                    }}
+                  >
+                    Delete
+                  </button>
+                </div>
+              </Dialog.Panel>
+            </Transition.Child>
+          </div>
+        </div>
+      </Dialog>
+    </Transition>
+  );
+};
 
 export default function CommentsSection({ bookId }: CommentsSectionProps) {
   const [comments, setComments] = useState<Comment[]>([]);
   const [newComment, setNewComment] = useState('');
+  const [editingComment, setEditingComment] = useState<Comment | null>(null);
+  const [editContent, setEditContent] = useState('');
   const [profiles, setProfiles] = useState<Record<string, string>>({});
   const [currentPage, setCurrentPage] = useState(1);
   const [isLoading, setIsLoading] = useState(true);
-  const [commentActions, setCommentActions] = useState<
-    Record<number, CommentAction[]>
-  >({});
+  const [likedComments, setLikedComments] = useState<Set<number>>(new Set());
   const commentsPerPage = 5;
+  const [deleteModalState, setDeleteModalState] = useState<{
+    isOpen: boolean;
+    commentId: number | null;
+    author: string;
+  }>({
+    isOpen: false,
+    commentId: null,
+    author: '',
+  });
 
   const user = useAppSelector((state) => state.auth.user);
 
-  // Optimized fetch with cursor-based pagination
   const fetchComments = useCallback(async () => {
     try {
       const { data: commentsData, error: commentsError } = await supabase
@@ -69,7 +169,6 @@ export default function CommentsSection({ bookId }: CommentsSectionProps) {
     }
   }, [bookId]);
 
-  // Real-time subscriptions with optimistic updates
   useEffect(() => {
     fetchComments();
 
@@ -78,7 +177,7 @@ export default function CommentsSection({ bookId }: CommentsSectionProps) {
       .on(
         'postgres_changes',
         {
-          event: '*', // Listen to all events
+          event: '*',
           schema: 'public',
           table: 'comments',
           filter: `book_id=eq.${bookId}`,
@@ -117,20 +216,6 @@ export default function CommentsSection({ bookId }: CommentsSectionProps) {
           })
           .filter(Boolean) || [];
 
-      // Optimistic update
-      const tempId = Date.now();
-      const tempComment = {
-        id: tempId,
-        user_id: user.id,
-        book_id: parseInt(bookId),
-        content: newComment,
-        mentions: mentions.length > 0 ? mentions : null,
-        created_at: new Date().toISOString(),
-      };
-
-      setComments((prev) => [tempComment, ...prev]);
-      setNewComment('');
-
       const { error } = await supabase.from('comments').insert({
         user_id: user.id,
         book_id: parseInt(bookId),
@@ -140,27 +225,167 @@ export default function CommentsSection({ bookId }: CommentsSectionProps) {
 
       if (error) throw error;
 
+      setNewComment('');
       toast.success('Comment posted successfully');
     } catch (error) {
       console.error('Error posting comment:', error);
       toast.error('Failed to post comment');
-      // Rollback optimistic update
-      setComments((prev) => prev.filter((c) => c.id !== Date.now()));
     }
   };
 
-  const handleAction = (commentId: number, type: 'like' | 'reply') => {
-    if (!user?.id) return;
+  const handleEditComment = async (comment: Comment) => {
+    setEditingComment(comment);
+    setEditContent(comment.content);
+  };
 
-    setCommentActions((prev) => ({
-      ...prev,
-      [commentId]: [
-        ...(prev[commentId] || []),
-        { commentId, userId: user.id, type },
-      ],
-    }));
+  const handleUpdateComment = async () => {
+    if (!editingComment || !editContent.trim()) return;
 
-    toast.success(type === 'like' ? '❤️ Liked!' : '💬 Reply mode activated');
+    try {
+      const { error } = await supabase
+        .from('comments')
+        .update({ content: editContent })
+        .eq('id', editingComment.id);
+
+      if (error) throw error;
+
+      setComments((prev) =>
+        prev.map((c) =>
+          c.id === editingComment.id ? { ...c, content: editContent } : c
+        )
+      );
+      setEditingComment(null);
+      setEditContent('');
+      toast.success('Comment updated successfully');
+    } catch (error) {
+      console.error('Error updating comment:', error);
+      toast.error('Failed to update comment');
+    }
+  };
+
+  const handleDeleteComment = async (commentId: number) => {
+    try {
+      // Optimistic update - remove comment immediately
+      setComments((prev) => prev.filter((c) => c.id !== commentId));
+
+      // Show loading toast
+      const toastId = toast.loading('Deleting comment...');
+
+      const { error } = await supabase
+        .from('comments')
+        .delete()
+        .eq('id', commentId);
+
+      if (error) {
+        // Revert optimistic update on error
+        fetchComments(); // Re-fetch all comments to ensure sync
+        toast.error('Failed to delete comment', { id: toastId });
+        throw error;
+      }
+
+      // Success cleanup
+      toast.success('Comment deleted successfully', { id: toastId });
+
+      // Cleanup related states
+      if (editingComment?.id === commentId) {
+        setEditingComment(null);
+        setEditContent('');
+      }
+
+      // Remove from liked comments
+      setLikedComments((prev) => {
+        const newSet = new Set(prev);
+        newSet.delete(commentId);
+        return newSet;
+      });
+
+      // Ensure pagination is still valid
+      const remainingComments = comments.length - 1;
+      const maxPage = Math.ceil(remainingComments / commentsPerPage);
+      if (currentPage > maxPage && maxPage > 0) {
+        setCurrentPage(maxPage);
+      }
+    } catch (error) {
+      console.error('Error deleting comment:', error);
+    }
+  };
+
+  const handleLikeToggle = (commentId: number) => {
+    setLikedComments((prev) => {
+      const newSet = new Set(prev);
+      if (newSet.has(commentId)) {
+        newSet.delete(commentId);
+      } else {
+        newSet.add(commentId);
+      }
+      return newSet;
+    });
+  };
+
+  const CommentActions = ({ comment }: { comment: Comment }) => {
+    const isOwner = user?.id === comment.user_id;
+
+    return (
+      <Menu as='div' className='relative'>
+        <Menu.Button className='p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-full transition-colors'>
+          <MoreVertical size={18} className='text-gray-400' />
+        </Menu.Button>
+        <Menu.Items className='absolute right-0 mt-2 w-48 bg-white dark:bg-gray-800 rounded-lg shadow-lg py-1 z-10'>
+          {isOwner && (
+            <>
+              <Menu.Item>
+                {({ active }) => (
+                  <button
+                    onClick={() => handleEditComment(comment)}
+                    className={`${
+                      active ? 'bg-gray-100 dark:bg-gray-700' : ''
+                    } flex items-center w-full px-4 py-2 text-sm text-gray-700 dark:text-gray-300`}
+                  >
+                    <Edit2 size={16} className='mr-2' />
+                    Edit
+                  </button>
+                )}
+              </Menu.Item>
+              <Menu.Item>
+                {({ active }) => (
+                  <button
+                    onClick={() => {
+                      setDeleteModalState({
+                        isOpen: true,
+                        commentId: comment.id,
+                        author: profiles[comment.user_id] || 'Unknown User',
+                      });
+                    }}
+                    className={`${
+                      active ? 'bg-gray-100 dark:bg-gray-700' : ''
+                    } flex items-center w-full px-4 py-2 text-sm text-red-600 dark:text-red-400`}
+                  >
+                    <Trash2 size={16} className='mr-2' />
+                    Delete
+                  </button>
+                )}
+              </Menu.Item>
+            </>
+          )}
+          <Menu.Item>
+            {({ active }) => (
+              <button
+                onClick={() => {
+                  navigator.clipboard.writeText(comment.content);
+                  toast.success('Comment copied to clipboard');
+                }}
+                className={`${
+                  active ? 'bg-gray-100 dark:bg-gray-700' : ''
+                } flex items-center w-full px-4 py-2 text-sm text-gray-700 dark:text-gray-300`}
+              >
+                <Share2 size={16} className='mr-2' />
+                Copy
+              </button>
+            )}
+          </Menu.Item>
+        </Menu.Items>
+      </Menu>
+    );
   };
 
   const containerVariants = {
@@ -248,8 +473,13 @@ export default function CommentsSection({ bookId }: CommentsSectionProps) {
                 layout
                 initial='hidden'
                 animate='show'
-                exit={{ opacity: 0, y: -20 }}
-                className='bg-white dark:bg-gray-800 rounded-lg shadow-sm p-6 mb-4 transform transition-all hover:shadow-md'
+                exit={{
+                  opacity: 0,
+                  y: -20,
+                  scale: 0.95,
+                  transition: { duration: 0.2 },
+                }}
+                className='bg-white dark:bg-gray-800 rounded-lg shadow-sm p-6 mb-4'
               >
                 <div className='flex items-start space-x-3'>
                   <div className='flex-1'>
@@ -259,49 +489,65 @@ export default function CommentsSection({ bookId }: CommentsSectionProps) {
                           {profiles[comment.user_id] || 'Unknown User'}
                         </span>
                         <span className='text-sm text-gray-500'>
-                          {new Date(comment.created_at).toLocaleDateString()}
+                          {formatDistanceToNow(new Date(comment.created_at), {
+                            addSuffix: true,
+                          })}
                         </span>
                       </div>
-                      <div className='flex items-center space-x-2'>
-                        <motion.button
-                          whileHover={{ scale: 1.1 }}
-                          whileTap={{ scale: 0.9 }}
-                          onClick={() => handleAction(comment.id, 'like')}
-                          className='p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-full transition-colors'
-                        >
-                          <Heart
-                            size={18}
-                            className={
-                              commentActions[comment.id]?.some(
-                                (a) =>
-                                  a.type === 'like' && a.userId === user?.id
-                              )
-                                ? 'fill-red-500 text-red-500'
-                                : 'text-gray-400'
-                            }
-                          />
-                        </motion.button>
-                        <motion.button
-                          whileHover={{ scale: 1.1 }}
-                          whileTap={{ scale: 0.9 }}
-                          onClick={() => handleAction(comment.id, 'reply')}
-                          className='p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-full transition-colors'
-                        >
-                          <MessageCircle size={18} className='text-gray-400' />
-                        </motion.button>
-                        <motion.button
-                          whileHover={{ scale: 1.1 }}
-                          whileTap={{ scale: 0.9 }}
-                          className='p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-full transition-colors'
-                        >
-                          <Share2 size={18} className='text-gray-400' />
-                        </motion.button>
-                      </div>
+                      <CommentActions comment={comment} />
                     </div>
-                    <div
-                      className='mt-2 text-gray-700 dark:text-gray-300 prose dark:prose-invert max-w-none'
-                      dangerouslySetInnerHTML={{ __html: comment.content }}
-                    />
+                    {editingComment?.id === comment.id ? (
+                      <div className='mt-2'>
+                        <RichTextEditor
+                          value={editContent}
+                          onChange={setEditContent}
+                          placeholder='Edit your comment...'
+                        />
+                        <div className='mt-2 flex gap-2'>
+                          <button
+                            onClick={handleUpdateComment}
+                            className='px-3 py-1 bg-blue-600 text-white rounded-lg hover:bg-blue-700'
+                          >
+                            Save
+                          </button>
+                          <button
+                            onClick={() => setEditingComment(null)}
+                            className='px-3 py-1 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300'
+                          >
+                            Cancel
+                          </button>
+                        </div>
+                      </div>
+                    ) : (
+                      <div
+                        className='mt-2 text-gray-700 dark:text-gray-300 prose dark:prose-invert max-w-none'
+                        dangerouslySetInnerHTML={{ __html: comment.content }}
+                      />
+                    )}
+                    <div className='mt-4 flex items-center space-x-4'>
+                      <motion.button
+                        whileHover={{ scale: 1.1 }}
+                        whileTap={{ scale: 0.9 }}
+                        onClick={() => handleLikeToggle(comment.id)}
+                        className='flex items-center space-x-1 text-gray-500 hover:text-red-500'
+                      >
+                        <Heart
+                          size={18}
+                          className={
+                            likedComments.has(comment.id)
+                              ? 'fill-red-500 text-red-500'
+                              : ''
+                          }
+                        />
+                        <span className='text-sm'>
+                          {likedComments.has(comment.id) ? 'Liked' : 'Like'}
+                        </span>
+                      </motion.button>
+                      <button className='flex items-center space-x-1 text-gray-500 hover:text-blue-500'>
+                        <MessageCircle size={18} />
+                        <span className='text-sm'>Reply</span>
+                      </button>
+                    </div>
                   </div>
                 </div>
               </motion.div>
@@ -333,6 +579,19 @@ export default function CommentsSection({ bookId }: CommentsSectionProps) {
           ))}
         </motion.div>
       )}
+
+      <DeleteConfirmationModal
+        isOpen={deleteModalState.isOpen}
+        onClose={() =>
+          setDeleteModalState({ isOpen: false, commentId: null, author: '' })
+        }
+        onConfirm={() => {
+          if (deleteModalState.commentId) {
+            handleDeleteComment(deleteModalState.commentId);
+          }
+        }}
+        commentAuthor={deleteModalState.author}
+      />
     </div>
   );
 }
