@@ -1,10 +1,12 @@
-import { useState, useLayoutEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { MoreVertical, Heart } from 'lucide-react';
 import { useAppDispatch, useAppSelector } from '../../app/hooks';
-import { toggleFavorite, fetchFavorites } from './bookSlice';
-import type { Book } from '../../types';
+import { toggleFavorite } from './bookSlice';
+import type { Book } from '../../types/supabase';
+import { supabase } from '../../config/supabaseClient';
+import { toast } from 'react-hot-toast';
 import OptimizedImage from '../../components/ui/OptimizedImage';
 
 interface BookCardProps {
@@ -22,14 +24,26 @@ export default function BookCard({
   const dispatch = useAppDispatch();
   const [showDropdown, setShowDropdown] = useState(false);
   const user = useAppSelector((state) => state.auth.user);
-  const favorites = useAppSelector((state) => state.books.favorites);
-  const isFavorite = favorites.some((f) => f.id === book.id);
+  const [isFavorite, setIsFavorite] = useState(false);
 
-  useLayoutEffect(() => {
-    if (user?.id) {
-      dispatch(fetchFavorites(user.id));
-    }
-  }, [user?.id, dispatch]);
+  useEffect(() => {
+    const checkFavoriteStatus = async () => {
+      if (!user?.id) return;
+
+      const { data, error } = await supabase
+        .from('user_books')
+        .select('favorite')
+        .eq('user_id', user.id)
+        .eq('book_id', book.id)
+        .single();
+
+      if (!error && data) {
+        setIsFavorite(data.favorite);
+      }
+    };
+
+    checkFavoriteStatus();
+  }, [book.id, user?.id]);
 
   const handleToggleFavorite = async (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -43,9 +57,12 @@ export default function BookCard({
         })
       ).unwrap();
 
+      // Update local state
+      setIsFavorite(!isFavorite);
       onFavoriteToggle?.();
     } catch (error) {
       console.error('Error toggling favorite:', error);
+      toast.error('Failed to update favorite status');
     }
     setShowDropdown(false);
   };

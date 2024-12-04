@@ -31,3 +31,46 @@ body {
 .button {
   @apply bg-primary-500 text-white hover:bg-primary-600 dark:bg-primary-700 dark:hover:bg-primary-600;
 }
+
+.mention {
+  background-color: rgba(59, 130, 246, 0.1);
+  color: #3b82f6;
+  border-radius: 0.25rem;
+  padding: 0.125rem 0.25rem;
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.dark .mention {
+  background-color: rgba(59, 130, 246, 0.2);
+  color: #60a5fa;
+}
+
+.ProseMirror {
+  @apply min-h-[200px] outline-none;
+}
+
+.ProseMirror p.is-editor-empty:first-child::before {
+  @apply text-gray-400 float-left h-0 pointer-events-none;
+  content: attr(data-placeholder);
+}
+
+.ProseMirror blockquote {
+  @apply border-l-4 border-gray-300 dark:border-gray-600 pl-4 italic;
+}
+
+.ProseMirror pre {
+  @apply bg-gray-100 dark:bg-gray-800 rounded-lg p-4 font-mono text-sm;
+}
+
+.ProseMirror code {
+  @apply bg-gray-100 dark:bg-gray-800 rounded px-1 py-0.5 font-mono text-sm;
+}
+
+.ProseMirror ul {
+  @apply list-disc pl-4;
+}
+
+.ProseMirror ol {
+  @apply list-decimal pl-4;
+}

@@ -2,19 +2,13 @@ import { useState, useEffect, useCallback } from 'react';
 import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
 import { motion, AnimatePresence } from 'framer-motion';
 import { toast } from 'react-hot-toast';
-import { supabase } from '../../utils/supabaseClient';
-import { RootState } from '../../store';
+import { supabase } from '../../config/supabaseClient';
+import { RootState } from '../../app/store';
 import { SearchIcon } from 'lucide-react';
 import { useSelector } from 'react-redux';
-import type { Book } from '../../types';
+import type { FavoriteBook } from '../../types/supabase';
 import type { DropResult } from '@hello-pangea/dnd';
 import BookCard from './BookCard';
-
-interface FavoriteBook {
-  id: number;
-  book: Book;
-  order: number;
-}
 
 export default function FavoritesPage() {
   const [favorites, setFavorites] = useState<FavoriteBook[]>([]);
@@ -42,24 +36,24 @@ export default function FavoritesPage() {
             title,
             authors,
             thumbnail,
-            average_rating,
-            ratings_count,
             description,
             isbn,
             published_date,
-            genres
+            genres,
+            average_rating,
+            ratings_count
           )
         `
         )
         .eq('user_id', userId)
-        .eq('read_status', 'favorite')
+        .eq('favorite', true)
         .order('order');
 
       if (error) throw error;
 
-      const formattedFavorites = data.map((item) => ({
+      const formattedFavorites: FavoriteBook[] = data.map((item) => ({
         id: item.id,
-        book: item.books as Book,
+        book: item.books,
         order: item.order || 0,
       }));
 

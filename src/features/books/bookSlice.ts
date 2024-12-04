@@ -1,16 +1,6 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import { Book, UserBook, LoadingState } from '../../types';
-import { bookService } from '../../services/bookService';
-import { supabase } from '../../utils/supabaseClient';
-
-// Add FilterState interface
-interface FilterState {
-  genre: string[];
-  minRating: number;
-  author: string;
-  year: string;
-  sortBy: 'latest' | 'rating' | 'title';
-}
+import { Book, UserBook } from '../types/supabase';
+import { supabase } from '../../config/supabaseClient';
 
 interface BookState {
   books: Book[];
@@ -19,7 +9,7 @@ interface BookState {
   favorites: Book[];
   loading: boolean;
   error: string | null;
-  status: LoadingState;
+  status: 'idle' | 'loading' | 'succeeded' | 'failed';
   totalBooks: number;
 }
 
@@ -129,7 +119,42 @@ export const toggleFavorite = createAsyncThunk(
     { rejectWithValue }
   ) => {
     try {
-      await bookService.toggleFavorite(bookId, userId);
+      // First check if the book exists in user_books
+      const { data: existingBook, error: fetchError } = await supabase
+        .from('user_books')
+        .select('*')
+        .eq('user_id', userId)
+        .eq('book_id', bookId)
+        .single();
+
+      if (fetchError && fetchError.code !== 'PGRST116') {
+        throw fetchError;
+      }
+
+      if (existingBook) {
+        // Update existing record
+        const { error: updateError } = await supabase
+          .from('user_books')
+          .update({ favorite: !existingBook.favorite })
+          .eq('user_id', userId)
+          .eq('book_id', bookId);
+
+        if (updateError) throw updateError;
+      } else {
+        // Insert new record
+        const { error: insertError } = await supabase
+          .from('user_books')
+          .insert({
+            user_id: userId,
+            book_id: bookId,
+            favorite: true,
+            read_status: 'none',
+            order: 0,
+          });
+
+        if (insertError) throw insertError;
+      }
+
       return bookId;
     } catch (error) {
       return rejectWithValue(
@@ -145,18 +170,34 @@ export const fetchFavorites = createAsyncThunk(
     try {
       const { data, error } = await supabase
         .from('user_books')
-        .select('*, books(*)')
+        .select(
+          `
+          book_id,
+          books (
+            id,
+            title,
+            authors,
+            thumbnail,
+            description,
+            isbn,
+            published_date,
+            genres,
+            average_rating,
+            ratings_count
+          )
+        `
+        )
         .eq('user_id', userId)
-        .eq('read_status', 'favorite');
+        .eq('favorite', true);
 
       if (error) throw error;
 
-      // Add proper type for the response
-      interface FavoriteResponse {
-        books: Book;
-      }
+      const favorites = data.map((item) => ({
+        ...item.books,
+        id: item.book_id,
+      })) as Book[];
 
-      return (data as FavoriteResponse[]).map((item) => item.books);
+      return favorites;
     } catch (error) {
       if (error instanceof Error) {
         return rejectWithValue(error.message);
