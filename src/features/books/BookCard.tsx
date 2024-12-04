@@ -1,24 +1,36 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { motion } from 'framer-motion';
-import { MoreVertical, Heart } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+import {
+  MoreVertical,
+  Heart,
+  BookOpen,
+  CheckCircle2,
+  Clock,
+} from 'lucide-react';
 import { useAppDispatch, useAppSelector } from '../../app/hooks';
-import { toggleFavorite } from './bookSlice';
+import { toggleFavorite, updateReadStatus } from './bookSlice';
 import type { Book } from '../../types/supabase';
 import { supabase } from '../../config/supabaseClient';
 import { toast } from 'react-hot-toast';
 import OptimizedImage from '../../components/ui/OptimizedImage';
+import ReadStatusButton from '../../components/ui/ReadStatusButton';
+import { animations } from '../../config/animations';
 
 interface BookCardProps {
   book: Book;
   index?: number;
   onFavoriteToggle?: () => void;
+  showReadStatus?: boolean;
+  onReadStatusChange?: (newStatus: 'none' | 'reading' | 'finished') => void;
 }
 
 export default function BookCard({
   book,
   index = 0,
   onFavoriteToggle,
+  showReadStatus = false,
+  onReadStatusChange,
 }: BookCardProps) {
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
@@ -67,82 +79,130 @@ export default function BookCard({
     setShowDropdown(false);
   };
 
+  const handleReadStatusClick = async (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (!user?.id) return;
+
+    const currentStatus = book.read_status || 'none';
+    const nextStatus =
+      currentStatus === 'none'
+        ? 'reading'
+        : currentStatus === 'reading'
+        ? 'finished'
+        : 'none';
+
+    try {
+      await dispatch(
+        updateReadStatus({
+          bookId: book.id,
+          userId: user.id,
+          status: nextStatus,
+        })
+      ).unwrap();
+
+      onReadStatusChange?.(nextStatus);
+      toast.success(
+        `Book marked as ${
+          nextStatus === 'none'
+            ? 'not started'
+            : nextStatus === 'reading'
+            ? 'currently reading'
+            : 'finished'
+        }`
+      );
+    } catch (error) {
+      console.error('Error updating read status:', error);
+      toast.error('Failed to update reading status');
+    }
+  };
+
   return (
-    <div
+    <motion.div
+      layout
+      variants={animations.stagger}
+      whileHover={animations.hover}
+      whileTap={animations.tap}
       onClick={() => navigate(`/book/${book.id}`)}
-      className='group bg-white dark:bg-gray-800 rounded-xl shadow-sm hover:shadow-md overflow-hidden cursor-pointer transition-all duration-300'
+      className='group relative bg-white dark:bg-gray-800 rounded-xl shadow-sm hover:shadow-xl overflow-hidden cursor-pointer transition-all duration-300'
     >
       <div className='relative w-full pt-[140%] overflow-hidden'>
-        <div className='absolute inset-0'>
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: index * 0.1 }}
+          className='absolute inset-0'
+        >
           <OptimizedImage
             src={book.thumbnail || '/placeholder-book.jpg'}
             alt={book.title}
             className='w-full h-full object-cover transform transition-transform duration-300 group-hover:scale-105'
           />
           <motion.div
-            className='absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300'
             initial={{ opacity: 0 }}
             whileHover={{ opacity: 1 }}
+            className='absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent'
           />
 
-          {/* Dropdown Menu */}
-          <div className='absolute top-2 right-2'>
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                setShowDropdown(!showDropdown);
-              }}
-              className='p-1 rounded-full bg-white/90 dark:bg-gray-800/90 hover:bg-white dark:hover:bg-gray-700 transition-colors'
+          {/* Status Badge */}
+          {showReadStatus && (
+            <motion.div
+              initial={{ opacity: 0, scale: 0.8 }}
+              animate={{ opacity: 1, scale: 1 }}
+              className='absolute top-2 left-2'
             >
-              <MoreVertical className='w-5 h-5 text-gray-600 dark:text-gray-400' />
-            </button>
+              <ReadStatusButton
+                status={book.read_status || 'none'}
+                onClick={handleReadStatusClick}
+                size='sm'
+              />
+            </motion.div>
+          )}
 
-            {showDropdown && (
-              <div className='absolute right-0 mt-1 w-48 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 z-50'>
-                <button
-                  onClick={handleToggleFavorite}
-                  className='w-full px-4 py-2 flex items-center gap-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors'
-                >
-                  <Heart
-                    className={`w-4 h-4 ${
-                      isFavorite ? 'fill-red-500 text-red-500' : 'text-gray-400'
-                    }`}
-                  />
-                  {isFavorite ? 'Remove from Favorites' : 'Add to Favorites'}
-                </button>
-              </div>
-            )}
-          </div>
-        </div>
+          {/* Actions */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileHover={{ opacity: 1, y: 0 }}
+            className='absolute bottom-0 left-0 right-0 p-4 flex justify-between items-center'
+          >
+            <motion.button
+              whileHover={{ scale: 1.1 }}
+              whileTap={{ scale: 0.9 }}
+              onClick={handleToggleFavorite}
+              className='p-2 rounded-full bg-white/90 dark:bg-gray-800/90'
+            >
+              <Heart
+                className={`w-5 h-5 ${
+                  isFavorite
+                    ? 'fill-red-500 text-red-500'
+                    : 'text-gray-600 dark:text-gray-400'
+                }`}
+              />
+            </motion.button>
+
+            <motion.div
+              initial={{ opacity: 0 }}
+              whileHover={{ opacity: 1 }}
+              className='text-white text-sm font-medium'
+            >
+              ⭐ {book.average_rating.toFixed(1)}
+            </motion.div>
+          </motion.div>
+        </motion.div>
       </div>
 
       <motion.div
-        className='p-4 bg-white dark:bg-gray-800'
-        initial={{ y: 10, opacity: 0 }}
-        animate={{ y: 0, opacity: 1 }}
+        className='p-4'
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
         transition={{ delay: index * 0.1 + 0.2 }}
       >
-        <h3
-          className='font-semibold text-gray-800 dark:text-gray-100 text-lg mb-1 truncate'
-          title={book.title}
-        >
+        <h3 className='font-semibold text-gray-800 dark:text-gray-100 text-lg mb-1 truncate'>
           {book.title}
         </h3>
-        <p
-          className='text-sm text-gray-600 dark:text-gray-300 mb-2 truncate'
-          title={book.authors?.join(', ')}
-        >
+        <p className='text-sm text-gray-600 dark:text-gray-300 truncate'>
           {book.authors?.join(', ')}
         </p>
-        <div className='flex items-center justify-between text-sm'>
-          <span className='flex items-center text-amber-500'>
-            ⭐ {book.average_rating.toFixed(1)}
-          </span>
-          <span className='text-gray-500 dark:text-gray-400'>
-            {book.ratings_count.toLocaleString()} ratings
-          </span>
-        </div>
       </motion.div>
-    </div>
+    </motion.div>
   );
 }

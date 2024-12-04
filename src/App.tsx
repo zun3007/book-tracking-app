@@ -9,6 +9,7 @@ import ProtectedRoute from './components/ProtectedRoute';
 import AuthProtectedRoute from './components/AuthProtectedRoute';
 import ThemeProvider from './features/theme/ThemeProvider';
 import store from './store';
+import BookshelfPage from './features/books/BookshelfPage';
 
 // Lazy load pages
 const LandingPage = lazy(() => import('./ui/LandingPage'));
@@ -76,6 +77,10 @@ const router = createBrowserRouter([
       {
         path: '/logout',
         element: <LogoutPage />,
+      },
+      {
+        path: '/bookshelf',
+        element: <BookshelfPage />,
       },
     ],
   },

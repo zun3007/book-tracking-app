@@ -207,6 +207,63 @@ export const fetchFavorites = createAsyncThunk(
   }
 );
 
+export const updateReadStatus = createAsyncThunk(
+  'books/updateReadStatus',
+  async (
+    {
+      bookId,
+      userId,
+      status,
+    }: {
+      bookId: number;
+      userId: string;
+      status: 'none' | 'reading' | 'finished';
+    },
+    { rejectWithValue }
+  ) => {
+    try {
+      const { data: existingBook, error: fetchError } = await supabase
+        .from('user_books')
+        .select('*')
+        .eq('user_id', userId)
+        .eq('book_id', bookId)
+        .single();
+
+      if (fetchError && fetchError.code !== 'PGRST116') {
+        throw fetchError;
+      }
+
+      if (existingBook) {
+        const { error: updateError } = await supabase
+          .from('user_books')
+          .update({ read_status: status })
+          .eq('user_id', userId)
+          .eq('book_id', bookId);
+
+        if (updateError) throw updateError;
+      } else {
+        const { error: insertError } = await supabase
+          .from('user_books')
+          .insert({
+            user_id: userId,
+            book_id: bookId,
+            read_status: status,
+            favorite: false,
+            order: 0,
+          });
+
+        if (insertError) throw insertError;
+      }
+
+      return { bookId, status };
+    } catch (error) {
+      return rejectWithValue(
+        error instanceof Error ? error.message : 'Failed to update read status'
+      );
+    }
+  }
+);
+
 const bookSlice = createSlice({
   name: 'books',
   initialState,
@@ -264,6 +321,16 @@ const bookSlice = createSlice({
       })
       .addCase(fetchFavorites.fulfilled, (state, action) => {
         state.favorites = action.payload;
+      })
+      .addCase(updateReadStatus.fulfilled, (state, action) => {
+        const { bookId, status } = action.payload;
+        const book = state.books.find((b) => b.id === bookId);
+        if (book) {
+          book.read_status = status;
+        }
+        if (state.selectedBook?.id === bookId) {
+          state.selectedBook.read_status = status;
+        }
       });
   },
 });

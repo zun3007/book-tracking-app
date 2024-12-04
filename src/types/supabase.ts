@@ -68,3 +68,32 @@ export interface FavoriteBook {
   book: Book;
   order: number;
 }
+
+export interface Book {
+  id: number;
+  title: string;
+  authors: string[];
+  description: string | null;
+  thumbnail: string | null;
+  isbn: string;
+  published_date: string | null;
+  genres: string[];
+  average_rating: number;
+  ratings_count: number;
+  created_at: string;
+  updated_at: string;
+  read_status?: 'none' | 'reading' | 'finished';
+  userRating?: number;
+}
+
+export interface UserBook {
+  id: number;
+  user_id: string;
+  book_id: number;
+  read_status: 'none' | 'reading' | 'finished';
+  rating: number | null;
+  favorite: boolean;
+  order: number;
+  created_at: string;
+  updated_at: string;
+}
