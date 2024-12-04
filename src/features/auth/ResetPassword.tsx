@@ -1,58 +1,72 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { toast } from 'react-hot-toast';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { supabase } from '../../utils/supabaseClient';
 import { motion } from 'framer-motion';
 import InputForm from './../../ui/InputForm';
 
-const RegisterSchema = z
+const ResetPasswordSchema = z
   .object({
-    email: z
-      .string()
-      .email('Invalid email address')
-      .nonempty('Email is required'),
-    password: z
+    newPassword: z
       .string()
       .min(6, 'Password must be at least 6 characters')
-      .nonempty('Password is required'),
-    confirmPassword: z.string().nonempty('Confirm Password is required'),
+      .nonempty('New password is required'),
+    confirmPassword: z.string().nonempty('Confirm password is required'),
   })
-  .refine((data) => data.password === data.confirmPassword, {
+  .refine((data) => data.newPassword === data.confirmPassword, {
     message: 'Passwords do not match',
     path: ['confirmPassword'],
   });
 
-type RegisterFormInputs = z.infer<typeof RegisterSchema>;
+type ResetPasswordInputs = z.infer<typeof ResetPasswordSchema>;
 
-export default function Register() {
+export default function ResetPasswordPage() {
   const navigate = useNavigate();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [resetToken, setResetToken] = useState<string | null>(null);
 
   const {
     register,
     handleSubmit,
     formState: { errors },
-  } = useForm<RegisterFormInputs>({
-    resolver: zodResolver(RegisterSchema),
+  } = useForm<ResetPasswordInputs>({
+    resolver: zodResolver(ResetPasswordSchema),
   });
 
-  const onSubmit = async (data: RegisterFormInputs) => {
+  useEffect(() => {
+    // Extract reset token from URL hash
+    const token = new URLSearchParams(window.location.hash.substring(1)).get(
+      'access_token'
+    );
+    if (!token) {
+      toast.error('Missing or invalid reset token.');
+      navigate('/forgot-password');
+    } else {
+      setResetToken(token);
+    }
+  }, [navigate]);
+
+  const onSubmit = async (data: ResetPasswordInputs) => {
+    if (!resetToken) {
+      toast.error('Invalid reset token. Please request a new reset link.');
+      return;
+    }
+
     setIsSubmitting(true);
     try {
-      const { email, password } = data;
-      const { error } = await supabase.auth.signUp({ email, password });
+      const { error } = await supabase.auth.updateUser({
+        password: data.newPassword,
+      });
 
       if (error) throw error;
 
-      toast.success(
-        'Account created successfully! Check your email to confirm.'
-      );
+      toast.success('Password reset successfully! Please log in.');
       navigate('/login');
     } catch (error: any) {
-      toast.error(error.message || 'Failed to register. Please try again.');
+      toast.error(error.message || 'Failed to reset password.');
     } finally {
       setIsSubmitting(false);
     }
@@ -72,23 +86,15 @@ export default function Register() {
           animate={{ opacity: 1 }}
           transition={{ delay: 0.2, duration: 0.8 }}
         >
-          Register
+          Reset Password
         </motion.h1>
         <form onSubmit={handleSubmit(onSubmit)} className='space-y-6'>
-          {/* Email Input */}
-          <InputForm
-            type='email'
-            placeholder='Email'
-            error={errors.email?.message}
-            {...register('email')}
-          />
-
-          {/* Password Input */}
+          {/* New Password Input */}
           <InputForm
             type='password'
-            placeholder='Password'
-            error={errors.password?.message}
-            {...register('password')}
+            placeholder='New Password'
+            error={errors.newPassword?.message}
+            {...register('newPassword')}
           />
 
           {/* Confirm Password Input */}
@@ -109,27 +115,9 @@ export default function Register() {
             }`}
             disabled={isSubmitting}
           >
-            {isSubmitting ? 'Registering...' : 'Register'}
+            {isSubmitting ? 'Resetting Password...' : 'Reset Password'}
           </button>
         </form>
-
-        {/* Navigation */}
-        <motion.div
-          className='mt-6 text-center'
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 1.2 }}
-        >
-          <p className='text-sm text-slate-600'>
-            Already have an account?{' '}
-            <Link
-              to='/login'
-              className='text-blue-500 font-bold hover:underline'
-            >
-              Sign In
-            </Link>
-          </p>
-        </motion.div>
       </div>
     </motion.section>
   );

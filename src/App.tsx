@@ -17,6 +17,9 @@ import Register from './features/auth/Register';
 import ProtectedRoute from './components/ProtectedRoute';
 import AuthProtectedRoute from './components/AuthProtectedRoute';
 import LogoutPage from './features/auth/Logout';
+import ForgotPasswordPage from './features/auth/ForgotPassword';
+import ResetPasswordPage from './features/auth/ResetPassword';
+import BookDescriptionPage from './features/books/BookDescription';
 
 // Initialize React Query client
 const queryClient = new QueryClient();
@@ -37,6 +40,10 @@ const router = createBrowserRouter([
         path: '/register',
         element: <Register />,
       },
+      {
+        path: '/forgot-password',
+        element: <ForgotPasswordPage />,
+      },
     ],
   },
 
@@ -52,6 +59,10 @@ const router = createBrowserRouter([
         element: <AllBooksPage />,
       },
       {
+        path: '/book/:bookId',
+        element: <BookDescriptionPage />,
+      },
+      {
         path: '/favorites',
         element: <FavoritesPage />,
       },
@@ -64,6 +75,10 @@ const router = createBrowserRouter([
         element: <LogoutPage />,
       },
     ],
+  },
+  {
+    path: '/reset-password',
+    element: <ResetPasswordPage />,
   },
 ]);
 

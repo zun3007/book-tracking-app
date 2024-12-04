@@ -42,33 +42,6 @@ function LandingPage() {
 
   return (
     <div className='bg-white text-slate-800 font-sans min-h-screen'>
-      {/* Navbar */}
-      <nav className='bg-white fixed top-0 w-full shadow-md z-10'>
-        <div className='max-w-7xl mx-auto px-4 py-3 flex justify-between items-center'>
-          <h1 className='text-2xl font-bold text-slate-800'>StoryTrack</h1>
-          <div className='flex items-center gap-6'>
-            <a
-              href='#features'
-              className='text-slate-600 hover:text-slate-800 transition'
-            >
-              Features
-            </a>
-            <a
-              href='#signup'
-              className='text-slate-600 hover:text-slate-800 transition'
-            >
-              Get Started
-            </a>
-            <a
-              href='/login'
-              className='px-6 py-2 bg-blue-500 text-white rounded-lg shadow hover:bg-blue-400 transition'
-            >
-              Login
-            </a>
-          </div>
-        </div>
-      </nav>
-
       {/* Hero Section */}
       <section className='relative h-screen bg-white text-center flex flex-col justify-center items-center px-8 shadow-md pt-20'>
         <animated.h1

@@ -5,19 +5,9 @@ import { z } from 'zod';
 import { toast } from 'react-hot-toast';
 import { useNavigate, Link } from 'react-router-dom';
 import { supabase } from '../../utils/supabaseClient';
-import { useMutation } from '@tanstack/react-query';
 import { motion } from 'framer-motion';
 
-import InputForm from './../../ui/InputForm';
-
-// Function to generate a random CAPTCHA
-const generateCaptcha = () => {
-  const characters =
-    'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-  return Array.from({ length: 6 }, () =>
-    characters.charAt(Math.floor(Math.random() * characters.length))
-  ).join('');
-};
+import InputForm from '../../ui/InputForm';
 
 // Form validation schema using Zod
 const SignInSchema = z.object({
@@ -29,14 +19,19 @@ const SignInSchema = z.object({
     .string()
     .min(6, 'Password must be at least 6 characters')
     .nonempty('Password is required'),
-  captcha: z.string().nonempty('CAPTCHA is required'),
 });
 
 type SignInFormInputs = z.infer<typeof SignInSchema>;
 
+// First, define the correct error type
+interface InputFormProps extends React.InputHTMLAttributes<HTMLInputElement> {
+  error?: string | undefined; // Changed from FieldError
+  // ... other props
+}
+
 export default function SignInPage() {
   const navigate = useNavigate();
-  const [captcha, setCaptcha] = useState(generateCaptcha());
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const {
     register,
@@ -46,33 +41,35 @@ export default function SignInPage() {
     resolver: zodResolver(SignInSchema),
   });
 
-  // React Query mutation for signing in
-  const signInMutation = useMutation({
-    mutationFn: async (data: SignInFormInputs) => {
-      const { email, password } = data;
-      const { error, user } = await supabase.auth.signInWithPassword({
-        email,
-        password,
-      });
-      if (error) throw new Error(error.message);
-      return user;
-    },
-    onSuccess: (user) => {
-      toast.success(`Welcome back, ${user?.email}!`);
-      navigate('/dashboard');
-    },
-    onError: (error: any) => {
-      toast.error(error.message || 'An error occurred while signing in.');
-    },
-  });
+  const onSubmit = async (data: SignInFormInputs) => {
+    setIsSubmitting(true);
 
-  // Submit handler
-  const onSubmit = (data: SignInFormInputs) => {
-    if (data.captcha !== captcha) {
-      toast.error('CAPTCHA does not match.');
-      return;
+    try {
+      const { data: sessionData, error } =
+        await supabase.auth.signInWithPassword({
+          email: data.email,
+          password: data.password,
+        });
+
+      if (error) throw error;
+
+      // Use `sessionData.user` to access the user information
+      const userEmail = sessionData?.user?.email;
+
+      if (userEmail) {
+        toast.success(`Welcome back, ${userEmail}!`);
+        navigate('/dashboard');
+      } else {
+        toast.error('Failed to retrieve user information.');
+      }
+    } catch (error: any) {
+      toast.error(
+        error.message ||
+          'Sign-in failed. Please check your credentials and try again.'
+      );
+    } finally {
+      setIsSubmitting(false);
     }
-    signInMutation.mutate(data);
   };
 
   return (
@@ -93,80 +90,33 @@ export default function SignInPage() {
         </motion.h1>
         <form onSubmit={handleSubmit(onSubmit)} className='space-y-6'>
           {/* Email Input */}
-          <motion.div
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ delay: 0.2 }}
-          >
-            <InputForm
-              type='email'
-              placeholder='Email'
-              error={errors.email?.message}
-              {...register('email')}
-            />
-          </motion.div>
+          <InputForm
+            type='email'
+            placeholder='Email'
+            error={errors.email?.message}
+            {...register('email')}
+          />
 
           {/* Password Input */}
-          <motion.div
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ delay: 0.4 }}
-          >
-            <InputForm
-              type='password'
-              placeholder='Password'
-              error={errors.password?.message}
-              {...register('password')}
-            />
-          </motion.div>
-
-          {/* CAPTCHA */}
-          <motion.div
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ delay: 0.6 }}
-          >
-            <div className='flex items-center justify-between'>
-              {/* Styled CAPTCHA */}
-              <div className='bg-slate-200 px-6 py-3 rounded-md font-mono text-lg text-slate-800 tracking-wider shadow-lg hover:shadow-2xl transition-all duration-200'>
-                {captcha}
-              </div>
-              {/* Refresh Button */}
-              <button
-                type='button'
-                onClick={() => setCaptcha(generateCaptcha())}
-                className='text-blue-500 hover:text-blue-600 underline'
-              >
-                Refresh
-              </button>
-            </div>
-            <InputForm
-              type='text'
-              placeholder='Enter CAPTCHA'
-              error={errors.captcha?.message}
-              {...register('captcha')}
-              className='mt-4 focus:ring-2 focus:ring-blue-500 rounded-md'
-            />
-          </motion.div>
+          <InputForm
+            type='password'
+            placeholder='Password'
+            error={errors.password?.message}
+            {...register('password')}
+          />
 
           {/* Submit Button */}
-          <motion.div
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ delay: 0.8 }}
+          <button
+            type='submit'
+            className={`w-full py-3 px-4 rounded-lg text-white ${
+              isSubmitting
+                ? 'bg-gray-400 cursor-not-allowed'
+                : 'bg-blue-500 hover:bg-blue-600 transition'
+            }`}
+            disabled={isSubmitting}
           >
-            <button
-              type='submit'
-              className={`w-full py-3 px-4 rounded-lg text-white ${
-                signInMutation.isLoading
-                  ? 'bg-gray-400 cursor-not-allowed'
-                  : 'bg-blue-500 hover:bg-blue-600 transition'
-              }`}
-              disabled={signInMutation.isLoading}
-            >
-              {signInMutation.isLoading ? 'Signing In...' : 'Sign In'}
-            </button>
-          </motion.div>
+            {isSubmitting ? 'Signing In...' : 'Sign In'}
+          </button>
         </form>
 
         {/* Forgot Password Link */}
@@ -175,6 +125,7 @@ export default function SignInPage() {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 1 }}
+          onClick={() => navigate('/forgot-password')}
         >
           Forgot Password?
         </motion.p>

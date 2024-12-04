@@ -3,6 +3,11 @@ import { useSpring, animated } from '@react-spring/web';
 import { toast } from 'react-hot-toast';
 import { supabase } from '../../utils/supabaseClient';
 
+interface SupabaseError extends Error {
+  message: string;
+  status?: number;
+}
+
 function SettingsPage() {
   const [email, setEmail] = useState('');
   const [notifications, setNotifications] = useState(true);
@@ -37,13 +42,13 @@ function SettingsPage() {
           error,
         } = await supabase.auth.getUser();
 
-        if (error || !user) {
-          throw new Error('User not found. Please log in.');
-        }
+        if (error) throw error;
+        if (!user) throw new Error('User not found. Please log in.');
 
         setEmail(user.email || '');
-      } catch (error) {
-        toast.error(error.message || 'Failed to fetch user info.');
+      } catch (error: unknown) {
+        const supabaseError = error as SupabaseError;
+        toast.error(supabaseError.message || 'Failed to fetch user info.');
       } finally {
         setIsLoading(false);
       }
@@ -89,8 +94,9 @@ function SettingsPage() {
         newPassword: '',
         confirmPassword: '',
       });
-    } catch (error) {
-      toast.error(error.message || 'Failed to change password.');
+    } catch (error: unknown) {
+      const supabaseError = error as SupabaseError;
+      toast.error(supabaseError.message || 'Failed to change password.');
     }
   };
 
@@ -136,6 +142,7 @@ function SettingsPage() {
               type='email'
               value={email}
               disabled
+              aria-label='Email address'
               className='w-full px-4 py-3 bg-slate-100 border border-slate-300 rounded-lg focus:outline-none cursor-not-allowed text-slate-500'
             />
           </div>
@@ -175,6 +182,7 @@ function SettingsPage() {
             <select
               value={theme}
               onChange={(e) => setTheme(e.target.value)}
+              aria-label='Select theme'
               className='w-full px-4 py-3 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500'
             >
               <option value='Light'>Light</option>
@@ -216,6 +224,8 @@ function SettingsPage() {
                   type='password'
                   value={passwords.currentPassword}
                   onChange={handleInputChange}
+                  aria-label='Current Password'
+                  placeholder='Enter current password'
                   className='w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500'
                 />
               </div>
@@ -229,6 +239,8 @@ function SettingsPage() {
                   type='password'
                   value={passwords.newPassword}
                   onChange={handleInputChange}
+                  aria-label='New Password'
+                  placeholder='Enter new password'
                   className='w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500'
                 />
               </div>
@@ -242,6 +254,8 @@ function SettingsPage() {
                   type='password'
                   value={passwords.confirmPassword}
                   onChange={handleInputChange}
+                  aria-label='Confirm Password'
+                  placeholder='Confirm new password'
                   className='w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500'
                 />
               </div>

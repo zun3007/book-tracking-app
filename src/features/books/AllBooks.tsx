@@ -1,177 +1,221 @@
-import React, { useState, useMemo } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
-import { useQuery } from '@tanstack/react-query';
-import { supabase } from './../../utils/supabaseClient';
-import { setBooks } from './bookSlice';
-import { useSpring, animated } from '@react-spring/web';
+import { useState, useEffect, useCallback } from 'react';
+import { debounce } from 'lodash';
+import { useAppDispatch, useAppSelector } from '../../app/hooks';
+import { fetchAllBooks } from './bookSlice';
+import BookCard from './components/BookCard';
+import { motion } from 'framer-motion';
 
-function AllBooksPage() {
-  const dispatch = useDispatch();
-  const books = useSelector((state) => state.books.items);
-  const genres = useSelector((state) => state.books.genres);
+interface FilterState {
+  genre: string[];
+  minRating: number;
+  author: string;
+  year: string;
+  sortBy: 'latest' | 'rating' | 'title';
+}
 
+export default function AllBooks() {
+  const dispatch = useAppDispatch();
+  const { books, status, error, totalBooks } = useAppSelector(
+    (state) => state.books
+  );
   const [searchQuery, setSearchQuery] = useState('');
-  const [selectedGenre, setSelectedGenre] = useState('All');
-  const [currentPage, setCurrentPage] = useState(1);
-  const booksPerPage = 8;
-
-  // Fetch books and genres
-  const { isLoading, error, refetch } = useQuery({
-    queryKey: ['books', 'genres'],
-    queryFn: async () => {
-      const { data: books, error: bookError } = await supabase
-        .from('books')
-        .select('*');
-      if (bookError) throw new Error('Failed to fetch books');
-
-      const genres = [
-        'All',
-        ...new Set(books.flatMap((book) => book.genres || [])),
-      ];
-      dispatch(setBooks({ books, genres }));
-
-      return { books, genres };
-    },
+  const [page, setPage] = useState(1);
+  const [itemsPerPage] = useState(8);
+  const [filters, setFilters] = useState<FilterState>({
+    genre: [],
+    minRating: 0,
+    author: '',
+    year: '',
+    sortBy: 'latest',
   });
 
-  // Filtered books
-  const filteredBooks = useMemo(() => {
-    return books.filter(
-      (book) =>
-        (selectedGenre === 'All' || book.genres?.includes(selectedGenre)) &&
-        (book.title?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          book.authors?.some((author) =>
-            author.toLowerCase().includes(searchQuery.toLowerCase())
-          ))
-    );
-  }, [books, selectedGenre, searchQuery]);
-
-  // Paginated books
-  const currentBooks = useMemo(() => {
-    const indexOfLastBook = currentPage * booksPerPage;
-    return filteredBooks.slice(indexOfLastBook - booksPerPage, indexOfLastBook);
-  }, [filteredBooks, currentPage]);
-
-  const totalPages = Math.ceil(filteredBooks.length / booksPerPage);
-
-  // Animations
-  const bookAnimation = useSpring({
-    from: { opacity: 0, transform: 'translateY(20px)' },
-    to: { opacity: 1, transform: 'translateY(0)' },
-    config: { duration: 500 },
-  });
-
-  // Render methods
-  const renderBooks = () =>
-    currentBooks.map((book) => (
-      <animated.div
-        key={book.id}
-        style={bookAnimation}
-        className='bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition transform hover:-translate-y-2 hover:scale-105'
-      >
-        <img
-          src={book.thumbnail || '/placeholder.jpg'}
-          alt={book.title || 'No Title'}
-          className='w-full h-40 object-cover rounded-md shadow'
-        />
-        <h3 className='text-lg font-bold text-slate-800 mt-4'>
-          {book.title || 'Untitled'}
-        </h3>
-        <p className='text-slate-600 text-sm'>
-          {book.authors?.join(', ') || 'Unknown Authors'}
-        </p>
-        <p className='text-slate-500 text-sm mt-2 italic'>
-          {book.genres?.join(', ') || 'No Genres'}
-        </p>
-      </animated.div>
-    ));
-
-  const renderPagination = () => (
-    <div className='flex items-center gap-2'>
-      {Array.from({ length: totalPages }, (_, i) => i + 1).map((number) => (
-        <button
-          key={number}
-          className={`px-4 py-3 rounded-lg font-medium ${
-            currentPage === number
-              ? 'bg-blue-500 text-white'
-              : 'bg-white text-slate-800 border border-slate-300'
-          } hover:bg-blue-400 hover:text-white transition`}
-          onClick={() => setCurrentPage(number)}
-        >
-          {number}
-        </button>
-      ))}
-    </div>
+  // Debounced search handler
+  const debouncedSearch = useCallback(
+    debounce((query: string) => {
+      setSearchQuery(query);
+      setPage(1); // Reset pagination when searching
+    }, 500),
+    []
   );
 
-  // Handle Errors
-  if (error) {
-    return (
-      <div className='text-center mt-10'>
-        <p className='text-red-500'>{error.message}</p>
-        <button
-          className='mt-4 px-6 py-3 bg-blue-500 text-white rounded-lg'
-          onClick={() => refetch()}
-        >
-          Retry
-        </button>
-      </div>
+  // Filter handlers
+  const handleGenreChange = (genre: string) => {
+    setFilters((prev) => ({
+      ...prev,
+      genre: prev.genre.includes(genre)
+        ? prev.genre.filter((g) => g !== genre)
+        : [...prev.genre, genre],
+    }));
+    setPage(1);
+  };
+
+  const handleRatingChange = (rating: number) => {
+    setFilters((prev) => ({ ...prev, minRating: rating }));
+    setPage(1);
+  };
+
+  const handleSortChange = (sortBy: 'latest' | 'rating' | 'title') => {
+    setFilters((prev) => ({ ...prev, sortBy }));
+    setPage(1);
+  };
+
+  // Add pagination handlers
+  const handlePageChange = (newPage: number) => {
+    setPage(newPage);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  // Fetch data with filters
+  useEffect(() => {
+    dispatch(
+      fetchAllBooks({
+        page,
+        filters,
+        searchQuery,
+      })
     );
-  }
+  }, [page, filters, searchQuery, dispatch]);
 
   return (
-    <div className='bg-slate-50 min-h-screen text-slate-800 font-sans'>
-      {/* Hero Header */}
-      <header className='bg-gradient-to-r from-blue-50 to-slate-100 py-16 px-8 text-center shadow-sm mt-4'>
-        <h1 className='text-4xl font-bold text-slate-800'>Explore All Books</h1>
-        <p className='text-lg text-slate-600 mt-4'>
-          Discover your next great read among thousands of books.
-        </p>
-      </header>
+    <div className='min-h-screen bg-slate-50 py-8 mt-16'>
+      <div className='container mx-auto px-4'>
+        {/* Search and Filters Section */}
+        <div className='mb-8 space-y-4'>
+          {/* Search Box */}
+          <div className='relative'>
+            <input
+              type='text'
+              placeholder='Search anime...'
+              onChange={(e) => debouncedSearch(e.target.value)}
+              className='w-full px-4 py-2 rounded-lg border focus:ring-2 focus:ring-blue-500'
+            />
+          </div>
 
-      {/* Filters */}
-      <section className='py-6 px-8 bg-white shadow-md'>
-        <div className='flex flex-col sm:flex-row justify-between items-center gap-4'>
-          <input
-            type='text'
-            placeholder='Search by title or author'
-            className='px-4 py-3 w-full sm:w-1/2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500'
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-          />
-          <select
-            className='px-4 py-3 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500'
-            value={selectedGenre}
-            onChange={(e) => setSelectedGenre(e.target.value)}
-          >
-            {genres.map((genre) => (
-              <option key={genre} value={genre}>
-                {genre}
-              </option>
+          {/* Filter Pills */}
+          <div className='flex flex-wrap gap-2'>
+            {['Action', 'Romance', 'Comedy', 'Fantasy', 'Slice of Life'].map(
+              (genre) => (
+                <button
+                  key={genre}
+                  onClick={() => handleGenreChange(genre)}
+                  className={`px-4 py-2 rounded-full ${
+                    filters.genre.includes(genre)
+                      ? 'bg-blue-500 text-white'
+                      : 'bg-gray-200 text-gray-700'
+                  }`}
+                >
+                  {genre}
+                </button>
+              )
+            )}
+          </div>
+
+          {/* Rating Filter */}
+          <div className='flex items-center gap-4'>
+            <span>Minimum Rating:</span>
+            {[1, 2, 3, 4, 5].map((rating) => (
+              <button
+                key={rating}
+                onClick={() => handleRatingChange(rating)}
+                className={`p-2 ${
+                  filters.minRating === rating
+                    ? 'text-yellow-500'
+                    : 'text-gray-400'
+                }`}
+              >
+                ⭐
+              </button>
             ))}
+          </div>
+
+          {/* Sort Options */}
+          <select
+            onChange={(e) => handleSortChange(e.target.value as any)}
+            className='px-4 py-2 rounded-lg border'
+          >
+            <option value='latest'>Latest</option>
+            <option value='rating'>Highest Rated</option>
+            <option value='title'>Title A-Z</option>
           </select>
         </div>
-      </section>
 
-      {/* Books Grid */}
-      <main className='py-10 px-8'>
-        {isLoading ? (
-          <p className='text-center text-slate-500'>Loading books...</p>
-        ) : filteredBooks.length > 0 ? (
-          <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6'>
-            {renderBooks()}
+        {/* Books Grid */}
+        <div className='grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 mb-8'>
+          {books.map((book, index) => (
+            <motion.div
+              key={book.id}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: index * 0.1 }}
+            >
+              <BookCard book={book} />
+            </motion.div>
+          ))}
+        </div>
+
+        {/* Pagination Controls */}
+        {status !== 'loading' && books.length > 0 && (
+          <div className='flex justify-center items-center space-x-2 py-4'>
+            <button
+              onClick={() => handlePageChange(page - 1)}
+              disabled={page === 1}
+              className='px-4 py-2 rounded-lg border border-slate-200 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-slate-50'
+            >
+              Previous
+            </button>
+
+            {/* Page Numbers */}
+            <div className='flex space-x-2'>
+              {Array.from({ length: Math.ceil(totalBooks / itemsPerPage) }).map(
+                (_, index) => {
+                  const pageNumber = index + 1;
+                  // Show only nearby pages
+                  if (
+                    pageNumber === 1 ||
+                    pageNumber === Math.ceil(totalBooks / itemsPerPage) ||
+                    (pageNumber >= page - 2 && pageNumber <= page + 2)
+                  ) {
+                    return (
+                      <button
+                        key={pageNumber}
+                        onClick={() => handlePageChange(pageNumber)}
+                        className={`px-4 py-2 rounded-lg ${
+                          page === pageNumber
+                            ? 'bg-blue-500 text-white'
+                            : 'border border-slate-200 hover:bg-slate-50'
+                        }`}
+                      >
+                        {pageNumber}
+                      </button>
+                    );
+                  } else if (
+                    pageNumber === page - 3 ||
+                    pageNumber === page + 3
+                  ) {
+                    return <span key={pageNumber}>...</span>;
+                  }
+                  return null;
+                }
+              )}
+            </div>
+
+            <button
+              onClick={() => handlePageChange(page + 1)}
+              disabled={page >= Math.ceil(totalBooks / itemsPerPage)}
+              className='px-4 py-2 rounded-lg border border-slate-200 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-slate-50'
+            >
+              Next
+            </button>
           </div>
-        ) : (
-          <p className='text-center text-slate-500 mt-8'>No books found.</p>
         )}
-      </main>
 
-      {/* Pagination */}
-      <footer className='py-6 px-8 flex justify-center'>
-        {renderPagination()}
-      </footer>
+        {/* Loading State */}
+        {status === 'loading' && (
+          <div className='flex justify-center p-4'>
+            <div className='animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500' />
+          </div>
+        )}
+      </div>
     </div>
   );
 }
-
-export default AllBooksPage;

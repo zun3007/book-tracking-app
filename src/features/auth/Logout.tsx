@@ -4,47 +4,37 @@ import { supabase } from '../../utils/supabaseClient';
 import { toast } from 'react-hot-toast';
 import { motion } from 'framer-motion';
 
-function LogoutPage() {
+export default function Logout() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    const logoutUser = async () => {
+    const handleLogout = async () => {
       try {
         const { error } = await supabase.auth.signOut();
+        if (error) throw error;
 
-        if (error) {
-          throw error;
-        }
-
-        toast.success('Logged out successfully!');
-        navigate('/login'); // Redirect to the login page
+        toast.success('Successfully logged out.');
+        navigate('/login');
       } catch (error: any) {
         toast.error(error.message || 'Failed to log out. Please try again.');
       }
     };
 
-    logoutUser();
+    handleLogout();
   }, [navigate]);
 
   return (
-    <div className='flex items-center justify-center min-h-screen bg-slate-50'>
-      {/* Animated Logout Message */}
-      <motion.div
-        className='text-center'
-        initial={{ opacity: 0, y: -20 }}
-        animate={{ opacity: 1, y: 0 }}
-        exit={{ opacity: 0, y: 20 }}
-        transition={{ duration: 0.6 }}
-      >
-        <h1 className='text-3xl font-bold text-blue-600 mb-4'>
-          Logging Out...
-        </h1>
-        <p className='text-slate-600'>
-          Please wait while we safely log you out of your account.
-        </p>
-      </motion.div>
-    </div>
+    <motion.div
+      className='flex justify-center items-center min-h-screen bg-slate-50 text-slate-700'
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      transition={{ duration: 0.5 }}
+    >
+      <div className='text-center'>
+        <h1 className='text-2xl font-bold'>Logging you out...</h1>
+        <p className='text-slate-500 mt-4'>Please wait a moment.</p>
+      </div>
+    </motion.div>
   );
 }
-
-export default LogoutPage;
