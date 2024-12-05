@@ -74,8 +74,15 @@ export default function ForgotPassword() {
               type='email'
               placeholder='Enter your email'
               error={errors.email?.message}
+              aria-label='Email'
+              aria-describedby={errors.email ? 'email-error' : undefined}
               {...register('email')}
             />
+            {errors.email && (
+              <span id='email-error' className='text-red-600'>
+                {errors.email.message}
+              </span>
+            )}
           </motion.div>
 
           {/* Submit Button */}

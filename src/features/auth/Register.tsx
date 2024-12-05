@@ -82,22 +82,45 @@ export default function Register() {
             type='email'
             placeholder='Email'
             error={errors.email?.message}
+            aria-label='Email'
+            aria-describedby={errors.email ? 'email-error' : undefined}
             {...register('email')}
           />
+          {errors.email && (
+            <span id='email-error' className='text-red-600'>
+              {errors.email.message}
+            </span>
+          )}
 
           <InputForm
             type='password'
             placeholder='Password'
             error={errors.password?.message}
+            aria-label='Password'
+            aria-describedby={errors.password ? 'password-error' : undefined}
             {...register('password')}
           />
+          {errors.password && (
+            <span id='password-error' className='text-red-600'>
+              {errors.password.message}
+            </span>
+          )}
 
           <InputForm
             type='password'
             placeholder='Confirm Password'
             error={errors.confirmPassword?.message}
+            aria-label='Confirm Password'
+            aria-describedby={
+              errors.confirmPassword ? 'confirm-password-error' : undefined
+            }
             {...register('confirmPassword')}
           />
+          {errors.confirmPassword && (
+            <span id='confirm-password-error' className='text-red-600'>
+              {errors.confirmPassword.message}
+            </span>
+          )}
 
           <button
             type='submit'
