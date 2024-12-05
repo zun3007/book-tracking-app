@@ -3,7 +3,7 @@
   "private": true,
   "version": "0.0.0",
   "type": "module",
-  "homepage": "https://zun3007.github.io/book-tracking-app/",
+  "homepage": "https://book-tracking-app-ebon.vercel.app/",
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build",
