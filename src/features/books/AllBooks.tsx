@@ -4,6 +4,7 @@ import { useAppDispatch, useAppSelector } from '../../app/hooks';
 import { fetchAllBooks, fetchFavorites } from './bookSlice';
 import { motion, AnimatePresence } from 'framer-motion';
 import BookCard from './BookCard';
+import VoiceSearchButton from '../../components/VoiceSearchButton';
 
 interface FilterState {
   genre: string[];
@@ -42,20 +43,22 @@ export default function AllBooks() {
     setPage(1);
   };
 
-  // Update search handler
-  const debouncedSearch = useCallback(
-    debounce((query: string) => {
-      setSearchQuery(query);
-      setPage(1); // Reset to first page when searching
-      // Reset filters when searching
-      setFilters((prev) => ({
-        ...prev,
-        genre: [],
-        minRating: 0,
-      }));
-    }, 500),
-    []
-  );
+  // Remove debounce for instant search
+  const handleSearchChange = (query: string) => {
+    setSearchQuery(query);
+    setPage(1); // Reset to first page when searching
+    // Reset filters when searching
+    setFilters((prev) => ({
+      ...prev,
+      genre: [],
+      minRating: 0,
+    }));
+  };
+
+  // Handle voice search
+  const handleVoiceSearch = (query: string) => {
+    handleSearchChange(query);
+  };
 
   // Update filter handlers
   const handleGenreChange = (genre: string) => {
@@ -148,14 +151,15 @@ export default function AllBooks() {
           className='mb-8 space-y-4 bg-white dark:bg-gray-800 p-4 rounded-lg shadow-sm'
         >
           {/* Search Box */}
-          <div className='relative'>
+          <div className='relative flex items-center'>
             <input
               type='text'
               value={searchQuery}
-              placeholder='Search anime...'
-              onChange={(e) => debouncedSearch(e.target.value)}
+              placeholder='Search books...'
+              onChange={(e) => handleSearchChange(e.target.value)}
               className='w-full px-4 py-2 rounded-lg border dark:border-gray-700 dark:bg-gray-700 dark:text-gray-100'
             />
+            <VoiceSearchButton onSearch={handleVoiceSearch} />
           </div>
 
           {/* Filter Pills */}
