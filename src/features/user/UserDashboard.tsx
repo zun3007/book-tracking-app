@@ -102,6 +102,49 @@ function createCustomIcon(emoji: string, title: string) {
   });
 }
 
+// Add this component for the recommendation skeleton
+const RecommendationSkeleton = () => (
+  <motion.div
+    initial={{ opacity: 0, y: 40 }}
+    animate={{ opacity: 1, y: 0 }}
+    transition={{ delay: 0.2 }}
+    className='mt-16 bg-white/80 backdrop-blur-lg rounded-2xl p-8 max-w-2xl w-full shadow-xl'
+  >
+    <div className='flex gap-6'>
+      {/* Book thumbnail skeleton */}
+      <div className='w-32 h-48 flex-shrink-0 rounded-lg bg-slate-200 dark:bg-slate-700 animate-pulse' />
+
+      <div className='flex-1'>
+        <div className='flex items-start justify-between'>
+          <div className='space-y-2 flex-1'>
+            {/* Title skeleton */}
+            <div className='h-8 bg-slate-200 dark:bg-slate-700 rounded-lg w-3/4 animate-pulse' />
+            {/* Author skeleton */}
+            <div className='h-4 bg-slate-200 dark:bg-slate-700 rounded-lg w-1/2 animate-pulse' />
+          </div>
+          {/* Rating skeleton */}
+          <div className='w-16 h-8 bg-slate-200 dark:bg-slate-700 rounded-full animate-pulse' />
+        </div>
+
+        {/* Description skeleton */}
+        <div className='mt-4 space-y-2'>
+          <div className='h-4 bg-slate-200 dark:bg-slate-700 rounded w-full animate-pulse' />
+          <div className='h-4 bg-slate-200 dark:bg-slate-700 rounded w-5/6 animate-pulse' />
+        </div>
+
+        {/* Actions skeleton */}
+        <div className='mt-6 flex items-center justify-between'>
+          <div className='flex gap-2'>
+            <div className='w-10 h-10 rounded-full bg-slate-200 dark:bg-slate-700 animate-pulse' />
+            <div className='w-10 h-10 rounded-full bg-slate-200 dark:bg-slate-700 animate-pulse' />
+          </div>
+          <div className='w-32 h-10 rounded-full bg-slate-200 dark:bg-slate-700 animate-pulse' />
+        </div>
+      </div>
+    </div>
+  </motion.div>
+);
+
 export default function UserDashboard() {
   const user = useAppSelector((state) => state.auth.user);
   const {
@@ -240,8 +283,10 @@ export default function UserDashboard() {
               </div>
             </motion.div>
 
-            {/* Featured Book */}
-            {recommendation && !recLoading && (
+            {/* Featured Book with Loading State */}
+            {recLoading ? (
+              <RecommendationSkeleton />
+            ) : recommendation ? (
               <motion.div
                 initial={{ opacity: 0, y: 40 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -306,7 +351,7 @@ export default function UserDashboard() {
                   </div>
                 </div>
               </motion.div>
-            )}
+            ) : null}
           </div>
         </div>
 
