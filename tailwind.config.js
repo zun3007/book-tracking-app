@@ -32,8 +32,12 @@ export default {
       },
       animation: {
         pulse: 'pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+        'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+      },
+      backdropBlur: {
+        xs: '2px',
       },
     },
   },
-  plugins: [require('tailwindcss-animate')],
+  plugins: ['tailwindcss-animate', '@tailwindcss/aspect-ratio'],
 };

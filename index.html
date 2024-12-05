@@ -2,12 +2,111 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <!-- Primary Meta Tags -->
     <title>StoryTrack | The only service you need to manage your Story</title>
+    <meta
+      name="title"
+      content="StoryTrack | The only service you need to manage your Story"
+    />
+    <meta
+      name="description"
+      content="Track your reading journey, manage your book collection, and discover new stories with StoryTrack - your personal digital library companion."
+    />
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
+    <link rel="manifest" href="/site.webmanifest" />
+
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://storytrack.app/" />
+    <meta
+      property="og:title"
+      content="StoryTrack | Your Digital Reading Companion"
+    />
+    <meta
+      property="og:description"
+      content="Track your reading journey, manage your book collection, and discover new stories with StoryTrack - your personal digital library companion."
+    />
+    <meta property="og:image" content="/og-image.jpg" />
+
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image" />
+    <meta property="twitter:url" content="https://storytrack.app/" />
+    <meta
+      property="twitter:title"
+      content="StoryTrack | Your Digital Reading Companion"
+    />
+    <meta
+      property="twitter:description"
+      content="Track your reading journey, manage your book collection, and discover new stories with StoryTrack."
+    />
+    <meta property="twitter:image" content="/twitter-image.jpg" />
+
+    <!-- Performance Optimizations -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="preload" href="/src/main.tsx" as="script" type="module" />
+
+    <!-- PWA -->
+    <meta name="theme-color" content="#8b5cf6" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta
+      name="apple-mobile-web-app-status-bar-style"
+      content="black-translucent"
+    />
+
+    <!-- Security -->
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="default-src 'self'; img-src 'self' data: https:; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; connect-src 'self' https://*.supabase.co;"
+    />
+    <meta name="referrer" content="strict-origin-when-cross-origin" />
+
+    <!-- SEO -->
+    <meta name="robots" content="index, follow" />
+    <meta
+      name="keywords"
+      content="book tracking, reading list, digital library, book management, reading progress"
+    />
+    <link rel="canonical" href="https://storytrack.app" />
+
+    <!-- Accessibility -->
+    <meta name="application-name" content="StoryTrack" />
+    <meta name="apple-mobile-web-app-title" content="StoryTrack" />
   </head>
   <body>
+    <noscript>
+      <div style="padding: 20px; text-align: center">
+        Please enable JavaScript to use StoryTrack. We promise it's worth it!
+      </div>
+    </noscript>
+
     <div id="root"></div>
+
+    <!-- Main Script -->
     <script type="module" src="/src/main.tsx"></script>
+
+    <!-- Preload Critical Resources -->
+    <link rel="preload" as="image" href="/logo.svg" />
+
+    <!-- Inline Critical CSS -->
+    <style>
+      /* Add any critical CSS here */
+      body {
+        margin: 0;
+        padding: 0;
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+      }
+      #root {
+        min-height: 100vh;
+      }
+    </style>
   </body>
 </html>
