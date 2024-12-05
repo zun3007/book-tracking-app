@@ -38,17 +38,21 @@ export default function BookDescription() {
     { id: string; email: string }[]
   >([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
 
   useLayoutEffect(() => {
     const initializeData = async () => {
       if (bookId && user?.id) {
         try {
+          setIsLoading(true);
           const bookData = await bookService.getBookById(parseInt(bookId, 10));
           dispatch(setSelectedBook(bookData));
 
           dispatch(fetchFavorites(user.id));
         } catch (err) {
           console.error('Error fetching data:', err);
+        } finally {
+          setIsLoading(false);
         }
       }
     };
@@ -179,7 +183,7 @@ export default function BookDescription() {
     }
   };
 
-  if (loading) {
+  if (isLoading) {
     return (
       <div className='min-h-screen bg-gray-50 dark:bg-gray-900 py-12 mt-16'>
         <div className='container mx-auto px-4'>
