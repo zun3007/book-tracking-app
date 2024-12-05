@@ -104,7 +104,7 @@ function App() {
         <Provider store={store}>
           <ThemeProvider>
             <QueryClientProvider client={queryClient}>
-              <Toaster />
+              <Toaster position='bottom-right' />
               <div className='container mx-auto'>
                 <RouterProvider router={router} />
               </div>
