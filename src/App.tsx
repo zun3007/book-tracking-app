@@ -10,6 +10,8 @@ import AuthProtectedRoute from './components/AuthProtectedRoute';
 import ThemeProvider from './features/theme/ThemeProvider';
 import store from './store';
 import BookshelfPage from './features/books/BookshelfPage';
+import Navbar from './ui/Navbar';
+import LandingNavbar from './ui/LandingNavbar';
 
 // Lazy load pages
 const LandingPage = lazy(() => import('./ui/LandingPage'));
@@ -25,6 +27,7 @@ const ResetPasswordPage = lazy(() => import('./features/auth/ResetPassword'));
 const BookDescriptionPage = lazy(
   () => import('./features/books/BookDescription')
 );
+const NotFound = lazy(() => import('./ui/NotFound'));
 
 // Initialize React Query client
 const queryClient = new QueryClient();
@@ -48,6 +51,17 @@ const router = createBrowserRouter([
       {
         path: '/forgot-password',
         element: <ForgotPasswordPage />,
+      },
+      {
+        path: '*',
+        element: (
+          <>
+            <LandingNavbar />
+            <div className='pt-16'>
+              <NotFound />
+            </div>
+          </>
+        ),
       },
     ],
   },
@@ -82,11 +96,33 @@ const router = createBrowserRouter([
         path: '/bookshelf',
         element: <BookshelfPage />,
       },
+      {
+        path: '*',
+        element: (
+          <>
+            <Navbar />
+            <div className='pt-16'>
+              <NotFound />
+            </div>
+          </>
+        ),
+      },
     ],
   },
   {
     path: '/reset-password',
     element: <ResetPasswordPage />,
+  },
+  {
+    path: '*',
+    element: (
+      <>
+        <LandingNavbar />
+        <div className='pt-16'>
+          <NotFound />
+        </div>
+      </>
+    ),
   },
 ]);
 
