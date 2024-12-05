@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 interface OptimizedImageProps {
@@ -25,18 +25,18 @@ export default function OptimizedImage({
   const [isLoading, setIsLoading] = useState(true);
   const [imageSrc, setImageSrc] = useState<string>('');
   const [error, setError] = useState<boolean>(false);
+  const imgRef = useRef<HTMLImageElement | null>(null);
 
   useEffect(() => {
     const img = new Image();
 
-    // Generate optimized image URLs with dimensions and quality
     const params = new URLSearchParams({
       w: width?.toString() || 'auto',
       h: height?.toString() || 'auto',
       q: quality.toString(),
     });
 
-    const baseUrl = src.replace(/\.[^/.]+$/, ''); // Remove extension
+    const baseUrl = src.replace(/\.[^/.]+$/, '');
     const webpSrc = `${baseUrl}.webp?${params.toString()}`;
     const fallbackSrc = `${baseUrl}.jpg?${params.toString()}`;
 
@@ -49,7 +49,6 @@ export default function OptimizedImage({
     };
 
     img.onerror = () => {
-      // If WebP fails, try fallback
       const fallbackImg = new Image();
       fallbackImg.src = fallbackSrc;
       setImageSrc(fallbackSrc);
@@ -75,6 +74,26 @@ export default function OptimizedImage({
     }
   }, [src, width, height, quality, priority]);
 
+  useEffect(() => {
+    if (!priority && imgRef.current) {
+      const observer = new IntersectionObserver(
+        ([entry]) => {
+          if (entry.isIntersecting) {
+            imgRef.current!.src = imageSrc;
+            observer.disconnect();
+          }
+        },
+        { rootMargin: '50px' }
+      );
+
+      observer.observe(imgRef.current);
+
+      return () => {
+        observer.disconnect();
+      };
+    }
+  }, [imageSrc, priority]);
+
   return (
     <picture className={`relative overflow-hidden ${className}`}>
       <source
@@ -92,7 +111,7 @@ export default function OptimizedImage({
       </AnimatePresence>
 
       <motion.img
-        src={imageSrc}
+        ref={imgRef}
         alt={alt}
         width={width}
         height={height}
