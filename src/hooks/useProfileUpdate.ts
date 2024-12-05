@@ -23,15 +23,15 @@ export const useProfileUpdate = () => {
 
         const { data: profileData, error: profileError } = await supabase
           .from('profiles')
-          .select('user_id')
-          .eq('user_id', user.id)
+          .select('id')
+          .eq('id', user.id)
           .single();
 
         if (!profileData && !profileError) {
           const { error: insertError } = await supabase
             .from('profiles')
             .insert({
-              user_id: user.id,
+              id: user.id,
               email: user.email,
             });
 
