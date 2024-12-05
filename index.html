@@ -51,6 +51,7 @@
     <!-- Performance Optimizations -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="preload" href="/src/main.tsx" as="script" type="module" />
 
     <!-- PWA -->
     <meta name="theme-color" content="#8b5cf6" />
@@ -83,6 +84,9 @@
 
     <!-- Main Script -->
     <script type="module" src="/src/main.tsx"></script>
+
+    <!-- Preload Critical Resources -->
+    <link rel="preload" as="image" href="/logo.svg" />
 
     <!-- Inline Critical CSS -->
     <style>
