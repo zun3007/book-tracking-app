@@ -53,35 +53,6 @@ export default function SignInPage() {
 
       if (error) throw error;
 
-      const user = authData.user;
-      if (user) {
-        const { data: profileData, error: profileError } = await supabase
-          .from('profiles')
-          .select('user_id')
-          .eq('user_id', user.id)
-          .single();
-
-        if (profileError) {
-          // Insert profile if it doesn't exist
-          const { error: insertError } = await supabase
-            .from('profiles')
-            .insert({
-              user_id: user.id,
-              email: user.email,
-            });
-
-          if (insertError) throw insertError;
-        } else {
-          // Update profile if it exists
-          const { error: updateError } = await supabase
-            .from('profiles')
-            .update({ email: user.email })
-            .eq('user_id', user.id);
-
-          if (updateError) throw updateError;
-        }
-      }
-
       toast.success('Logged in successfully!');
       navigate('/dashboard');
     } catch (error: any) {

@@ -50,16 +50,6 @@ export default function Register() {
 
       if (error) throw error;
 
-      const user = authData.user;
-      if (user) {
-        const { error: profileError } = await supabase.from('profiles').insert({
-          user_id: user.id,
-          email: user.email,
-        });
-
-        if (profileError) throw profileError;
-      }
-
       toast.success(
         'Account created successfully! Check your email to confirm.'
       );
