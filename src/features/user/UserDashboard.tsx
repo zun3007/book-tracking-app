@@ -231,7 +231,7 @@ export default function UserDashboard() {
                   {navigationIcons.library.name}
                 </Link>
                 <Link
-                  to='/reading-list'
+                  to='/bookshelf'
                   className='px-8 py-3 bg-blue-500 text-white rounded-xl font-semibold hover:bg-blue-600 transition-all shadow-lg hover:shadow-xl hover:-translate-y-0.5 flex items-center gap-2 group'
                 >
                   <navigationIcons.readingList.icon className='w-5 h-5 group-hover:scale-110 transition-transform' />
