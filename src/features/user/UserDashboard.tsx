@@ -27,12 +27,9 @@ import StatCard from '../../components/StatCard';
 import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import { Store } from '../../types/store';
-import StoreSidebar from '../../components/StoreSidebar';
 import { fahasaStores } from './../../data/fahasaStores';
 import { toast } from 'react-hot-toast';
 import L from 'leaflet';
-
-type StatKey = keyof typeof statIcons;
 
 function getGoogleMapsUrl(
   address: string,
@@ -221,7 +218,7 @@ export default function UserDashboard() {
   }, []);
 
   return (
-    <div className='min-h-screen bg-slate-50'>
+    <div className='min-h-screen bg-slate-50 mt-6'>
       {/* Hero Section */}
       <motion.section
         ref={heroRef}
@@ -494,6 +491,7 @@ export default function UserDashboard() {
               ))}
             </div>
           ) : (
+            // Actual content
             <>
               {/* Stats Cards */}
               <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-16'>
