@@ -273,7 +273,7 @@ function LandingPage() {
           </animated.p>
           <animated.a
             style={ctaAnimation}
-            href='/signup'
+            href='/register'
             className='mt-6 sm:mt-8 px-6 sm:px-8 py-3 sm:py-4 rounded-lg bg-blue-500 text-white font-semibold shadow-lg hover:shadow-xl hover:bg-blue-400 transition'
           >
             Sign Up Now
