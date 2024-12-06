@@ -16,7 +16,7 @@ export default function LandingNavbar() {
         <div className='flex items-center justify-between h-16'>
           <NavLink
             to='/'
-            className='text-3xl font-bold text-slate-800 hover:text-slate-600 transition-colors duration-300'
+            className='text-3xl font-bold text-blue-600 hover:text-blue-500 transition-colors duration-300'
           >
             StoryTrack
           </NavLink>
