@@ -125,121 +125,128 @@ export default function BookDetails({
   };
 
   return (
-    <div className='flex flex-col md:flex-row'>
-      <div className='md:w-1/3'>
-        <OptimizedImage
-          src={book.thumbnail || '/placeholder-book.jpg'}
-          alt={book.title}
-          className='w-full h-full object-cover'
-        />
-      </div>
-      <div className='md:w-2/3 p-6'>
-        <h1 className='text-3xl font-bold text-gray-800 dark:text-gray-100 mb-2'>
-          {book.title}
-        </h1>
-        <p className='text-lg text-gray-600 dark:text-gray-300 mb-6'>
-          {book.authors?.join(', ')}
-        </p>
-
-        <div className='flex items-center space-x-4 mb-8'>
-          <div className='flex items-center'>
-            {[1, 2, 3, 4, 5].map((rating) => (
-              <button
-                key={rating}
-                onClick={() => handleRatingChange(rating)}
-                disabled={!user}
-                className={`w-8 h-8 ${
-                  rating <= (book.userRating || 0)
-                    ? 'text-amber-400'
-                    : 'text-gray-300 dark:text-gray-600'
-                } hover:text-amber-500 transition-colors disabled:cursor-not-allowed`}
-              >
-                ⭐
-              </button>
-            ))}
+    <div className='max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8'>
+      <div className='flex flex-col lg:flex-row gap-8'>
+        {/* Image Section */}
+        <div className='lg:w-1/3'>
+          <div className='sticky top-8'>
+            <div className='aspect-[2/3] rounded-xl overflow-hidden shadow-2xl ring-1 ring-gray-200 dark:ring-gray-800'>
+              <OptimizedImage
+                src={book.thumbnail || '/placeholder-book.jpg'}
+                alt={book.title}
+                className='w-full h-full object-cover'
+              />
+            </div>
           </div>
-
-          <button
-            onClick={handleToggleFavorite}
-            disabled={!user}
-            className='flex items-center space-x-2 px-4 py-2 rounded-lg border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed'
-          >
-            {favorites.some((f) => f.id === book.id) ? (
-              <HeartSolidIcon className='w-5 h-5 text-red-500' />
-            ) : (
-              <HeartIcon className='w-5 h-5 text-gray-400 dark:text-gray-500' />
-            )}
-            <span className='text-gray-600 dark:text-gray-300'>
-              {favorites.some((f) => f.id === book.id)
-                ? 'Remove from Favorites'
-                : 'Add to Favorites'}
-            </span>
-          </button>
         </div>
 
-        <div className='prose prose-gray dark:prose-invert max-w-none mt-6'>
-          <p className='text-gray-600 dark:text-gray-300'>{book.description}</p>
+        {/* Content Section */}
+        <div className='lg:w-2/3 space-y-8'>
+          {/* Title and Author */}
+          <div className='space-y-2'>
+            <h1 className='text-4xl font-bold text-gray-900 dark:text-gray-50 tracking-tight'>
+              {book.title}
+            </h1>
+            <p className='text-xl text-gray-600 dark:text-gray-400'>
+              by {book.authors?.join(', ')}
+            </p>
+          </div>
 
-          <div className='border-t border-gray-200 dark:border-gray-700 pt-6'>
-            <h2 className='text-lg font-semibold text-gray-800 dark:text-gray-100 mb-4'>
+          {/* Rating and Favorites */}
+          <div className='flex flex-wrap items-center gap-6'>
+            <div className='flex items-center gap-2 bg-gray-50 dark:bg-gray-800/50 rounded-lg p-2'>
+              {[1, 2, 3, 4, 5].map((rating) => (
+                <button
+                  key={rating}
+                  onClick={() => handleRatingChange(rating)}
+                  disabled={!user}
+                  className={`w-8 h-8 transform transition-all duration-200 ${
+                    rating <= (book.userRating || 0)
+                      ? 'text-amber-400 scale-110'
+                      : 'text-gray-300 dark:text-gray-600 hover:scale-105'
+                  } disabled:cursor-not-allowed`}
+                >
+                  ⭐
+                </button>
+              ))}
+            </div>
+
+            <button
+              onClick={handleToggleFavorite}
+              disabled={!user}
+              className='flex items-center gap-2 px-4 py-2 rounded-lg 
+                ${favorites.some((f) => f.id === book.id)
+                  ? "bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400"
+                  : "bg-gray-50 dark:bg-gray-800/50 text-gray-600 dark:text-gray-400"}
+                hover:shadow-md transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed'
+            >
+              {favorites.some((f) => f.id === book.id) ? (
+                <HeartSolidIcon className='w-5 h-5 text-red-500' />
+              ) : (
+                <HeartIcon className='w-5 h-5' />
+              )}
+              <span>
+                {favorites.some((f) => f.id === book.id)
+                  ? 'Remove from Favorites'
+                  : 'Add to Favorites'}
+              </span>
+            </button>
+          </div>
+
+          {/* Description */}
+          <div className='prose prose-lg prose-gray dark:prose-invert max-w-none'>
+            <p className='text-gray-600 dark:text-gray-300 leading-relaxed'>
+              {book.description}
+            </p>
+          </div>
+
+          {/* Book Details */}
+          <div className='rounded-xl bg-gray-50 dark:bg-gray-800/50 p-6 space-y-4'>
+            <h2 className='text-xl font-semibold text-gray-900 dark:text-gray-100'>
               Book Details
             </h2>
-            <dl className='grid grid-cols-2 gap-4 text-sm'>
-              <div>
-                <dt className='text-sm text-gray-500 dark:text-gray-400'>
-                  ISBN
-                </dt>
-                <dd className='text-gray-700 dark:text-gray-300'>
-                  {book.isbn}
-                </dd>
-              </div>
-              <div>
-                <dt className='text-sm text-gray-500 dark:text-gray-400'>
-                  Published
-                </dt>
-                <dd className='text-gray-700 dark:text-gray-300'>
-                  {book.published_date}
-                </dd>
-              </div>
-              <div>
-                <dt className='text-sm text-gray-500 dark:text-gray-400'>
-                  Rating
-                </dt>
-                <dd className='text-gray-700 dark:text-gray-300'>
-                  ⭐ {book.average_rating.toFixed(1)} (
-                  {book.ratings_count.toLocaleString()} ratings)
-                </dd>
-              </div>
-              <div>
-                <dt className='text-sm text-gray-500 dark:text-gray-400'>
-                  Genres
-                </dt>
-                <dd className='text-gray-700 dark:text-gray-300'>
-                  {book.genres?.join(', ')}
-                </dd>
-              </div>
+            <dl className='grid sm:grid-cols-2 gap-6'>
+              {[
+                { label: 'ISBN', value: book.isbn },
+                { label: 'Published', value: book.published_date },
+                {
+                  label: 'Rating',
+                  value: `⭐ ${book.average_rating.toFixed(1)} (${book.ratings_count.toLocaleString()} ratings)`,
+                },
+                { label: 'Genres', value: book.genres?.join(', ') },
+              ].map(({ label, value }) => (
+                <div key={label} className='space-y-1'>
+                  <dt className='text-sm font-medium text-gray-500 dark:text-gray-400'>
+                    {label}
+                  </dt>
+                  <dd className='text-base text-gray-900 dark:text-gray-100'>
+                    {value}
+                  </dd>
+                </div>
+              ))}
             </dl>
           </div>
 
-          <div className='mt-6 space-y-6'>
+          {/* Reading Progress */}
+          <div className='space-y-6'>
             <motion.div
               className='flex items-center gap-3'
               initial={{ opacity: 0, y: -20 }}
               animate={{ opacity: 1, y: 0 }}
             >
               <motion.div
-                className='p-2 rounded-full bg-blue-50 dark:bg-blue-900/20'
+                className='p-2.5 rounded-full bg-blue-50 dark:bg-blue-900/20'
                 whileHover={{ rotate: 360, scale: 1.1 }}
                 transition={{ duration: 0.3 }}
               >
-                <BookOpen className='w-5 h-5 text-blue-500' />
+                <BookOpen className='w-6 h-6 text-blue-500' />
               </motion.div>
-              <h2 className='text-xl font-semibold text-gray-800 dark:text-gray-100'>
+              <h2 className='text-2xl font-semibold text-gray-900 dark:text-gray-100'>
                 Reading Progress
               </h2>
             </motion.div>
 
-            <div className='grid grid-cols-3 gap-4'>
+            <div className='grid sm:grid-cols-3 gap-4'>
               <AnimatePresence mode='wait'>
                 {Object.entries(readingStatusConfig).map(([status, config]) => {
                   const Icon = config.icon;
