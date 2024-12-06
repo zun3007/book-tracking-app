@@ -1,13 +1,11 @@
 import { useState, useEffect, useCallback } from 'react';
-import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
 import { motion, AnimatePresence } from 'framer-motion';
 import { toast } from 'react-hot-toast';
 import { supabase } from '../../config/supabaseClient';
 import { RootState } from '../../app/store';
-import { SearchIcon } from 'lucide-react';
+import { SearchIcon, BookmarkIcon } from 'lucide-react';
 import { useSelector } from 'react-redux';
 import type { FavoriteBook } from '../../types/supabase';
-import type { DropResult } from '@hello-pangea/dnd';
 import BookCard from './BookCard';
 import VoiceSearchButton from '../../components/VoiceSearchButton';
 
@@ -48,13 +46,13 @@ export default function FavoritesPage() {
         )
         .eq('user_id', userId)
         .eq('favorite', true)
-        .order('order');
+        .order('created_at', { ascending: false });
 
       if (error) throw error;
 
       const formattedFavorites: FavoriteBook[] = data.map((item) => ({
         id: item.id,
-        book: item.books,
+        book: item.books as unknown as FavoriteBook['book'],
         order: item.order || 0,
       }));
 
@@ -66,41 +64,6 @@ export default function FavoritesPage() {
       setLoading(false);
     }
   }, [userId]);
-
-  const handleDragEnd = async (result: DropResult) => {
-    if (!result.destination || !userId) return;
-
-    const sourceIndex = result.source.index;
-    const destinationIndex = result.destination.index;
-
-    try {
-      const updatedFavorites = Array.from(favorites);
-      const [movedItem] = updatedFavorites.splice(sourceIndex, 1);
-      updatedFavorites.splice(destinationIndex, 0, movedItem);
-
-      setFavorites(updatedFavorites);
-
-      const updates = updatedFavorites.map((item, index) => ({
-        id: item.id,
-        user_id: userId,
-        order: index,
-        read_status: 'favorite',
-      }));
-
-      const { error: upsertError } = await supabase
-        .from('user_books')
-        .upsert(updates, {
-          onConflict: 'id',
-        });
-
-      if (upsertError) throw upsertError;
-    } catch (error) {
-      if (error instanceof Error) {
-        toast.error(error.message);
-      }
-      fetchFavorites();
-    }
-  };
 
   const handleFavoriteToggle = () => {
     fetchFavorites();
@@ -118,82 +81,121 @@ export default function FavoritesPage() {
       )
   );
 
-  if (loading) {
-    return (
-      <div className='flex justify-center items-center min-h-screen'>
-        <div className='animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500' />
-      </div>
-    );
-  }
-
   return (
     <motion.div
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
-      className='container mx-auto px-4 py-8 mt-16 min-h-screen bg-gray-50 dark:bg-dark-900'
+      className='min-h-screen mt-16 bg-gradient-to-b from-gray-50 to-white dark:from-dark-900 dark:to-dark-800'
     >
-      <div className='mb-8'>
-        <h1 className='text-3xl font-bold text-primary mb-4'>My Favorites</h1>
-
-        <div className='flex items-center gap-2'>
-          <input
-            type='text'
-            placeholder='Search favorites...'
-            className='flex-grow pl-10 pr-4 py-2 rounded-lg border dark:border-gray-700 dark:bg-dark-700 dark:text-gray-100 focus:ring-2 focus:ring-primary-500'
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-          />
-          <VoiceSearchButton onSearch={handleSearch} />
-        </div>
-      </div>
-
-      {favorites.length === 0 ? (
-        <div className='text-center py-12'>
-          <p className='text-secondary text-lg'>
-            You haven't added any favorites yet.
-          </p>
-        </div>
-      ) : (
-        <DragDropContext onDragEnd={handleDragEnd}>
-          <Droppable droppableId='favorites'>
-            {(provided) => (
-              <div
-                {...provided.droppableProps}
-                ref={provided.innerRef}
-                className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6'
-                aria-label='Favorites List'
-              >
-                <AnimatePresence>
-                  {filteredFavorites.map((favorite, index) => (
-                    <Draggable
-                      key={favorite.id.toString()}
-                      draggableId={favorite.id.toString()}
-                      index={index}
-                    >
-                      {(provided, snapshot) => (
-                        <div
-                          ref={provided.innerRef}
-                          {...provided.draggableProps}
-                          {...provided.dragHandleProps}
-                          className={snapshot.isDragging ? 'z-50' : ''}
-                          aria-roledescription='Draggable item'
-                        >
-                          <BookCard
-                            book={favorite.book}
-                            index={index}
-                            onFavoriteToggle={handleFavoriteToggle}
-                          />
-                        </div>
-                      )}
-                    </Draggable>
-                  ))}
-                </AnimatePresence>
-                {provided.placeholder}
+      <div className='container mx-auto px-4 sm:px-6 lg:px-8 py-12'>
+        {/* Header Section */}
+        <div className='max-w-4xl mx-auto space-y-6 mb-12'>
+          <motion.div
+            initial={{ y: -20, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            transition={{ duration: 0.5 }}
+            className='flex items-center justify-between'
+          >
+            <div className='flex items-center gap-3'>
+              <div className='p-2 rounded-xl bg-primary-50 dark:bg-primary-900/20'>
+                <BookmarkIcon className='w-6 h-6 text-primary-500' />
               </div>
-            )}
-          </Droppable>
-        </DragDropContext>
-      )}
+              <h1 className='text-4xl font-bold text-gray-900 dark:text-gray-50'>
+                My Favorites
+                <span className='ml-3 text-lg font-normal text-gray-500 dark:text-gray-400'>
+                  ({favorites.length}{' '}
+                  {favorites.length === 1 ? 'book' : 'books'})
+                </span>
+              </h1>
+            </div>
+          </motion.div>
+
+          {/* Search Section */}
+          <motion.div
+            initial={{ y: -10, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            transition={{ duration: 0.5, delay: 0.1 }}
+            className='relative'
+          >
+            <div className='relative flex items-center gap-3'>
+              <div className='relative flex-grow'>
+                <SearchIcon className='absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400 dark:text-gray-500' />
+                <input
+                  type='text'
+                  placeholder='Search by title or author...'
+                  className='w-full pl-10 pr-4 py-3 rounded-xl border border-gray-200 dark:border-gray-700 
+                    bg-white dark:bg-dark-800 text-gray-900 dark:text-gray-100 
+                    placeholder-gray-400 dark:placeholder-gray-500
+                    shadow-sm hover:border-gray-300 dark:hover:border-gray-600
+                    focus:ring-2 focus:ring-primary-500 focus:border-transparent
+                    transition-all duration-200'
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                />
+              </div>
+              <VoiceSearchButton onSearch={handleSearch} />
+            </div>
+          </motion.div>
+        </div>
+
+        {/* Content Section */}
+        {loading ? (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            className='flex flex-col items-center justify-center min-h-[400px] gap-4'
+          >
+            <div className='animate-spin rounded-full h-12 w-12 border-4 border-primary-500 border-t-transparent' />
+            <p className='text-gray-500 dark:text-gray-400'>
+              Loading your favorites...
+            </p>
+          </motion.div>
+        ) : favorites.length === 0 ? (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className='flex flex-col items-center justify-center min-h-[400px] gap-6 text-center'
+          >
+            <div className='w-24 h-24 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center'>
+              <BookmarkIcon className='w-12 h-12 text-gray-400 dark:text-gray-500' />
+            </div>
+            <div className='space-y-2'>
+              <h2 className='text-xl font-semibold text-gray-900 dark:text-gray-100'>
+                No favorites yet
+              </h2>
+              <p className='text-gray-500 dark:text-gray-400 max-w-md'>
+                Start exploring books and add them to your favorites to see them
+                here.
+              </p>
+            </div>
+          </motion.div>
+        ) : (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
+            className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6'
+          >
+            <AnimatePresence>
+              {filteredFavorites.map((favorite, index) => (
+                <motion.div
+                  key={favorite.id}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -20 }}
+                  transition={{ duration: 0.3, delay: index * 0.05 }}
+                >
+                  <BookCard
+                    book={favorite.book}
+                    index={index}
+                    onFavoriteToggle={handleFavoriteToggle}
+                  />
+                </motion.div>
+              ))}
+            </AnimatePresence>
+          </motion.div>
+        )}
+      </div>
     </motion.div>
   );
 }
