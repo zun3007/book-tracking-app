@@ -1,11 +1,4 @@
-import {
-  useState,
-  useEffect,
-  useCallback,
-  useLayoutEffect,
-  useMemo,
-} from 'react';
-import { debounce } from 'lodash';
+import { useState, useLayoutEffect, useMemo } from 'react';
 import { useAppDispatch, useAppSelector } from '../../app/hooks';
 import { fetchAllBooks, fetchFavorites } from './bookSlice';
 import { motion, AnimatePresence } from 'framer-motion';

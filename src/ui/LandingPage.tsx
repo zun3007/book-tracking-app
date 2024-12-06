@@ -208,7 +208,7 @@ function LandingPage() {
       >
         <video
           className='absolute top-0 left-0 w-full h-full object-cover z-0 filter blur-sm'
-          src='/videos/reading_book_landing_page_1.mp4'
+          src='/videos/reading_book_landing_page_1.webm'
           autoPlay
           loop
           muted
