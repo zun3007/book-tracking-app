@@ -81,13 +81,32 @@ function LandingPage() {
     <div className='bg-gradient-to-b from-slate-100 to-white text-slate-800 font-sans min-h-screen'>
       {/* Hero Section */}
       <section className='relative h-screen flex flex-col justify-center items-center px-4 sm:px-8 shadow-md pt-20 mb-0'>
-        <video
-          className='absolute top-0 left-0 w-full h-full object-cover z-0 filter blur-sm'
-          src='/videos/reading_book_landing_page.webm'
-          autoPlay
-          loop
-          muted
-        />
+        <div className='absolute top-0 left-0 w-full h-full'>
+          <video
+            className='w-full h-full object-cover z-0 filter blur-sm'
+            preload='metadata'
+            playsInline
+            autoPlay
+            loop
+            muted
+            poster='/images/video-poster-1.webp'
+            aria-label='Background video showing someone reading a book'
+          >
+            <source
+              src='/videos/reading_book_landing_page.webm'
+              type='video/webm'
+            />
+            <source
+              src='/videos/reading_book_landing_page.mp4'
+              type='video/mp4'
+            />
+            <img
+              src='/images/video-poster-1.webp'
+              alt='Video fallback showing someone reading a book'
+              className='w-full h-full object-cover'
+            />
+          </video>
+        </div>
         <div className='absolute top-0 left-0 w-full h-full bg-black opacity-30 z-0'></div>
         <div
           className='relative z-10 flex flex-col items-center text-center'
@@ -211,14 +230,32 @@ function LandingPage() {
         className='relative h-screen flex flex-col justify-center items-center px-4 sm:px-8 shadow-md pt-20 mb-0'
         ref={ctaRef}
       >
-        <video
-          className='absolute top-0 left-0 w-full h-full object-cover z-0 filter blur-sm'
-          src='/videos/reading_book_landing_page_1.webm'
-          autoPlay
-          loop
-          muted
-          aria-label='Promotional video for StoryTrack'
-        />
+        <div className='absolute top-0 left-0 w-full h-full'>
+          <video
+            className='w-full h-full object-cover z-0 filter blur-sm'
+            preload='metadata'
+            playsInline
+            autoPlay
+            loop
+            muted
+            poster='/images/video-poster-2.webp'
+            aria-label='Promotional video for StoryTrack showing reading experience'
+          >
+            <source
+              src='/videos/reading_book_landing_page_1.webm'
+              type='video/webm'
+            />
+            <source
+              src='/videos/reading_book_landing_page_1.mp4'
+              type='video/mp4'
+            />
+            <img
+              src='/images/video-poster-2.webp'
+              alt='Video fallback showing reading experience'
+              className='w-full h-full object-cover'
+            />
+          </video>
+        </div>
         <div className='absolute top-0 left-0 w-full h-full bg-black opacity-30 z-0'></div>
         <div className='relative z-10 flex flex-col items-center text-center'>
           <animated.h2
