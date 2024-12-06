@@ -80,7 +80,7 @@ function LandingPage() {
   return (
     <div className='bg-gradient-to-b from-slate-100 to-white text-slate-800 font-sans min-h-screen'>
       {/* Hero Section */}
-      <section className='relative h-screen flex flex-col justify-center items-center px-8 shadow-md pt-20 mb-0'>
+      <section className='relative h-screen flex flex-col justify-center items-center px-4 sm:px-8 shadow-md pt-20 mb-0'>
         <video
           className='absolute top-0 left-0 w-full h-full object-cover z-0 filter blur-sm'
           src='/videos/reading_book_landing_page.webm'
@@ -89,33 +89,36 @@ function LandingPage() {
           muted
         />
         <div className='absolute top-0 left-0 w-full h-full bg-black opacity-30 z-0'></div>
-        <div className='relative z-10 flex flex-col items-center' ref={heroRef}>
+        <div
+          className='relative z-10 flex flex-col items-center text-center'
+          ref={heroRef}
+        >
           <animated.h1
             style={heroAnimation}
-            className='text-6xl sm:text-7xl font-extrabold text-slate-100'
+            className='text-4xl sm:text-6xl md:text-7xl font-extrabold text-slate-100'
           >
             Welcome to StoryTrack
           </animated.h1>
           <animated.p
             style={heroAnimation}
-            className='mt-6 text-lg sm:text-2xl max-w-2xl text-slate-100 text-center'
+            className='mt-4 sm:mt-6 text-base sm:text-lg md:text-2xl max-w-2xl text-slate-100'
           >
             Your ultimate reading companion. Organize, track, and explore books
             effortlessly.
           </animated.p>
           <animated.div
             style={heroAnimation}
-            className='mt-8 flex gap-6 justify-center'
+            className='mt-6 sm:mt-8 flex flex-col sm:flex-row gap-4 sm:gap-6 justify-center'
           >
             <a
               href='#features'
-              className='px-6 py-3 rounded-lg bg-blue-500 text-white font-semibold hover:bg-blue-400 transition shadow-lg hover:shadow-xl'
+              className='px-4 sm:px-6 py-2 sm:py-3 rounded-lg bg-blue-500 text-white font-semibold hover:bg-blue-400 transition shadow-lg hover:shadow-xl'
             >
               Learn More
             </a>
             <a
               href='#signup'
-              className='px-6 py-3 rounded-lg bg-slate-800 text-white font-semibold hover:bg-slate-700 transition shadow-lg hover:shadow-xl'
+              className='px-4 sm:px-6 py-2 sm:py-3 rounded-lg bg-slate-800 text-white font-semibold hover:bg-slate-700 transition shadow-lg hover:shadow-xl'
             >
               Get Started
             </a>
@@ -126,22 +129,22 @@ function LandingPage() {
       {/* Features Section */}
       <section
         id='features'
-        className='relative min-h-screen py-20 px-8 bg-gradient-to-b from-slate-100 to-white mb-0'
+        className='relative min-h-screen py-16 sm:py-20 px-4 sm:px-8 bg-gradient-to-b from-slate-100 to-white mb-0'
         ref={featureRef}
       >
         {/* Sticky Header */}
-        <div className='sticky top-0 pt-20 pb-12 bg-gradient-to-b from-slate-100 to-transparent z-20'>
+        <div className='sticky top-0 pt-16 sm:pt-20 pb-8 sm:pb-12 bg-gradient-to-b from-slate-100 to-transparent z-20'>
           <animated.div style={featureAnimation}>
-            <h2 className='text-4xl sm:text-5xl font-extrabold text-center'>
+            <h2 className='text-3xl sm:text-4xl md:text-5xl font-extrabold text-center'>
               Why Choose StoryTrack?
             </h2>
           </animated.div>
         </div>
 
         {/* Features Content */}
-        <div className='flex justify-between items-start gap-8 max-w-7xl mx-auto'>
+        <div className='flex flex-col md:flex-row justify-between items-start gap-8 max-w-7xl mx-auto'>
           {/* Features Grid */}
-          <div className='flex-1 space-y-12'>
+          <div className='flex-1 space-y-8 sm:space-y-12'>
             {[
               {
                 title: 'Organize Your Books',
@@ -168,16 +171,18 @@ function LandingPage() {
               <animated.div
                 key={idx}
                 style={featureAnimations[idx]}
-                className='p-6 bg-white rounded-lg shadow-lg hover:shadow-xl transition transform hover:scale-105 max-w-lg flex flex-col items-center'
+                className='p-4 sm:p-6 bg-white rounded-lg shadow-lg hover:shadow-xl transition transform hover:scale-105 max-w-full sm:max-w-lg flex flex-col items-center'
               >
                 <img
                   src={feature.image}
                   alt={feature.title}
-                  className='w-full h-48 object-cover rounded-t-lg mb-4'
+                  className='w-full h-32 sm:h-48 object-cover rounded-t-lg mb-4'
                 />
-                <div className='text-4xl mb-2'>{feature.icon}</div>
-                <h3 className='text-2xl font-bold mb-2'>{feature.title}</h3>
-                <p className='text-lg text-slate-600 text-center'>
+                <div className='text-3xl sm:text-4xl mb-2'>{feature.icon}</div>
+                <h3 className='text-xl sm:text-2xl font-bold mb-2'>
+                  {feature.title}
+                </h3>
+                <p className='text-base sm:text-lg text-slate-600 text-center'>
                   {feature.description}
                 </p>
               </animated.div>
@@ -185,7 +190,7 @@ function LandingPage() {
           </div>
 
           {/* Sticky Anime Character */}
-          <div className='sticky top-10 w-1/3 h-[90dvh]'>
+          <div className='sticky top-10 w-full md:w-1/3 h-[60vh] md:h-[90vh]'>
             <div
               className='h-full transition-transform duration-300'
               ref={characterRef}
@@ -203,7 +208,7 @@ function LandingPage() {
       {/* Call to Action Section */}
       <section
         id='signup'
-        className='relative h-screen flex flex-col justify-center items-center px-8 shadow-md pt-20 mb-0'
+        className='relative h-screen flex flex-col justify-center items-center px-4 sm:px-8 shadow-md pt-20 mb-0'
         ref={ctaRef}
       >
         <video
@@ -215,16 +220,16 @@ function LandingPage() {
           aria-label='Promotional video for StoryTrack'
         />
         <div className='absolute top-0 left-0 w-full h-full bg-black opacity-30 z-0'></div>
-        <div className='relative z-10 flex flex-col items-center'>
+        <div className='relative z-10 flex flex-col items-center text-center'>
           <animated.h2
             style={ctaAnimation}
-            className='text-6xl sm:text-7xl font-extrabold text-slate-100'
+            className='text-4xl sm:text-6xl md:text-7xl font-extrabold text-slate-100'
           >
             Ready to Join StoryTrack?
           </animated.h2>
           <animated.p
             style={ctaAnimation}
-            className='mt-6 text-lg sm:text-2xl max-w-2xl text-slate-100 text-center'
+            className='mt-4 sm:mt-6 text-base sm:text-lg md:text-2xl max-w-2xl text-slate-100'
           >
             Sign up today and take the first step toward mastering your reading
             journey.
@@ -232,7 +237,7 @@ function LandingPage() {
           <animated.a
             style={ctaAnimation}
             href='/signup'
-            className='mt-8 px-8 py-4 rounded-lg bg-blue-500 text-white font-semibold shadow-lg hover:shadow-xl hover:bg-blue-400 transition'
+            className='mt-6 sm:mt-8 px-6 sm:px-8 py-3 sm:py-4 rounded-lg bg-blue-500 text-white font-semibold shadow-lg hover:shadow-xl hover:bg-blue-400 transition'
           >
             Sign Up Now
           </animated.a>
