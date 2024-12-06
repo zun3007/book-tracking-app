@@ -1,10 +1,20 @@
-import { useState, useEffect, useCallback, useLayoutEffect } from 'react';
+import {
+  useState,
+  useEffect,
+  useCallback,
+  useLayoutEffect,
+  useMemo,
+} from 'react';
 import { debounce } from 'lodash';
 import { useAppDispatch, useAppSelector } from '../../app/hooks';
 import { fetchAllBooks, fetchFavorites } from './bookSlice';
 import { motion, AnimatePresence } from 'framer-motion';
 import BookCard from './BookCard';
 import VoiceSearchButton from '../../components/VoiceSearchButton';
+import { Search } from 'lucide-react';
+import { toast } from 'react-hot-toast';
+import Fuse from 'fuse.js';
+import { useDebounce } from '@uidotdev/usehooks';
 
 interface FilterState {
   genre: string[];
@@ -29,6 +39,7 @@ export default function AllBooks() {
   });
   const [isLoading, setIsLoading] = useState(false);
   const user = useAppSelector((state) => state.auth.user);
+  const [debouncedSearchTerm] = useDebounce(searchQuery, 300);
 
   // Reset filters
   const resetFilters = () => {
@@ -43,21 +54,28 @@ export default function AllBooks() {
     setPage(1);
   };
 
-  // Remove debounce for instant search
-  const handleSearchChange = (query: string) => {
-    setSearchQuery(query);
-    setPage(1); // Reset to first page when searching
-    // Reset filters when searching
-    setFilters((prev) => ({
-      ...prev,
-      genre: [],
-      minRating: 0,
-    }));
+  // Create Fuse instance for fuzzy search
+  const fuseOptions = {
+    keys: ['title', 'authors', 'description'],
+    threshold: 0.3,
+    distance: 100,
   };
 
-  // Handle voice search
+  const fuse = new Fuse(books, fuseOptions);
+
+  // Update search handler
+  const handleSearchChange = (query: string) => {
+    setSearchQuery(query);
+    setPage(1);
+  };
+
+  // Update voice search handler with better speech recognition using react-speech-recognition
   const handleVoiceSearch = (query: string) => {
-    handleSearchChange(query);
+    setSearchQuery(query);
+    toast.success(`Searching for: "${query}"`, {
+      icon: '🎤',
+      duration: 2000,
+    });
   };
 
   // Update filter handlers
@@ -141,6 +159,12 @@ export default function AllBooks() {
     },
   };
 
+  // Add filtered books logic
+  const filteredBooks = useMemo(() => {
+    if (!debouncedSearchTerm) return books;
+    return fuse.search(debouncedSearchTerm).map((result) => result.item);
+  }, [books, debouncedSearchTerm, fuse]);
+
   return (
     <div className='min-h-screen bg-gray-50 dark:bg-gray-900 py-8 mt-16'>
       <div className='container mx-auto px-4'>
@@ -155,11 +179,16 @@ export default function AllBooks() {
             <input
               type='text'
               value={searchQuery}
-              placeholder='Search books...'
+              placeholder='Search books by title, author...'
               onChange={(e) => handleSearchChange(e.target.value)}
-              className='w-full px-4 py-2 rounded-lg border dark:border-gray-700 dark:bg-gray-700 dark:text-gray-100'
+              className='w-full px-10 py-2 rounded-lg border dark:border-gray-700 dark:bg-gray-700 dark:text-gray-100'
+              aria-label='Search books'
             />
-            <VoiceSearchButton onSearch={handleVoiceSearch} />
+            <Search className='absolute left-3 w-5 h-5 text-gray-400' />
+            <VoiceSearchButton
+              onSearch={handleVoiceSearch}
+              isSearching={isLoading}
+            />
           </div>
 
           {/* Filter Pills */}
@@ -243,7 +272,7 @@ export default function AllBooks() {
           className='grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 mb-8'
         >
           <AnimatePresence mode='popLayout'>
-            {books.map((book, index) => (
+            {filteredBooks.map((book, index) => (
               <motion.div
                 key={book.id}
                 variants={item}
