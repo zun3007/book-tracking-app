@@ -84,7 +84,7 @@ function LandingPage() {
         <div className='absolute top-0 left-0 w-full h-full'>
           <video
             className='w-full h-full object-cover z-0 filter blur-sm'
-            preload='metadata'
+            preload='auto'
             playsInline
             autoPlay
             loop
@@ -95,10 +95,12 @@ function LandingPage() {
             <source
               src='/videos/reading_book_landing_page.webm'
               type='video/webm'
+              media="all and (min-width: 768px)"
             />
             <source
               src='/videos/reading_book_landing_page.mp4'
               type='video/mp4'
+              media="all and (min-width: 768px)"
             />
             <img
               src='/images/video-poster-1.webp'
@@ -233,7 +235,7 @@ function LandingPage() {
         <div className='absolute top-0 left-0 w-full h-full'>
           <video
             className='w-full h-full object-cover z-0 filter blur-sm'
-            preload='metadata'
+            preload='auto'
             playsInline
             autoPlay
             loop
@@ -244,10 +246,12 @@ function LandingPage() {
             <source
               src='/videos/reading_book_landing_page_1.webm'
               type='video/webm'
+              media="all and (min-width: 768px)"
             />
             <source
               src='/videos/reading_book_landing_page_1.mp4'
               type='video/mp4'
+              media="all and (min-width: 768px)"
             />
             <img
               src='/images/video-poster-2.webp'
