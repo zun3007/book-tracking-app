@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { toast } from 'react-hot-toast';
 import { supabase } from '../../config/supabaseClient';
 import { RootState } from '../../app/store';
-import { SearchIcon, BookmarkIcon } from 'lucide-react';
+import { SearchIcon, BookmarkIcon, AlertCircle } from 'lucide-react';
 import { useSelector } from 'react-redux';
 import type { FavoriteBook } from '../../types/supabase';
 import BookCard from './BookCard';
@@ -13,15 +13,13 @@ export default function FavoritesPage() {
   const [favorites, setFavorites] = useState<FavoriteBook[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   const userId = useSelector((state: RootState) => state.auth.user?.id);
 
-  useEffect(() => {
-    fetchFavorites();
-  }, [userId]);
-
   const fetchFavorites = useCallback(async () => {
     if (!userId) return;
+    setError(null);
 
     try {
       const { data, error } = await supabase
@@ -50,7 +48,14 @@ export default function FavoritesPage() {
 
       if (error) throw error;
 
-      const formattedFavorites: FavoriteBook[] = data.map((item) => ({
+      // Filter out entries where books is null
+      const validData = data.filter((item) => item.books !== null);
+
+      if (validData.length < data.length) {
+        toast.error('Some books could not be loaded');
+      }
+
+      const formattedFavorites: FavoriteBook[] = validData.map((item) => ({
         id: item.id,
         book: item.books as unknown as FavoriteBook['book'],
         order: item.order || 0,
@@ -58,16 +63,23 @@ export default function FavoritesPage() {
 
       setFavorites(formattedFavorites);
     } catch (error) {
-      toast.error('Failed to fetch favorites');
+      const errorMessage =
+        error instanceof Error ? error.message : 'Failed to fetch favorites';
+      setError(errorMessage);
+      toast.error(errorMessage);
       console.error('Error:', error);
     } finally {
       setLoading(false);
     }
   }, [userId]);
 
-  const handleFavoriteToggle = () => {
+  useEffect(() => {
     fetchFavorites();
-  };
+  }, [fetchFavorites]);
+
+  const handleFavoriteToggle = useCallback(() => {
+    fetchFavorites();
+  }, [fetchFavorites]);
 
   const handleSearch = (query: string) => {
     setSearchQuery(query);
@@ -80,6 +92,46 @@ export default function FavoritesPage() {
         author.toLowerCase().includes(searchQuery.toLowerCase())
       )
   );
+
+  // Render error state
+  if (error) {
+    return (
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        className='min-h-screen mt-16 bg-gradient-to-b from-gray-50 to-white dark:from-dark-900 dark:to-dark-800'
+      >
+        <div className='container mx-auto px-4 py-12'>
+          <motion.div
+            initial={{ scale: 0.9, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            className='flex flex-col items-center justify-center min-h-[400px] gap-6 text-center'
+          >
+            <div className='w-24 h-24 rounded-full bg-red-50 dark:bg-red-900/20 flex items-center justify-center'>
+              <AlertCircle className='w-12 h-12 text-red-500' />
+            </div>
+            <div className='space-y-2'>
+              <h2 className='text-xl font-semibold text-gray-900 dark:text-gray-100'>
+                Unable to Load Favorites
+              </h2>
+              <p className='text-gray-500 dark:text-gray-400 max-w-md'>
+                {error}
+              </p>
+              <button
+                onClick={() => {
+                  setLoading(true);
+                  fetchFavorites();
+                }}
+                className='mt-4 px-4 py-2 bg-primary-500 hover:bg-primary-600 text-white rounded-lg transition-colors'
+              >
+                Try Again
+              </button>
+            </div>
+          </motion.div>
+        </div>
+      </motion.div>
+    );
+  }
 
   return (
     <motion.div
@@ -119,7 +171,7 @@ export default function FavoritesPage() {
           >
             <div className='relative flex items-center gap-3'>
               <div className='relative flex-grow'>
-                <SearchIcon className='absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400 dark:text-gray-500' />
+                <SearchIcon className='absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400 dark:text-gray-500 pointer-events-none' />
                 <input
                   type='text'
                   placeholder='Search by title or author...'
@@ -167,6 +219,33 @@ export default function FavoritesPage() {
                 Start exploring books and add them to your favorites to see them
                 here.
               </p>
+            </div>
+          </motion.div>
+        ) : filteredFavorites.length === 0 ? (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className='flex flex-col items-center justify-center min-h-[400px] gap-6 text-center'
+          >
+            <div className='w-24 h-24 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center'>
+              <SearchIcon className='w-12 h-12 text-gray-400 dark:text-gray-500' />
+            </div>
+            <div className='space-y-2'>
+              <h2 className='text-xl font-semibold text-gray-900 dark:text-gray-100'>
+                No matches found
+              </h2>
+              <p className='text-gray-500 dark:text-gray-400 max-w-md'>
+                Try adjusting your search terms or clear the search to see all
+                favorites.
+              </p>
+              {searchQuery && (
+                <button
+                  onClick={() => setSearchQuery('')}
+                  className='mt-4 px-4 py-2 bg-primary-500 hover:bg-primary-600 text-white rounded-lg transition-colors'
+                >
+                  Clear Search
+                </button>
+              )}
             </div>
           </motion.div>
         ) : (
