@@ -51,8 +51,8 @@ export default function OptimizedImage({
 
   const handleImageError = async () => {
     if (retryCount < MAX_RETRIES) {
-      setRetryCount(prev => prev + 1);
-      await new Promise(resolve => setTimeout(resolve, 1000 * retryCount));
+      setRetryCount((prev) => prev + 1);
+      await new Promise((resolve) => setTimeout(resolve, 1000 * retryCount));
       loadImage();
     } else {
       setIsLoading(false);
@@ -70,11 +70,10 @@ export default function OptimizedImage({
       width: width?.toString() || 'auto',
       height: height?.toString() || 'auto',
       quality: quality.toString(),
-      format: 'jpeg', // Use JPEG for better compatibility
     });
 
-    const imageUrl = `${src}?${params.toString()}`;
-    imgRef.current.src = imageUrl;
+    // Set the image source directly
+    imgRef.current.src = `${src}?${params.toString()}&format=jpeg`;
   };
 
   useEffect(() => {
@@ -99,25 +98,19 @@ export default function OptimizedImage({
     }
   }, [src, width, height, quality, priority, inView]);
 
-  const containerClasses = clsx(
-    'relative overflow-hidden',
-    className
-  );
+  const containerClasses = clsx('relative overflow-hidden', className);
 
-  const imageClasses = clsx(
-    'w-full h-full transition-all duration-300',
-    {
-      'opacity-0 scale-[1.02]': isLoading,
-      'opacity-100 scale-100': !isLoading,
-      'grayscale opacity-50': error,
-      'cursor-pointer hover:scale-[1.02]': onClick,
-      'hover:blur-0': blur,
-      'blur-[1px]': blur && !isLoading,
-    }
-  );
+  const imageClasses = clsx('w-full h-full transition-all duration-300', {
+    'opacity-0 scale-[1.02]': isLoading,
+    'opacity-100 scale-100': !isLoading,
+    'grayscale opacity-50': error,
+    'cursor-pointer hover:scale-[1.02]': onClick,
+    'hover:blur-0': blur,
+    'blur-[1px]': blur && !isLoading,
+  });
 
   return (
-    <div 
+    <div
       ref={inViewRef}
       className={containerClasses}
       style={{
@@ -125,59 +118,58 @@ export default function OptimizedImage({
         height: height ? `${height}px` : '100%',
       }}
     >
+      <picture>
+        <source type='image/webp' srcSet={`${src}?format=webp`} />
+        <motion.img
+          ref={imgRef}
+          alt={alt}
+          width={width}
+          height={height}
+          onClick={onClick}
+          loading={priority ? 'eager' : 'lazy'}
+          className={imageClasses}
+          style={{ objectFit }}
+          initial={{ opacity: 0, scale: 1.02 }}
+          animate={{
+            opacity: isLoading ? 0 : 1,
+            scale: isLoading ? 1.02 : 1,
+          }}
+          transition={{ duration: 0.3 }}
+          onError={handleImageError}
+          onLoad={handleImageLoad}
+        />
+      </picture>
       <AnimatePresence>
         {isLoading && (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className={clsx(
-              'absolute inset-0 animate-pulse',
-              placeholderColor
-            )}
+            className={clsx('absolute inset-0 animate-pulse', placeholderColor)}
           />
         )}
       </AnimatePresence>
 
       {error && (
-        <div className="absolute inset-0 flex flex-col items-center justify-center bg-gray-100 dark:bg-gray-800 p-4">
+        <div className='absolute inset-0 flex flex-col items-center justify-center bg-gray-100 dark:bg-gray-800 p-4'>
           <svg
-            className="w-12 h-12 text-gray-400 dark:text-gray-600 mb-2"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
+            className='w-12 h-12 text-gray-400 dark:text-gray-600 mb-2'
+            fill='none'
+            stroke='currentColor'
+            viewBox='0 0 24 24'
           >
             <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
+              strokeLinecap='round'
+              strokeLinejoin='round'
               strokeWidth={2}
-              d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
+              d='M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z'
             />
           </svg>
-          <p className="text-sm text-gray-500 dark:text-gray-400 text-center">
+          <p className='text-sm text-gray-500 dark:text-gray-400 text-center'>
             Failed to load image
           </p>
         </div>
       )}
-
-      <motion.img
-        ref={imgRef}
-        alt={alt}
-        width={width}
-        height={height}
-        onClick={onClick}
-        loading={priority ? 'eager' : 'lazy'}
-        className={imageClasses}
-        style={{ objectFit }}
-        initial={{ opacity: 0, scale: 1.02 }}
-        animate={{ 
-          opacity: isLoading ? 0 : 1,
-          scale: isLoading ? 1.02 : 1,
-        }}
-        transition={{ duration: 0.3 }}
-        onError={handleImageError}
-        onLoad={handleImageLoad}
-      />
     </div>
   );
 }
