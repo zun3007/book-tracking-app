@@ -18,14 +18,14 @@ interface VideoConfig {
 
 const CONFIGS = {
   mobile: {
-    width: 720,
-    bitrate: '800k',
-    crf: 28,
+    width: 480,
+    bitrate: '150k',
+    crf: 35,
   },
   desktop: {
-    width: 1920,
-    bitrate: '2500k',
-    crf: 23,
+    width: 720,
+    bitrate: '300k',
+    crf: 32,
   },
 } as const;
 
@@ -44,20 +44,26 @@ async function optimizeVideo(
 ) {
   const { width, bitrate, crf } = config;
 
-  // FFmpeg command for MP4 with improved compression
-  const mp4Command = `ffmpeg -i "${inputPath}" -c:v libx264 -preset veryslow \
-    -crf ${crf} -b:v ${bitrate} -maxrate ${bitrate} -bufsize ${bitrate} \
-    -vf "scale=${width}:-2" -movflags +faststart \
-    -c:a aac -b:a 96k "${outputPath}.mp4"`;
+  // Single pass with strict compression settings
+  const command = `ffmpeg -i "${inputPath}" \
+    -c:v libx264 \
+    -preset slower \
+    -crf ${crf} \
+    -maxrate ${bitrate} -bufsize ${bitrate} \
+    -vf "scale=${width}:-2:flags=lanczos,fps=15" \
+    -profile:v baseline \
+    -level 3.0 \
+    -movflags +faststart \
+    -c:a aac -b:a 32k -ac 1 \
+    "${outputPath}.mp4"`;
 
   try {
     console.log(`Optimizing ${path.basename(inputPath)}...`);
-
-    // Run MP4 conversion
-    await execAsync(mp4Command);
+    await execAsync(command);
     console.log(`Created optimized MP4: ${path.basename(outputPath)}.mp4`);
   } catch (error) {
     console.error(`Error optimizing ${inputPath}:`, error);
+    throw error;
   }
 }
 
