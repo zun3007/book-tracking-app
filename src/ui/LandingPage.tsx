@@ -84,7 +84,7 @@ function LandingPage() {
         <div className='absolute top-0 left-0 w-full h-full'>
           <video
             className='w-full h-full object-cover z-0 filter blur-sm brightness-90 dark:brightness-75'
-            preload='auto'
+            preload='metadata'
             playsInline
             autoPlay
             loop
@@ -92,20 +92,33 @@ function LandingPage() {
             poster='/images/video-poster-1.webp'
             aria-label='Background video showing someone reading a book'
           >
+            {/* Desktop Sources */}
             <source
-              src='/videos/reading_book_landing_page.webm'
+              src='/videos/optimized/reading_book_landing_page_desktop.webm'
               type='video/webm'
-              media='all and (min-width: 768px)'
+              media='(min-width: 768px)'
             />
             <source
-              src='/videos/reading_book_landing_page.mp4'
+              src='/videos/optimized/reading_book_landing_page_desktop.mp4'
               type='video/mp4'
-              media='all and (min-width: 768px)'
+              media='(min-width: 768px)'
+            />
+            {/* Mobile Sources */}
+            <source
+              src='/videos/optimized/reading_book_landing_page_mobile.webm'
+              type='video/webm'
+              media='(max-width: 767px)'
+            />
+            <source
+              src='/videos/optimized/reading_book_landing_page_mobile.mp4'
+              type='video/mp4'
+              media='(max-width: 767px)'
             />
             <img
               src='/images/video-poster-1.webp'
               alt='Video fallback showing someone reading a book'
               className='w-full h-full object-cover'
+              loading='lazy'
             />
           </video>
         </div>
@@ -242,7 +255,7 @@ function LandingPage() {
         <div className='absolute top-0 left-0 w-full h-full'>
           <video
             className='w-full h-full object-cover z-0 filter blur-sm brightness-90 dark:brightness-75'
-            preload='auto'
+            preload='metadata'
             playsInline
             autoPlay
             loop
@@ -250,20 +263,33 @@ function LandingPage() {
             poster='/images/video-poster-2.webp'
             aria-label='Promotional video for StoryTrack showing reading experience'
           >
+            {/* Desktop Sources */}
             <source
-              src='/videos/reading_book_landing_page_1.webm'
+              src='/videos/optimized/reading_book_landing_page_1_desktop.webm'
               type='video/webm'
-              media='all and (min-width: 768px)'
+              media='(min-width: 768px)'
             />
             <source
-              src='/videos/reading_book_landing_page_1.mp4'
+              src='/videos/optimized/reading_book_landing_page_1_desktop.mp4'
               type='video/mp4'
-              media='all and (min-width: 768px)'
+              media='(min-width: 768px)'
+            />
+            {/* Mobile Sources */}
+            <source
+              src='/videos/optimized/reading_book_landing_page_1_mobile.webm'
+              type='video/webm'
+              media='(max-width: 767px)'
+            />
+            <source
+              src='/videos/optimized/reading_book_landing_page_1_mobile.mp4'
+              type='video/mp4'
+              media='(max-width: 767px)'
             />
             <img
               src='/images/video-poster-2.webp'
               alt='Video fallback showing reading experience'
               className='w-full h-full object-contain'
+              loading='lazy'
             />
           </video>
         </div>

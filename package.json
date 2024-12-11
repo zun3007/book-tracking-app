@@ -11,6 +11,7 @@
     "preview": "vite preview",
     "load-sample-data": "tsx src/scripts/sampleBooks.ts",
     "generate-images": "tsx scripts/generate-images.ts",
+    "optimize-videos": "tsx scripts/optimize-videos.ts",
     "predeploy": "pnpm run build",
     "deploy": "gh-pages -d dist"
   },
