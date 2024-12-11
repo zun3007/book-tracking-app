@@ -78,12 +78,12 @@ function LandingPage() {
   ];
 
   return (
-    <div className='bg-gradient-to-b from-slate-100 to-white text-slate-800 font-sans min-h-screen'>
+    <div className='bg-gradient-to-b from-slate-50 to-white dark:from-dark-950 dark:to-dark-900 text-slate-800 dark:text-slate-100 font-sans min-h-screen transition-colors duration-300'>
       {/* Hero Section */}
-      <section className='relative h-screen flex flex-col justify-center items-center px-4 sm:px-8 shadow-md pt-20 mb-0'>
+      <section className='relative h-screen flex flex-col justify-center items-center px-4 sm:px-8 shadow-lg pt-20 mb-0'>
         <div className='absolute top-0 left-0 w-full h-full'>
           <video
-            className='w-full h-full object-cover z-0 filter blur-sm'
+            className='w-full h-full object-cover z-0 filter blur-sm brightness-90 dark:brightness-75'
             preload='auto'
             playsInline
             autoPlay
@@ -95,12 +95,12 @@ function LandingPage() {
             <source
               src='/videos/reading_book_landing_page.webm'
               type='video/webm'
-              media="all and (min-width: 768px)"
+              media='all and (min-width: 768px)'
             />
             <source
               src='/videos/reading_book_landing_page.mp4'
               type='video/mp4'
-              media="all and (min-width: 768px)"
+              media='all and (min-width: 768px)'
             />
             <img
               src='/images/video-poster-1.webp'
@@ -109,20 +109,23 @@ function LandingPage() {
             />
           </video>
         </div>
-        <div className='absolute top-0 left-0 w-full h-full bg-black opacity-30 z-0'></div>
+        <div className='absolute top-0 left-0 w-full h-full bg-black opacity-40 dark:opacity-50 z-0'></div>
         <div
           className='relative z-10 flex flex-col items-center text-center'
           ref={heroRef}
         >
           <animated.h1
             style={heroAnimation}
-            className='text-4xl sm:text-6xl md:text-7xl font-extrabold text-slate-100'
+            className='text-4xl sm:text-6xl md:text-7xl font-extrabold text-white'
           >
-            Welcome to StoryTrack
+            Welcome to{' '}
+            <span className='text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-blue-600 dark:from-blue-300 dark:to-blue-500'>
+              StoryTrack
+            </span>
           </animated.h1>
           <animated.p
             style={heroAnimation}
-            className='mt-4 sm:mt-6 text-base sm:text-lg md:text-2xl max-w-2xl text-slate-100'
+            className='mt-4 sm:mt-6 text-base sm:text-lg md:text-2xl max-w-2xl text-white'
           >
             Your ultimate reading companion. Organize, track, and explore books
             effortlessly.
@@ -133,13 +136,13 @@ function LandingPage() {
           >
             <a
               href='#features'
-              className='px-4 sm:px-6 py-2 sm:py-3 rounded-lg bg-blue-500 text-white font-semibold hover:bg-blue-400 transition shadow-lg hover:shadow-xl'
+              className='px-4 sm:px-6 py-2 sm:py-3 rounded-lg bg-blue-600 dark:bg-blue-500 text-white font-semibold hover:bg-blue-500 dark:hover:bg-blue-400 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105'
             >
               Learn More
             </a>
             <a
               href='#signup'
-              className='px-4 sm:px-6 py-2 sm:py-3 rounded-lg bg-slate-800 text-white font-semibold hover:bg-slate-700 transition shadow-lg hover:shadow-xl'
+              className='px-4 sm:px-6 py-2 sm:py-3 rounded-lg bg-slate-900 dark:bg-slate-700 text-white font-semibold hover:bg-slate-800 dark:hover:bg-slate-600 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105'
             >
               Get Started
             </a>
@@ -150,14 +153,18 @@ function LandingPage() {
       {/* Features Section */}
       <section
         id='features'
-        className='relative min-h-screen py-16 sm:py-20 px-4 sm:px-8 bg-gradient-to-b from-slate-100 to-white mb-0'
+        className='relative min-h-screen py-16 sm:py-20 px-4 sm:px-8 bg-gradient-to-b from-slate-50 to-white dark:from-dark-950 dark:to-dark-900 mb-0 transition-colors duration-300'
         ref={featureRef}
       >
         {/* Sticky Header */}
-        <div className='sticky top-0 pt-16 sm:pt-20 pb-8 sm:pb-12 bg-gradient-to-b from-slate-100 to-transparent z-20'>
+        <div className='sticky top-0 pt-16 sm:pt-20 pb-8 sm:pb-12 bg-gradient-to-b from-slate-50 dark:from-dark-950 to-transparent z-20 transition-colors duration-300'>
           <animated.div style={featureAnimation}>
-            <h2 className='text-3xl sm:text-4xl md:text-5xl font-extrabold text-center'>
-              Why Choose StoryTrack?
+            <h2 className='text-3xl sm:text-4xl md:text-5xl font-extrabold text-center text-slate-900 dark:text-white'>
+              Why Choose{' '}
+              <span className='text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-blue-400 dark:from-blue-400 dark:to-blue-300'>
+                StoryTrack
+              </span>
+              ?
             </h2>
           </animated.div>
         </div>
@@ -192,7 +199,7 @@ function LandingPage() {
               <animated.div
                 key={idx}
                 style={featureAnimations[idx]}
-                className='p-4 sm:p-6 bg-white rounded-lg shadow-lg hover:shadow-xl transition transform hover:scale-105 max-w-full sm:max-w-lg flex flex-col items-center'
+                className='p-4 sm:p-6 bg-white dark:bg-dark-800 rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 max-w-full sm:max-w-lg flex flex-col items-center border border-slate-200 dark:border-dark-700'
               >
                 <img
                   src={feature.image}
@@ -200,10 +207,10 @@ function LandingPage() {
                   className='w-full h-32 sm:h-48 object-cover rounded-t-lg mb-4'
                 />
                 <div className='text-3xl sm:text-4xl mb-2'>{feature.icon}</div>
-                <h3 className='text-xl sm:text-2xl font-bold mb-2'>
+                <h3 className='text-xl sm:text-2xl font-bold mb-2 text-slate-900 dark:text-white'>
                   {feature.title}
                 </h3>
-                <p className='text-base sm:text-lg text-slate-600 text-center'>
+                <p className='text-base sm:text-lg text-slate-600 dark:text-slate-300 text-center'>
                   {feature.description}
                 </p>
               </animated.div>
@@ -219,7 +226,7 @@ function LandingPage() {
               <img
                 src='/images/anime_character.webp'
                 alt='Anime Character'
-                className='h-full object-contain'
+                className='h-full object-contain filter dark:brightness-90'
               />
             </div>
           </div>
@@ -229,12 +236,12 @@ function LandingPage() {
       {/* Call to Action Section */}
       <section
         id='signup'
-        className='relative h-screen flex flex-col justify-center items-center px-4 sm:px-8 shadow-md pt-20 mb-0'
+        className='relative h-screen flex flex-col justify-center items-center px-4 sm:px-8 shadow-lg pt-20 mb-0'
         ref={ctaRef}
       >
         <div className='absolute top-0 left-0 w-full h-full'>
           <video
-            className='w-full h-full object-cover z-0 filter blur-sm'
+            className='w-full h-full object-cover z-0 filter blur-sm brightness-90 dark:brightness-75'
             preload='auto'
             playsInline
             autoPlay
@@ -246,31 +253,35 @@ function LandingPage() {
             <source
               src='/videos/reading_book_landing_page_1.webm'
               type='video/webm'
-              media="all and (min-width: 768px)"
+              media='all and (min-width: 768px)'
             />
             <source
               src='/videos/reading_book_landing_page_1.mp4'
               type='video/mp4'
-              media="all and (min-width: 768px)"
+              media='all and (min-width: 768px)'
             />
             <img
               src='/images/video-poster-2.webp'
               alt='Video fallback showing reading experience'
-              className='w-full h-full object-cover'
+              className='w-full h-full object-contain'
             />
           </video>
         </div>
-        <div className='absolute top-0 left-0 w-full h-full bg-black opacity-30 z-0'></div>
+        <div className='absolute top-0 left-0 w-full h-full bg-black opacity-40 dark:opacity-50 z-0'></div>
         <div className='relative z-10 flex flex-col items-center text-center'>
           <animated.h2
             style={ctaAnimation}
-            className='text-4xl sm:text-6xl md:text-7xl font-extrabold text-slate-100'
+            className='text-4xl sm:text-6xl md:text-7xl font-extrabold text-white'
           >
-            Ready to Join StoryTrack?
+            Ready to Join{' '}
+            <span className='text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-blue-600 dark:from-blue-300 dark:to-blue-500'>
+              StoryTrack
+            </span>
+            ?
           </animated.h2>
           <animated.p
             style={ctaAnimation}
-            className='mt-4 sm:mt-6 text-base sm:text-lg md:text-2xl max-w-2xl text-slate-100'
+            className='mt-4 sm:mt-6 text-base sm:text-lg md:text-2xl max-w-2xl text-white'
           >
             Sign up today and take the first step toward mastering your reading
             journey.
@@ -278,7 +289,7 @@ function LandingPage() {
           <animated.a
             style={ctaAnimation}
             href='/register'
-            className='mt-6 sm:mt-8 px-6 sm:px-8 py-3 sm:py-4 rounded-lg bg-blue-500 text-white font-semibold shadow-lg hover:shadow-xl hover:bg-blue-400 transition'
+            className='mt-6 sm:mt-8 px-6 sm:px-8 py-3 sm:py-4 rounded-lg bg-blue-600 dark:bg-blue-500 text-white font-semibold hover:bg-blue-500 dark:hover:bg-blue-400 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105'
           >
             Sign Up Now
           </animated.a>

@@ -40,7 +40,7 @@ A user-friendly web app designed to help you manage and keep track of your book 
 
 ### Requirements
 
-- [Node.js](https://nodejs.org/) and npm or [pnpm](https://pnpm.io/)
+- [Node.js](https://nodejs.org/) v16 and npm or [pnpm](https://pnpm.io/)
 - An active Supabase project with API credentials.
 
 ### Steps to Install
