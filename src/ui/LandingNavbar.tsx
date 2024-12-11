@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { NavLink } from 'react-router-dom';
 import { Menu, X } from 'lucide-react';
+import ThemeToggle from '../components/ui/ThemeToggle';
 
 export default function LandingNavbar() {
   const [isOpen, setIsOpen] = useState(false);
@@ -11,7 +12,7 @@ export default function LandingNavbar() {
   ];
 
   return (
-    <nav className='fixed top-0 left-0 right-0 z-50 bg-slate-100 shadow-md transition-all duration-300'>
+    <nav className='fixed top-0 left-0 right-0 z-50 bg-white dark:bg-dark-900 border-b border-gray-200 dark:border-dark-800 transition-colors duration-300'>
       <div className='max-w-7xl mx-auto px-4 sm:px-6 lg:px-8'>
         <div className='flex items-center justify-between h-16'>
           <NavLink
@@ -26,17 +27,19 @@ export default function LandingNavbar() {
               <NavLink
                 key={link.path}
                 to={link.path}
-                className='px-5 py-2 rounded-md text-lg font-medium text-slate-700 hover:text-slate-900 transition-colors duration-300'
+                className='px-5 py-2 rounded-md text-lg font-medium text-slate-700 dark:text-slate-200 hover:text-slate-900 dark:hover:text-white transition-colors duration-300'
               >
                 {link.name}
               </NavLink>
             ))}
+            <ThemeToggle />
           </div>
 
-          <div className='md:hidden'>
+          <div className='md:hidden flex items-center gap-4'>
+            <ThemeToggle />
             <button
               onClick={() => setIsOpen(!isOpen)}
-              className='p-2 rounded-md text-slate-800 hover:text-slate-600 transition-colors duration-300'
+              className='p-2 rounded-md text-slate-800 dark:text-slate-200 hover:text-slate-600 dark:hover:text-white transition-colors duration-300'
             >
               {isOpen ? <X size={24} /> : <Menu size={24} />}
             </button>
@@ -46,12 +49,12 @@ export default function LandingNavbar() {
 
       {isOpen && (
         <div className='md:hidden'>
-          <div className='px-2 pt-2 pb-3 space-y-1 bg-slate-100 shadow-lg'>
+          <div className='px-2 pt-2 pb-3 space-y-1 bg-white dark:bg-dark-900 shadow-lg'>
             {navLinks.map((link) => (
               <NavLink
                 key={link.path}
                 to={link.path}
-                className='block px-3 py-2 rounded-md text-lg font-medium text-slate-700 hover:text-slate-900 transition-colors duration-300'
+                className='block px-3 py-2 rounded-md text-lg font-medium text-slate-700 dark:text-slate-200 hover:text-slate-900 dark:hover:text-white transition-colors duration-300'
                 onClick={() => setIsOpen(false)}
               >
                 {link.name}

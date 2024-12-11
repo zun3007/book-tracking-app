@@ -10,6 +10,7 @@ import ProtectedRoute from './components/ProtectedRoute';
 import AuthProtectedRoute from './components/AuthProtectedRoute';
 import ThemeProvider from './features/theme/ThemeProvider';
 import store from './store';
+import ThemeToggle from './components/ui/ThemeToggle';
 
 const LandingPage = lazy(() => import('./ui/LandingPage'));
 const UserDashboardPage = lazy(() => import('./features/user/UserDashboard'));
@@ -153,21 +154,30 @@ function App() {
     <Suspense fallback={<PageLoader />}>
       <ErrorBoundary FallbackComponent={ErrorFallback}>
         <Provider store={store}>
-          <ThemeProvider>
-            <QueryClientProvider client={queryClient}>
-              <Toaster
-                position='bottom-right'
-                toastOptions={{
-                  duration: 3000,
-                  style: {
-                    background: '#363636',
-                    color: '#fff',
-                  },
-                }}
-              />
-              <RouterProvider router={router} />
-            </QueryClientProvider>
-          </ThemeProvider>
+          <QueryClientProvider client={queryClient}>
+            <ThemeProvider>
+              <div className='min-h-screen bg-white dark:bg-dark-900 text-dark-900 dark:text-white transition-colors duration-200'>
+                <nav className='fixed top-0 left-0 right-0 z-50 bg-white dark:bg-dark-900 border-b border-gray-200 dark:border-dark-800'>
+                  <div className='container mx-auto px-4 h-16 flex items-center justify-between'>
+                    <div className='flex items-center gap-4'>
+                      <ThemeToggle />
+                    </div>
+                  </div>
+                </nav>
+                <Toaster
+                  position='bottom-right'
+                  toastOptions={{
+                    duration: 3000,
+                    style: {
+                      background: '#363636',
+                      color: '#fff',
+                    },
+                  }}
+                />
+                <RouterProvider router={router} />
+              </div>
+            </ThemeProvider>
+          </QueryClientProvider>
         </Provider>
       </ErrorBoundary>
     </Suspense>

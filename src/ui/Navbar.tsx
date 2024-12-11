@@ -11,6 +11,7 @@ import {
   LogOut,
 } from 'lucide-react';
 import { motion } from 'framer-motion';
+import ThemeToggle from '../components/ui/ThemeToggle';
 
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
@@ -56,6 +57,7 @@ export default function Navbar() {
                 </Link>
               );
             })}
+            <ThemeToggle />
             <Link
               to='/logout'
               className='px-4 py-2 rounded-md text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 dark:bg-primary-700 dark:hover:bg-primary-600 transition-colors flex items-center gap-2'
@@ -65,7 +67,8 @@ export default function Navbar() {
             </Link>
           </div>
 
-          <div className='md:hidden'>
+          <div className='md:hidden flex items-center gap-4'>
+            <ThemeToggle />
             <button
               onClick={() => setIsOpen(!isOpen)}
               className='p-2 rounded-md text-gray-700 hover:text-blue-600 dark:text-gray-200 dark:hover:text-primary-300 transition-colors'
