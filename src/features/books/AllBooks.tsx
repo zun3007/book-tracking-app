@@ -160,7 +160,7 @@ export default function AllBooks() {
 
   return (
     <div className='min-h-screen bg-gradient-to-b from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800 py-12 mt-16'>
-      <div className='container mx-auto px-4 max-w-7xl'>
+      <div className='container pt-4 mx-auto px-4 max-w-7xl'>
         {/* Search and Filters Section */}
         <motion.div
           initial={{ opacity: 0, y: -20 }}

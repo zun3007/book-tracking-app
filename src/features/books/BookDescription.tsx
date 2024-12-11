@@ -9,17 +9,25 @@ import {
 } from './bookSlice';
 import { useAuth } from '../../hooks/useAuth';
 import { bookService } from '../../services/bookService';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { supabase } from '../../utils/supabaseClient';
 import { toast } from 'react-hot-toast';
 import BookDetails from './BookDetails';
 import CommentsSection from './CommentsSection';
+import { Loader2 } from 'lucide-react';
 
 type Comment = {
   id: number;
   user_id: string;
   content: string;
   // Add other properties as needed
+};
+
+const pageTransition = {
+  initial: { opacity: 0, y: 20 },
+  animate: { opacity: 1, y: 0 },
+  exit: { opacity: 0, y: -20 },
+  transition: { duration: 0.3, ease: 'easeInOut' },
 };
 
 export default function BookDescription() {
@@ -185,30 +193,43 @@ export default function BookDescription() {
 
   if (isLoading) {
     return (
-      <div className='min-h-screen bg-gray-50 dark:bg-gray-900 py-12 mt-16'>
-        <div className='container mx-auto px-4'>
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            className='flex justify-center'
-          >
-            <div className='animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 dark:border-blue-400' />
-          </motion.div>
-        </div>
+      <div
+        className='min-h-screen bg-gradient-to-b from-gray-50 to-gray-100 
+        dark:from-gray-900 dark:to-gray-800 py-12 mt-16 flex items-center justify-center'
+      >
+        <motion.div
+          initial={{ opacity: 0, scale: 0.9 }}
+          animate={{ opacity: 1, scale: 1 }}
+          className='flex flex-col items-center gap-4 p-8 rounded-xl 
+            bg-white/50 dark:bg-gray-800/50 backdrop-blur-sm'
+        >
+          <Loader2 className='w-12 h-12 text-blue-500 dark:text-blue-400 animate-spin' />
+          <p className='text-gray-600 dark:text-gray-300 font-medium'>
+            Loading book details...
+          </p>
+        </motion.div>
       </div>
     );
   }
 
   if (error || !book) {
     return (
-      <div className='min-h-screen bg-gray-50 dark:bg-gray-900 py-12 mt-16'>
-        <div className='container mx-auto px-4'>
+      <div
+        className='min-h-screen bg-gradient-to-b from-gray-50 to-gray-100 
+        dark:from-gray-900 dark:to-gray-800 py-12 mt-16'
+      >
+        <div className='container mx-auto px-4 max-w-4xl'>
           <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className='bg-red-50 dark:bg-red-900/50 border border-red-200 dark:border-red-800 text-red-700 dark:text-red-200 px-6 py-4 rounded-lg shadow-sm'
+            {...pageTransition}
+            className='bg-red-50 dark:bg-red-900/30 border border-red-200 
+              dark:border-red-800/50 text-red-700 dark:text-red-300 p-8 
+              rounded-xl shadow-lg backdrop-blur-sm'
           >
-            <p className='font-medium'>{error || 'Book not found'}</p>
+            <h2 className='text-2xl font-bold mb-2'>Error Loading Book</h2>
+            <p className='text-lg font-medium'>{error || 'Book not found'}</p>
+            <p className='mt-4 text-red-600 dark:text-red-400'>
+              Please try refreshing the page or go back to browse other books.
+            </p>
           </motion.div>
         </div>
       </div>
@@ -216,34 +237,74 @@ export default function BookDescription() {
   }
 
   return (
-    <div className='min-h-screen bg-gray-50 dark:bg-gray-900 py-12 mt-16'>
-      <div className='container mx-auto px-4 pb-12'>
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className='bg-white dark:bg-gray-800 rounded-xl shadow-sm overflow-hidden max-w-5xl mx-auto'
-        >
-          <BookDetails
-            book={book}
-            favorites={favorites}
-            handleRatingChange={handleRatingChange}
-            handleToggleFavorite={handleToggleFavorite}
-            user={user}
-          />
-        </motion.div>
+    <AnimatePresence mode='wait'>
+      <div
+        className='min-h-screen bg-gradient-to-b from-gray-50 to-gray-100 
+        dark:from-gray-900 dark:to-gray-800 py-12 mt-16'
+      >
+        <div className='container pt-4 mx-auto px-4 pb-12 max-w-6xl'>
+          <motion.div {...pageTransition} className='space-y-8'>
+            {/* Book Header */}
+            <div className='text-center mb-8'>
+              <h1
+                className='text-4xl font-bold text-gray-900 dark:text-white mb-2 
+                leading-tight'
+              >
+                {book.title}
+              </h1>
+              <p className='text-xl text-gray-600 dark:text-gray-300'>
+                by {book.authors?.join(', ')}
+              </p>
+            </div>
 
-        <CommentsSection
-          comments={comments}
-          profiles={profiles}
-          user={user}
-          bookId={bookId}
-          handleCommentSubmit={handleCommentSubmit}
-          handleTagInput={handleTagInput}
-          handleTagSelect={handleTagSelect}
-          taggedUsers={taggedUsers}
-          showSuggestions={showSuggestions}
-        />
+            {/* Book Details Card */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              className='bg-white dark:bg-gray-800 rounded-2xl shadow-xl 
+                overflow-hidden border border-gray-100 dark:border-gray-700'
+            >
+              <BookDetails
+                book={book}
+                favorites={favorites}
+                handleRatingChange={handleRatingChange}
+                handleToggleFavorite={handleToggleFavorite}
+                user={user}
+              />
+            </motion.div>
+
+            {/* Comments Section */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.2 }}
+              className='bg-white dark:bg-gray-800 rounded-2xl shadow-xl 
+                overflow-hidden border border-gray-100 dark:border-gray-700'
+            >
+              <div className='p-6 border-b border-gray-100 dark:border-gray-700'>
+                <h2 className='text-2xl font-bold text-gray-900 dark:text-white'>
+                  Discussion
+                </h2>
+                <p className='text-gray-600 dark:text-gray-300 mt-1'>
+                  Share your thoughts about the book
+                </p>
+              </div>
+
+              <CommentsSection
+                comments={comments}
+                profiles={profiles}
+                user={user}
+                bookId={bookId}
+                handleCommentSubmit={handleCommentSubmit}
+                handleTagInput={handleTagInput}
+                handleTagSelect={handleTagSelect}
+                taggedUsers={taggedUsers}
+                showSuggestions={showSuggestions}
+              />
+            </motion.div>
+          </motion.div>
+        </div>
       </div>
-    </div>
+    </AnimatePresence>
   );
 }
