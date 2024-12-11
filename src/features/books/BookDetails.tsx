@@ -1,12 +1,12 @@
 import { HeartIcon } from '@heroicons/react/24/outline';
 import { HeartIcon as HeartSolidIcon } from '@heroicons/react/24/solid';
 import OptimizedImage from '../../components/ui/OptimizedImage';
-import { Book } from '../../types';
+import { Book, UserBook } from '../../types';
 import { BookOpen, CheckCircle2, Clock, Sparkles } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { useAppDispatch } from '../../app/hooks';
-import { updateReadStatus } from './bookSlice';
-import { useState } from 'react';
+import { useAppDispatch, useAppSelector } from '../../app/hooks';
+import { updateReadStatus, fetchUserBooks } from './bookSlice';
+import { useLayoutEffect, useState, useCallback } from 'react';
 import { toast } from 'react-hot-toast';
 
 interface BookDetailsProps {
@@ -16,6 +16,8 @@ interface BookDetailsProps {
   handleToggleFavorite: () => void;
   user: { id: string } | null;
 }
+
+type ReadStatus = 'none' | 'reading' | 'finished';
 
 const readingStatusConfig = {
   none: {
@@ -76,20 +78,44 @@ export default function BookDetails({
   user,
 }: BookDetailsProps) {
   const dispatch = useAppDispatch();
-  const [currentStatus, setCurrentStatus] = useState<
-    'none' | 'reading' | 'finished'
-  >(book.read_status || 'none');
+  const userBooks = useAppSelector((state) => state.books.userBooks);
+  const [currentStatus, setCurrentStatus] = useState<ReadStatus>('none');
   const [isUpdating, setIsUpdating] = useState(false);
   const [showCelebration, setShowCelebration] = useState(false);
 
-  const handleReadStatusChange = async (
-    status: 'none' | 'reading' | 'finished'
-  ) => {
+  const getCurrentReadStatus = useCallback(
+    (bookId: number, userBooks: UserBook[]): ReadStatus => {
+      const userBook = userBooks.find((ub) => ub.book_id === bookId);
+      return (userBook?.read_status as ReadStatus) || 'none';
+    },
+    []
+  );
+
+  // Initial fetch of user books if needed
+  useLayoutEffect(() => {
+    if (user?.id && userBooks.length === 0) {
+      dispatch(fetchUserBooks(user.id));
+    }
+  }, [user?.id, userBooks.length, dispatch]);
+
+  // Sync with userBooks data
+  useLayoutEffect(() => {
+    if (user?.id) {
+      const newStatus = getCurrentReadStatus(book.id, userBooks);
+      if (newStatus !== currentStatus) {
+        setCurrentStatus(newStatus);
+      }
+    } else {
+      setCurrentStatus('none');
+    }
+  }, [user?.id, userBooks, book.id, currentStatus, getCurrentReadStatus]);
+
+  const handleReadStatusChange = async (status: ReadStatus) => {
     if (!user?.id || isUpdating) return;
 
     try {
       setIsUpdating(true);
-      await dispatch(
+      const result = await dispatch(
         updateReadStatus({
           bookId: book.id,
           userId: user.id,
@@ -97,28 +123,33 @@ export default function BookDetails({
         })
       ).unwrap();
 
-      setCurrentStatus(status);
+      if (result) {
+        // Fetch updated user books to ensure sync
+        await dispatch(fetchUserBooks(user.id));
 
-      if (status === 'finished') {
-        setShowCelebration(true);
-        setTimeout(() => setShowCelebration(false), 2000);
+        if (status === 'finished') {
+          setShowCelebration(true);
+          setTimeout(() => setShowCelebration(false), 2000);
+        }
+
+        toast.success(
+          <div className='flex items-center gap-2'>
+            <span>{readingStatusConfig[status].emoji}</span>
+            <span>
+              {status === 'none'
+                ? 'Added to reading list'
+                : status === 'reading'
+                  ? 'Happy reading!'
+                  : 'Congratulations on finishing!'}
+            </span>
+          </div>
+        );
       }
-
-      toast.success(
-        <div className='flex items-center gap-2'>
-          <span>{readingStatusConfig[status].emoji}</span>
-          <span>
-            {status === 'none'
-              ? 'Added to reading list'
-              : status === 'reading'
-                ? 'Happy reading!'
-                : 'Congratulations on finishing!'}
-          </span>
-        </div>
-      );
     } catch (error) {
       console.error('Error updating read status:', error);
       toast.error('Failed to update reading status');
+      // Revert to previous status on error
+      setCurrentStatus(getCurrentReadStatus(book.id, userBooks));
     } finally {
       setIsUpdating(false);
     }

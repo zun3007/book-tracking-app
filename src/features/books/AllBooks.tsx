@@ -273,7 +273,7 @@ export default function AllBooks() {
           <div className='space-y-3'>
             <label
               htmlFor='sort-select'
-              className='text-sm font-semibold text-gray-700 dark:text-gray-200'
+              className='text-sm font-semibold text-gray-700 dark:text-gray-200 mr-3'
             >
               Sort Books By
             </label>

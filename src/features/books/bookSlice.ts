@@ -264,6 +264,42 @@ export const updateReadStatus = createAsyncThunk(
   }
 );
 
+export const fetchUserBooks = createAsyncThunk(
+  'books/fetchUserBooks',
+  async (userId: string, { rejectWithValue }) => {
+    try {
+      const { data, error } = await supabase
+        .from('user_books')
+        .select(
+          `
+          *,
+          books (
+            id,
+            title,
+            authors,
+            thumbnail,
+            description,
+            isbn,
+            published_date,
+            genres,
+            average_rating,
+            ratings_count
+          )
+        `
+        )
+        .eq('user_id', userId);
+
+      if (error) throw error;
+
+      return data as UserBook[];
+    } catch (error) {
+      return rejectWithValue(
+        error instanceof Error ? error.message : 'Failed to fetch user books'
+      );
+    }
+  }
+);
+
 const bookSlice = createSlice({
   name: 'books',
   initialState,
@@ -277,6 +313,23 @@ const bookSlice = createSlice({
   },
   extraReducers: (builder) => {
     builder
+      // Fetch user books
+      .addCase(fetchUserBooks.pending, (state) => {
+        state.status = 'loading';
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(fetchUserBooks.fulfilled, (state, action) => {
+        state.status = 'succeeded';
+        state.loading = false;
+        state.userBooks = action.payload;
+        state.error = null;
+      })
+      .addCase(fetchUserBooks.rejected, (state, action) => {
+        state.status = 'failed';
+        state.loading = false;
+        state.error = action.error.message || 'Failed to fetch user books';
+      })
       // Fetch all books
       .addCase(fetchAllBooks.pending, (state) => {
         state.status = 'loading';
@@ -324,12 +377,28 @@ const bookSlice = createSlice({
       })
       .addCase(updateReadStatus.fulfilled, (state, action) => {
         const { bookId, status } = action.payload;
+        // Update in books array
         const book = state.books.find((b) => b.id === bookId);
         if (book) {
           book.read_status = status;
         }
+        // Update in selected book
         if (state.selectedBook?.id === bookId) {
           state.selectedBook.read_status = status;
+        }
+        // Update in user books
+        const userBook = state.userBooks.find((ub) => ub.book_id === bookId);
+        if (userBook) {
+          userBook.read_status = status;
+        } else {
+          // Add new user book if it doesn't exist
+          state.userBooks.push({
+            book_id: bookId,
+            user_id: action.meta.arg.userId,
+            read_status: status,
+            favorite: false,
+            order: 0,
+          });
         }
       });
   },
