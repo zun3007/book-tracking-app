@@ -1,5 +1,5 @@
 import { useLayoutEffect, useState, Suspense, lazy, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import { useAppDispatch, useAppSelector } from '../../app/hooks';
 import {
   toggleFavorite,
@@ -12,7 +12,7 @@ import { bookService } from '../../services/bookService';
 import { motion, AnimatePresence } from 'framer-motion';
 import { supabase } from '../../utils/supabaseClient';
 import { toast } from 'react-hot-toast';
-import { Loader2 } from 'lucide-react';
+import { Loader2, ArrowLeft } from 'lucide-react';
 import LoadingSpinner from '../../components/ui/LoadingSpinner';
 
 const BookDetails = lazy(() => import('./BookDetails'));
@@ -38,6 +38,7 @@ const pageTransition = {
 };
 
 export default function BookDescription() {
+  const navigate = useNavigate();
   const { bookId } = useParams<{ bookId: string }>();
   const dispatch = useAppDispatch();
   const {
@@ -261,6 +262,26 @@ export default function BookDescription() {
       >
         <div className='container pt-8 mx-auto px-4 pb-12 max-w-6xl'>
           <motion.div {...pageTransition} className='space-y-8'>
+            {/* Back Button */}
+            <motion.button
+              onClick={() => navigate(-1)}
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              className='group flex items-center gap-2 px-4 py-2 rounded-xl 
+                bg-white dark:bg-gray-800 shadow-md hover:shadow-lg
+                border border-gray-200 dark:border-gray-700
+                text-gray-700 dark:text-gray-200
+                transition-all duration-200 ease-in-out'
+            >
+              <ArrowLeft
+                className='w-5 h-5 transition-transform duration-200 
+                group-hover:-translate-x-1'
+              />
+              <span className='font-medium'>Back to Books</span>
+            </motion.button>
+
             {/* Book Header */}
             <div className='text-center mb-8'>
               <h1
