@@ -279,7 +279,7 @@ export default function BookDescription() {
                 className='w-5 h-5 transition-transform duration-200 
                 group-hover:-translate-x-1'
               />
-              <span className='font-medium'>Back to Books</span>
+              <span className='font-medium'>Back</span>
             </motion.button>
 
             {/* Book Header */}
