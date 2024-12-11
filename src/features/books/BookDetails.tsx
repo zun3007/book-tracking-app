@@ -228,29 +228,78 @@ export default function BookDetails({
           </div>
 
           {/* Reading Progress */}
-          <div className='space-y-6'>
-            <motion.div
-              className='flex items-center gap-3'
+          <section
+            aria-labelledby='reading-progress-title'
+            className='space-y-8 rounded-2xl bg-white/80 dark:bg-gray-800/40 p-8 shadow-lg ring-1 ring-gray-900/10 dark:ring-white/10 backdrop-blur-sm'
+          >
+            <motion.header
+              className='flex items-center gap-4'
               initial={{ opacity: 0, y: -20 }}
               animate={{ opacity: 1, y: 0 }}
             >
               <motion.div
-                className='p-2.5 rounded-full bg-blue-50 dark:bg-blue-900/20'
+                className='p-3.5 rounded-2xl bg-gradient-to-br from-blue-100 to-blue-50 dark:from-blue-900/40 dark:to-blue-800/20 shadow-md ring-1 ring-blue-500/20 dark:ring-blue-400/20'
                 whileHover={{ rotate: 360, scale: 1.1 }}
                 transition={{ duration: 0.3 }}
               >
-                <BookOpen className='w-6 h-6 text-blue-500' />
+                <BookOpen
+                  className='w-7 h-7 text-blue-600 dark:text-blue-300 drop-shadow-sm'
+                  aria-hidden='true'
+                />
               </motion.div>
-              <h2 className='text-2xl font-semibold text-gray-900 dark:text-gray-100'>
+              <h2
+                id='reading-progress-title'
+                className='text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-gray-900 to-gray-600 dark:from-white dark:to-gray-300'
+              >
                 Reading Progress
               </h2>
-            </motion.div>
+            </motion.header>
 
-            <div className='grid sm:grid-cols-3 gap-4'>
+            <div
+              className='grid sm:grid-cols-3 gap-6'
+              role='radiogroup'
+              aria-label='Reading status selection'
+            >
               <AnimatePresence mode='wait'>
                 {Object.entries(readingStatusConfig).map(([status, config]) => {
                   const Icon = config.icon;
                   const isActive = currentStatus === status;
+                  const colorClasses = {
+                    gray: {
+                      bg: 'bg-gradient-to-br from-gray-100 to-gray-50 dark:from-gray-800 dark:to-gray-800/50',
+                      border: 'border-gray-200 dark:border-gray-700',
+                      text: 'text-gray-700 dark:text-gray-200',
+                      hover: 'hover:border-gray-300 dark:hover:border-gray-600',
+                      active: {
+                        bg: 'bg-gradient-to-br from-gray-200 to-gray-100 dark:from-gray-700 dark:to-gray-800',
+                        text: 'text-gray-900 dark:text-white',
+                        icon: 'text-gray-700 dark:text-gray-200',
+                      },
+                    },
+                    blue: {
+                      bg: 'bg-gradient-to-br from-blue-50 to-blue-50/50 dark:from-blue-900/30 dark:to-blue-900/10',
+                      border: 'border-blue-200 dark:border-blue-800',
+                      text: 'text-blue-700 dark:text-blue-200',
+                      hover: 'hover:border-blue-300 dark:hover:border-blue-700',
+                      active: {
+                        bg: 'bg-gradient-to-br from-blue-100 to-blue-50 dark:from-blue-800/40 dark:to-blue-900/20',
+                        text: 'text-blue-900 dark:text-blue-100',
+                        icon: 'text-blue-600 dark:text-blue-300',
+                      },
+                    },
+                    green: {
+                      bg: 'bg-gradient-to-br from-green-50 to-green-50/50 dark:from-green-900/30 dark:to-green-900/10',
+                      border: 'border-green-200 dark:border-green-800',
+                      text: 'text-green-700 dark:text-green-200',
+                      hover:
+                        'hover:border-green-300 dark:hover:border-green-700',
+                      active: {
+                        bg: 'bg-gradient-to-br from-green-100 to-green-50 dark:from-green-800/40 dark:to-green-900/20',
+                        text: 'text-green-900 dark:text-green-100',
+                        icon: 'text-green-600 dark:text-green-300',
+                      },
+                    },
+                  };
 
                   return (
                     <motion.button
@@ -260,31 +309,41 @@ export default function BookDetails({
                           status as keyof typeof readingStatusConfig
                         )
                       }
-                      disabled={isUpdating}
+                      disabled={isUpdating || !user}
+                      role='radio'
+                      aria-checked={isActive}
+                      aria-label={`Mark as ${config.label}`}
                       className={`
-                        relative p-4 rounded-xl border transition-all duration-300
+                        group relative flex flex-col min-h-[16rem] p-6
+                        rounded-2xl border-2 transition-all duration-300
+                        focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-gray-900
                         ${
                           isActive
-                            ? `border-${config.color}-500/50 bg-${config.color}-50/50 dark:bg-${config.color}-900/20`
-                            : 'border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600'
+                            ? `${colorClasses[config.color].border} ${colorClasses[config.color].bg} focus-visible:ring-${config.color}-500/50`
+                            : 'border-gray-200 dark:border-gray-700 hover:bg-gray-50/80 dark:hover:bg-gray-800/30 focus-visible:ring-gray-500/50'
                         }
-                        disabled:opacity-50 disabled:cursor-not-allowed
-                        group overflow-hidden
-                        hover:shadow-lg hover:shadow-${config.color}-500/10
+                        disabled:opacity-60 disabled:cursor-not-allowed
+                        hover:shadow-lg hover:scale-[1.02]
+                        transform-gpu backdrop-blur-[2px]
+                        ${!user ? 'cursor-not-allowed' : 'cursor-pointer'}
                       `}
                       initial={{ opacity: 0, y: 20 }}
                       animate={{ opacity: 1, y: 0 }}
-                      whileHover={config.animation.hover}
-                      whileTap={config.animation.tap}
+                      whileHover={
+                        !isUpdating && user ? config.animation.hover : undefined
+                      }
+                      whileTap={
+                        !isUpdating && user ? config.animation.tap : undefined
+                      }
                     >
-                      {/* Background glow effect */}
+                      {/* Background gradient */}
                       {isActive && (
                         <motion.div
-                          className={`absolute inset-0 bg-gradient-to-br from-${config.color}-500/10 to-transparent`}
+                          className={`absolute inset-0 rounded-xl ${colorClasses[config.color].bg} opacity-60`}
                           initial={{ opacity: 0, scale: 0.8 }}
                           animate={{
-                            opacity: [0.3, 0.5, 0.3],
-                            scale: [1, 1.05, 1],
+                            opacity: [0.4, 0.6, 0.4],
+                            scale: [1, 1.02, 1],
                           }}
                           transition={{
                             duration: 2,
@@ -294,30 +353,33 @@ export default function BookDetails({
                         />
                       )}
 
-                      <div className='relative z-10 flex flex-col items-center gap-3'>
+                      <div className='relative z-10 flex-1 flex flex-col items-center'>
                         <motion.div
                           className={`
-                            w-12 h-12 rounded-lg flex items-center justify-center
+                            w-16 h-16 rounded-2xl flex items-center justify-center mb-5
+                            shadow-md ring-1 ring-black/5 dark:ring-white/5 transition-colors duration-300
                             ${
                               isActive
-                                ? `bg-${config.color}-100 text-${config.color}-600 dark:bg-${config.color}-900/30 dark:text-${config.color}-400`
-                                : 'bg-gray-100 text-gray-500 dark:bg-gray-800 dark:text-gray-400'
+                                ? `${colorClasses[config.color].active.bg} ${colorClasses[config.color].active.icon}`
+                                : 'bg-white dark:bg-gray-800 text-gray-400 dark:text-gray-500'
                             }
-                            transition-colors duration-300
                           `}
                           animate={isActive ? config.animation.active : {}}
                         >
-                          <Icon className='w-6 h-6' />
+                          <Icon className='w-8 h-8' aria-hidden='true' />
                         </motion.div>
 
-                        <div className='text-center space-y-1'>
-                          <div className='flex items-center justify-center gap-1.5'>
+                        <div className='flex flex-col items-center gap-3 mb-8'>
+                          <div className='flex items-center justify-center gap-2'>
                             <span
-                              className={`font-medium ${
-                                isActive
-                                  ? `text-${config.color}-700 dark:text-${config.color}-400`
-                                  : 'text-gray-700 dark:text-gray-300'
-                              }`}
+                              className={`
+                                font-bold text-lg tracking-tight
+                                ${
+                                  isActive
+                                    ? colorClasses[config.color].text
+                                    : 'text-gray-700 dark:text-gray-300'
+                                }
+                              `}
                             >
                               {config.label}
                             </span>
@@ -327,31 +389,52 @@ export default function BookDetails({
                                 scale: isActive ? 1 : 0,
                                 rotate: isActive ? [0, 10, -10, 0] : 0,
                               }}
-                              className='text-base'
+                              className='text-xl'
+                              aria-hidden='true'
                             >
                               {config.emoji}
                             </motion.span>
                           </div>
-                          <p className='text-xs text-gray-500 dark:text-gray-400'>
+                          <p
+                            className={`
+                              text-base text-center leading-relaxed
+                              ${
+                                isActive
+                                  ? `${colorClasses[config.color].text} opacity-90`
+                                  : 'text-gray-600 dark:text-gray-400'
+                              }
+                            `}
+                          >
                             {config.description}
                           </p>
                         </div>
-                      </div>
 
-                      {/* Motivational text */}
-                      <motion.div
-                        className={`absolute inset-x-0 bottom-0 py-1 text-xs text-center
-                          ${isActive ? `text-${config.color}-600 dark:text-${config.color}-400` : 'text-gray-400'}
-                        `}
-                        initial={{ opacity: 0, y: 10 }}
-                        animate={{
-                          opacity: isActive ? 1 : 0,
-                          y: isActive ? 0 : 10,
-                        }}
-                        transition={{ duration: 0.2 }}
-                      >
-                        {config.motivationalText}
-                      </motion.div>
+                        {/* Motivational text */}
+                        <motion.div
+                          className={`
+                            w-full mt-auto pt-4 border-t
+                            ${
+                              isActive
+                                ? `border-${config.color}-200/40 dark:border-${config.color}-700/40`
+                                : 'border-gray-200/50 dark:border-gray-700/30'
+                            }
+                            text-sm text-center font-medium tracking-wide
+                            ${
+                              isActive
+                                ? colorClasses[config.color].text
+                                : 'text-gray-500 dark:text-gray-400'
+                            }
+                          `}
+                          initial={{ opacity: 0, y: 10 }}
+                          animate={{
+                            opacity: isActive ? 1 : 0,
+                            y: isActive ? 0 : 10,
+                          }}
+                          transition={{ duration: 0.2 }}
+                        >
+                          {config.motivationalText}
+                        </motion.div>
+                      </div>
 
                       {/* Celebration effect */}
                       <AnimatePresence>
@@ -383,18 +466,32 @@ export default function BookDetails({
                                   ease: [0.4, 0, 0.2, 1],
                                 }}
                               >
-                                <Sparkles className='w-3 h-3 text-yellow-400 drop-shadow' />
+                                <Sparkles
+                                  className='w-5 h-5 text-yellow-400 drop-shadow-lg'
+                                  aria-hidden='true'
+                                />
                               </motion.div>
                             ))}
                           </motion.div>
                         )}
                       </AnimatePresence>
+
+                      {!user && (
+                        <div
+                          className='absolute inset-0 bg-white/40 dark:bg-gray-900/40 rounded-xl backdrop-blur-[1px] flex items-center justify-center'
+                          aria-hidden='true'
+                        >
+                          <p className='text-sm font-medium text-gray-500 dark:text-gray-400'>
+                            Sign in to track progress
+                          </p>
+                        </div>
+                      )}
                     </motion.button>
                   );
                 })}
               </AnimatePresence>
             </div>
-          </div>
+          </section>
         </div>
       </div>
     </div>
