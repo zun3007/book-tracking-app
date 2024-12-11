@@ -1,4 +1,4 @@
-import { useLayoutEffect, useState, Suspense, lazy } from 'react';
+import { useLayoutEffect, useState, Suspense, lazy, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { useAppDispatch, useAppSelector } from '../../app/hooks';
 import {
@@ -13,6 +13,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { supabase } from '../../utils/supabaseClient';
 import { toast } from 'react-hot-toast';
 import { Loader2 } from 'lucide-react';
+import LoadingSpinner from '../../components/ui/LoadingSpinner';
 
 const BookDetails = lazy(() => import('./BookDetails'));
 const CommentsSection = lazy(() => import('./CommentsSection'));
@@ -21,7 +22,12 @@ type Comment = {
   id: number;
   user_id: string;
   content: string;
-  // Add other properties as needed
+  created_at: string;
+};
+
+type Profile = {
+  id: string;
+  email: string;
 };
 
 const pageTransition = {
@@ -43,11 +49,10 @@ export default function BookDescription() {
   const { user } = useAuth();
   const [comments, setComments] = useState<Comment[]>([]);
   const [profiles, setProfiles] = useState<Record<string, string>>({});
-  const [taggedUsers, setTaggedUsers] = useState<
-    { id: string; email: string }[]
-  >([]);
+  const [taggedUsers, setTaggedUsers] = useState<Profile[]>([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const [newComment, setNewComment] = useState('');
 
   useLayoutEffect(() => {
     const initializeData = async () => {
@@ -56,7 +61,6 @@ export default function BookDescription() {
           setIsLoading(true);
           const bookData = await bookService.getBookById(parseInt(bookId, 10));
           dispatch(setSelectedBook(bookData));
-
           dispatch(fetchFavorites(user.id));
         } catch (err) {
           console.error('Error fetching data:', err);
@@ -78,26 +82,34 @@ export default function BookDescription() {
       const { data: commentsData, error: commentsError } = await supabase
         .from('comments')
         .select('*')
-        .eq('book_id', bookId);
+        .eq('book_id', bookId)
+        .order('created_at', { ascending: true });
 
       if (commentsError) {
-        console.error('Error fetching comments:', commentsError);
-      } else {
-        setComments(commentsData);
+        toast.error('Failed to load comments');
+        return;
+      }
 
-        const userIds = commentsData.map((comment) => comment.user_id);
+      setComments(commentsData || []);
+
+      // Fetch profiles for all comments
+      const userIds = [...new Set(commentsData?.map((c) => c.user_id) || [])];
+      if (userIds.length > 0) {
         const { data: profilesData, error: profilesError } = await supabase
           .from('profiles')
           .select('id, email')
           .in('id', userIds);
 
         if (profilesError) {
-          console.error('Error fetching profiles:', profilesError);
+          toast.error('Failed to load user profiles');
         } else {
-          const profilesMap = profilesData.reduce((acc, profile) => {
-            acc[profile.id] = profile.email;
-            return acc;
-          }, {});
+          const profilesMap = profilesData.reduce<Record<string, string>>(
+            (acc, profile) => {
+              acc[profile.id] = profile.email;
+              return acc;
+            },
+            {}
+          );
           setProfiles(profilesMap);
         }
       }
@@ -105,32 +117,36 @@ export default function BookDescription() {
 
     fetchCommentsAndProfiles();
 
-    const commentsChannel = supabase
+    // Set up real-time subscription for comments
+    const subscription = supabase
       .channel('comments')
       .on(
         'postgres_changes',
         { event: 'INSERT', schema: 'public', table: 'comments' },
         (payload) => {
-          setComments((prevComments) => [...prevComments, payload.new]);
+          setComments((prevComments) => [
+            ...prevComments,
+            payload.new as Comment,
+          ]);
         }
       )
       .subscribe();
 
     return () => {
-      supabase.removeChannel(commentsChannel);
+      subscription.unsubscribe();
     };
   }, [bookId]);
 
   const handleCommentSubmit = async (
-    newComment: string,
+    commentText: string,
     setNewComment: (value: string) => void
   ) => {
-    if (!newComment.trim()) return;
+    if (!commentText.trim() || !user) return;
 
     const { error } = await supabase.from('comments').insert({
       user_id: user.id,
       book_id: bookId,
-      content: newComment,
+      content: commentText,
     });
 
     if (error) {
@@ -149,7 +165,7 @@ export default function BookDescription() {
         .ilike('email', `%${search}%`)
         .limit(5);
 
-      if (!error) {
+      if (!error && data) {
         setTaggedUsers(data);
         setShowSuggestions(true);
       }
@@ -159,7 +175,7 @@ export default function BookDescription() {
   };
 
   const handleTagSelect = (email: string) => {
-    setNewComment((prev) => `${prev}@${email} `);
+    setNewComment((prev: string) => `${prev}@${email} `);
     setShowSuggestions(false);
   };
 
@@ -243,7 +259,7 @@ export default function BookDescription() {
         className='min-h-screen bg-gradient-to-b from-gray-50 to-gray-100 
         dark:from-gray-900 dark:to-gray-800 py-12 mt-16'
       >
-        <div className='container pt-4 mx-auto px-4 pb-12 max-w-6xl'>
+        <div className='container pt-8 mx-auto px-4 pb-12 max-w-6xl'>
           <motion.div {...pageTransition} className='space-y-8'>
             {/* Book Header */}
             <div className='text-center mb-8'>
