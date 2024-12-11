@@ -277,11 +277,11 @@ export default function FavoritesPage() {
                 aria-hidden='true'
               />
             </div>
-            <div className='space-y-2'>
+            <div className='space-y-3'>
               <h2 className='text-2xl font-semibold text-gray-900 dark:text-gray-50'>
                 No matches found
               </h2>
-              <p className='text-gray-600 dark:text-gray-300 max-w-md'>
+              <p className='text-gray-600 dark:text-gray-300 max-w-lg'>
                 Try adjusting your search terms or clear the search to see all
                 favorites.
               </p>
