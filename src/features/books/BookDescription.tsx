@@ -279,7 +279,7 @@ export default function BookDescription() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.2 }}
               className='bg-white dark:bg-gray-800 rounded-2xl shadow-xl 
-                overflow-hidden border border-gray-100 dark:border-gray-700'
+                overflow-hidden border border-gray-100 dark:border-gray-700 pb-8'
             >
               <div className='p-6 border-b border-gray-100 dark:border-gray-700'>
                 <h2 className='text-2xl font-bold text-gray-900 dark:text-white'>

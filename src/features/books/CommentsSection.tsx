@@ -12,6 +12,7 @@ import {
   MoreVertical,
   Edit2,
   Trash2,
+  MessageSquare,
 } from 'lucide-react';
 import { Menu } from '@headlessui/react';
 import { formatDistanceToNow } from 'date-fns';
@@ -38,7 +39,12 @@ const DeleteConfirmationModal = ({
 }: DeleteModalProps) => {
   return (
     <Transition appear show={isOpen} as={Fragment}>
-      <Dialog as='div' className='relative z-50' onClose={onClose}>
+      <Dialog
+        as='div'
+        className='relative z-50'
+        onClose={onClose}
+        aria-labelledby='delete-modal-title'
+      >
         <Transition.Child
           as={Fragment}
           enter='ease-out duration-300'
@@ -48,7 +54,7 @@ const DeleteConfirmationModal = ({
           leaveFrom='opacity-100'
           leaveTo='opacity-0'
         >
-          <div className='fixed inset-0 bg-black/25 backdrop-blur-sm' />
+          <div className='fixed inset-0 bg-black/40 backdrop-blur-sm' />
         </Transition.Child>
 
         <div className='fixed inset-0 overflow-y-auto'>
@@ -62,36 +68,39 @@ const DeleteConfirmationModal = ({
               leaveFrom='opacity-100 scale-100'
               leaveTo='opacity-0 scale-95'
             >
-              <Dialog.Panel className='w-full max-w-md transform overflow-hidden rounded-2xl bg-white dark:bg-gray-800 p-6 text-left align-middle shadow-xl transition-all'>
-                <div className='flex items-center gap-3 text-yellow-500'>
-                  <AlertTriangle className='h-6 w-6' />
+              <Dialog.Panel className='w-full max-w-md transform overflow-hidden rounded-2xl bg-white dark:bg-gray-800 p-6 text-left align-middle shadow-xl transition-all border border-gray-200 dark:border-gray-700'>
+                <div className='flex items-center gap-3 text-yellow-600 dark:text-yellow-500'>
+                  <AlertTriangle className='h-6 w-6' aria-hidden='true' />
                   <Dialog.Title
                     as='h3'
-                    className='text-lg font-medium leading-6'
+                    className='text-lg font-semibold leading-6'
+                    id='delete-modal-title'
                   >
                     Delete Comment
                   </Dialog.Title>
                 </div>
 
                 <div className='mt-4'>
-                  <p className='text-gray-600 dark:text-gray-300'>
+                  <p className='text-gray-700 dark:text-gray-300'>
                     Are you sure you want to delete this comment by{' '}
-                    <span className='font-semibold'>{commentAuthor}</span>? This
-                    action cannot be undone.
+                    <span className='font-semibold text-gray-900 dark:text-gray-100'>
+                      {commentAuthor}
+                    </span>
+                    ? This action cannot be undone.
                   </p>
                 </div>
 
                 <div className='mt-6 flex justify-end gap-3'>
                   <button
                     type='button'
-                    className='inline-flex justify-center rounded-lg border border-gray-300 dark:border-gray-600 px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500'
+                    className='inline-flex justify-center rounded-lg border border-gray-300 dark:border-gray-600 px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-gray-800 transition-colors'
                     onClick={onClose}
                   >
                     Cancel
                   </button>
                   <button
                     type='button'
-                    className='inline-flex justify-center rounded-lg border border-transparent bg-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-red-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-500'
+                    className='inline-flex justify-center rounded-lg border border-transparent bg-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-red-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-gray-800 transition-colors'
                     onClick={() => {
                       onConfirm();
                       onClose();
@@ -327,63 +336,80 @@ export default function CommentsSection({ bookId }: CommentsSectionProps) {
 
     return (
       <Menu as='div' className='relative'>
-        <Menu.Button className='p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-full transition-colors'>
-          <MoreVertical size={18} className='text-gray-400' />
+        <Menu.Button
+          className='p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-full transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-gray-800'
+          aria-label='Comment actions'
+        >
+          <MoreVertical
+            size={18}
+            className='text-gray-500 dark:text-gray-400'
+            aria-hidden='true'
+          />
         </Menu.Button>
-        <Menu.Items className='absolute right-0 mt-2 w-48 bg-white dark:bg-gray-800 rounded-lg shadow-lg py-1 z-10'>
-          {isOwner && (
-            <>
-              <Menu.Item>
-                {({ active }) => (
-                  <button
-                    onClick={() => handleEditComment(comment)}
-                    className={`${
-                      active ? 'bg-gray-100 dark:bg-gray-700' : ''
-                    } flex items-center w-full px-4 py-2 text-sm text-gray-700 dark:text-gray-300`}
-                  >
-                    <Edit2 size={16} className='mr-2' />
-                    Edit
-                  </button>
-                )}
-              </Menu.Item>
-              <Menu.Item>
-                {({ active }) => (
-                  <button
-                    onClick={() => {
-                      setDeleteModalState({
-                        isOpen: true,
-                        commentId: comment.id,
-                        author: profiles[comment.user_id] || 'Unknown User',
-                      });
-                    }}
-                    className={`${
-                      active ? 'bg-gray-100 dark:bg-gray-700' : ''
-                    } flex items-center w-full px-4 py-2 text-sm text-red-600 dark:text-red-400`}
-                  >
-                    <Trash2 size={16} className='mr-2' />
-                    Delete
-                  </button>
-                )}
-              </Menu.Item>
-            </>
-          )}
-          <Menu.Item>
-            {({ active }) => (
-              <button
-                onClick={() => {
-                  navigator.clipboard.writeText(comment.content);
-                  toast.success('Comment copied to clipboard');
-                }}
-                className={`${
-                  active ? 'bg-gray-100 dark:bg-gray-700' : ''
-                } flex items-center w-full px-4 py-2 text-sm text-gray-700 dark:text-gray-300`}
-              >
-                <Share2 size={16} className='mr-2' />
-                Copy
-              </button>
+        <Transition
+          as={Fragment}
+          enter='transition ease-out duration-100'
+          enterFrom='transform opacity-0 scale-95'
+          enterTo='transform opacity-100 scale-100'
+          leave='transition ease-in duration-75'
+          leaveFrom='transform opacity-100 scale-100'
+          leaveTo='transform opacity-0 scale-95'
+        >
+          <Menu.Items className='absolute right-0 mt-2 w-48 bg-white dark:bg-gray-800 rounded-lg shadow-lg py-1 z-10 border border-gray-200 dark:border-gray-700 focus:outline-none'>
+            {isOwner && (
+              <>
+                <Menu.Item>
+                  {({ active }) => (
+                    <button
+                      onClick={() => handleEditComment(comment)}
+                      className={`${
+                        active ? 'bg-gray-100 dark:bg-gray-700' : ''
+                      } flex items-center w-full px-4 py-2 text-sm text-gray-700 dark:text-gray-300 transition-colors`}
+                    >
+                      <Edit2 size={16} className='mr-2' aria-hidden='true' />
+                      Edit
+                    </button>
+                  )}
+                </Menu.Item>
+                <Menu.Item>
+                  {({ active }) => (
+                    <button
+                      onClick={() => {
+                        setDeleteModalState({
+                          isOpen: true,
+                          commentId: comment.id,
+                          author: profiles[comment.user_id] || 'Unknown User',
+                        });
+                      }}
+                      className={`${
+                        active ? 'bg-gray-100 dark:bg-gray-700' : ''
+                      } flex items-center w-full px-4 py-2 text-sm text-red-600 dark:text-red-500 transition-colors`}
+                    >
+                      <Trash2 size={16} className='mr-2' aria-hidden='true' />
+                      Delete
+                    </button>
+                  )}
+                </Menu.Item>
+              </>
             )}
-          </Menu.Item>
-        </Menu.Items>
+            <Menu.Item>
+              {({ active }) => (
+                <button
+                  onClick={() => {
+                    navigator.clipboard.writeText(comment.content);
+                    toast.success('Comment copied to clipboard');
+                  }}
+                  className={`${
+                    active ? 'bg-gray-100 dark:bg-gray-700' : ''
+                  } flex items-center w-full px-4 py-2 text-sm text-gray-700 dark:text-gray-300 transition-colors`}
+                >
+                  <Share2 size={16} className='mr-2' aria-hidden='true' />
+                  Copy
+                </button>
+              )}
+            </Menu.Item>
+          </Menu.Items>
+        </Transition>
       </Menu>
     );
   };
@@ -418,12 +444,13 @@ export default function CommentsSection({ bookId }: CommentsSectionProps) {
   const totalPages = Math.ceil(comments.length / commentsPerPage);
 
   return (
-    <div className='mt-8 max-w-4xl mx-auto'>
+    <section className='mt-8 max-w-4xl mx-auto' aria-label='Comments section'>
       <motion.h2
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
-        className='text-2xl font-bold mb-6'
+        className='text-2xl font-bold mb-6 text-gray-900 dark:text-gray-100 flex items-center gap-2'
       >
+        <MessageSquare className='w-6 h-6' aria-hidden='true' />
         Comments
       </motion.h2>
 
@@ -431,7 +458,7 @@ export default function CommentsSection({ bookId }: CommentsSectionProps) {
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className='mb-8'
+          className='mb-8 bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm border border-gray-200 dark:border-gray-700'
         >
           <RichTextEditor
             value={newComment}
@@ -443,7 +470,8 @@ export default function CommentsSection({ bookId }: CommentsSectionProps) {
             whileTap={{ scale: 0.98 }}
             onClick={handleCommentSubmit}
             disabled={!newComment.trim()}
-            className='mt-4 px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors'
+            className='mt-4 px-6 py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-gray-800 font-medium'
+            aria-label='Post comment'
           >
             Post Comment
           </motion.button>
@@ -454,7 +482,9 @@ export default function CommentsSection({ bookId }: CommentsSectionProps) {
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          className='flex justify-center'
+          className='flex justify-center py-8'
+          role='status'
+          aria-label='Loading comments'
         >
           <div className='animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500' />
         </motion.div>
@@ -463,11 +493,13 @@ export default function CommentsSection({ bookId }: CommentsSectionProps) {
           variants={containerVariants}
           initial='hidden'
           animate='show'
-          className='space-y-4'
+          className='space-y-6'
+          role='feed'
+          aria-label='Comments list'
         >
           <AnimatePresence mode='popLayout'>
             {currentComments.map((comment) => (
-              <motion.div
+              <motion.article
                 key={comment.id}
                 variants={itemVariants}
                 layout
@@ -479,7 +511,8 @@ export default function CommentsSection({ bookId }: CommentsSectionProps) {
                   scale: 0.95,
                   transition: { duration: 0.2 },
                 }}
-                className='bg-white dark:bg-gray-800 rounded-lg shadow-sm p-6 mb-4'
+                className='bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 border border-gray-200 dark:border-gray-700'
+                aria-label={`Comment by ${profiles[comment.user_id] || 'Unknown User'}`}
               >
                 <div className='flex items-start space-x-3'>
                   <div className='flex-1'>
@@ -488,31 +521,34 @@ export default function CommentsSection({ bookId }: CommentsSectionProps) {
                         <span className='font-semibold text-gray-900 dark:text-gray-100'>
                           {profiles[comment.user_id] || 'Unknown User'}
                         </span>
-                        <span className='text-sm text-gray-500'>
+                        <time
+                          dateTime={comment.created_at}
+                          className='text-sm text-gray-500 dark:text-gray-400'
+                        >
                           {formatDistanceToNow(new Date(comment.created_at), {
                             addSuffix: true,
                           })}
-                        </span>
+                        </time>
                       </div>
                       <CommentActions comment={comment} />
                     </div>
                     {editingComment?.id === comment.id ? (
-                      <div className='mt-2'>
+                      <div className='mt-4'>
                         <RichTextEditor
                           value={editContent}
                           onChange={setEditContent}
                           placeholder='Edit your comment...'
                         />
-                        <div className='mt-2 flex gap-2'>
+                        <div className='mt-3 flex gap-2'>
                           <button
                             onClick={handleUpdateComment}
-                            className='px-3 py-1 bg-blue-600 text-white rounded-lg hover:bg-blue-700'
+                            className='px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-gray-800 font-medium'
                           >
                             Save
                           </button>
                           <button
                             onClick={() => setEditingComment(null)}
-                            className='px-3 py-1 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300'
+                            className='px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-gray-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-gray-800 font-medium'
                           >
                             Cancel
                           </button>
@@ -520,47 +556,60 @@ export default function CommentsSection({ bookId }: CommentsSectionProps) {
                       </div>
                     ) : (
                       <div
-                        className='mt-2 text-gray-700 dark:text-gray-300 prose dark:prose-invert max-w-none'
+                        className='mt-3 text-gray-700 dark:text-gray-300 prose dark:prose-invert max-w-none'
                         dangerouslySetInnerHTML={{ __html: comment.content }}
                       />
                     )}
-                    <div className='mt-4 flex items-center space-x-4'>
+                    <div className='mt-4 flex items-center space-x-6 border-t dark:border-gray-700 pt-4'>
                       <motion.button
-                        whileHover={{ scale: 1.1 }}
-                        whileTap={{ scale: 0.9 }}
+                        whileHover={{ scale: 1.05 }}
+                        whileTap={{ scale: 0.95 }}
                         onClick={() => handleLikeToggle(comment.id)}
-                        className='flex items-center space-x-1 text-gray-500 hover:text-red-500'
+                        className={`flex items-center space-x-2 ${
+                          likedComments.has(comment.id)
+                            ? 'text-red-500 dark:text-red-400'
+                            : 'text-gray-500 dark:text-gray-400 hover:text-red-500 dark:hover:text-red-400'
+                        } transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-red-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-gray-800 rounded-lg px-2 py-1`}
+                        aria-pressed={likedComments.has(comment.id)}
+                        aria-label={
+                          likedComments.has(comment.id)
+                            ? 'Unlike comment'
+                            : 'Like comment'
+                        }
                       >
                         <Heart
                           size={18}
                           className={
-                            likedComments.has(comment.id)
-                              ? 'fill-red-500 text-red-500'
-                              : ''
+                            likedComments.has(comment.id) ? 'fill-current' : ''
                           }
+                          aria-hidden='true'
                         />
-                        <span className='text-sm'>
+                        <span className='text-sm font-medium'>
                           {likedComments.has(comment.id) ? 'Liked' : 'Like'}
                         </span>
                       </motion.button>
-                      <button className='flex items-center space-x-1 text-gray-500 hover:text-blue-500'>
-                        <MessageCircle size={18} />
-                        <span className='text-sm'>Reply</span>
-                      </button>
+                      <motion.button
+                        whileHover={{ scale: 1.05 }}
+                        whileTap={{ scale: 0.95 }}
+                        className='flex items-center space-x-2 text-gray-500 dark:text-gray-400 hover:text-blue-500 dark:hover:text-blue-400 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-gray-800 rounded-lg px-2 py-1'
+                        aria-label='Reply to comment'
+                      >
+                        <MessageCircle size={18} aria-hidden='true' />
+                        <span className='text-sm font-medium'>Reply</span>
+                      </motion.button>
                     </div>
                   </div>
                 </div>
-              </motion.div>
+              </motion.article>
             ))}
           </AnimatePresence>
         </motion.div>
       )}
 
       {totalPages > 1 && (
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          className='flex justify-center space-x-2 mt-6'
+        <nav
+          className='flex justify-center space-x-2 mt-8'
+          aria-label='Comments pagination'
         >
           {Array.from({ length: totalPages }, (_, i) => (
             <motion.button
@@ -568,16 +617,18 @@ export default function CommentsSection({ bookId }: CommentsSectionProps) {
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
               onClick={() => setCurrentPage(i + 1)}
-              className={`px-3 py-1 rounded transition-colors ${
+              className={`px-4 py-2 rounded-lg transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-gray-800 font-medium ${
                 currentPage === i + 1
                   ? 'bg-blue-600 text-white'
-                  : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                  : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600'
               }`}
+              aria-current={currentPage === i + 1 ? 'page' : undefined}
+              aria-label={`Page ${i + 1}`}
             >
               {i + 1}
             </motion.button>
           ))}
-        </motion.div>
+        </nav>
       )}
 
       <DeleteConfirmationModal
@@ -592,6 +643,6 @@ export default function CommentsSection({ bookId }: CommentsSectionProps) {
         }}
         commentAuthor={deleteModalState.author}
       />
-    </div>
+    </section>
   );
 }
