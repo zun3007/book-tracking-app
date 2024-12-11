@@ -92,23 +92,13 @@ function LandingPage() {
             poster='/images/video-poster-1.webp'
             aria-label='Background video showing someone reading a book'
           >
-            {/* Desktop Sources */}
-            <source
-              src='/videos/optimized/reading_book_landing_page_desktop.webm'
-              type='video/webm'
-              media='(min-width: 768px)'
-            />
+            {/* Desktop Source */}
             <source
               src='/videos/optimized/reading_book_landing_page_desktop.mp4'
               type='video/mp4'
               media='(min-width: 768px)'
             />
-            {/* Mobile Sources */}
-            <source
-              src='/videos/optimized/reading_book_landing_page_mobile.webm'
-              type='video/webm'
-              media='(max-width: 767px)'
-            />
+            {/* Mobile Source */}
             <source
               src='/videos/optimized/reading_book_landing_page_mobile.mp4'
               type='video/mp4'
@@ -263,23 +253,13 @@ function LandingPage() {
             poster='/images/video-poster-2.webp'
             aria-label='Promotional video for StoryTrack showing reading experience'
           >
-            {/* Desktop Sources */}
-            <source
-              src='/videos/optimized/reading_book_landing_page_1_desktop.webm'
-              type='video/webm'
-              media='(min-width: 768px)'
-            />
+            {/* Desktop Source */}
             <source
               src='/videos/optimized/reading_book_landing_page_1_desktop.mp4'
               type='video/mp4'
               media='(min-width: 768px)'
             />
-            {/* Mobile Sources */}
-            <source
-              src='/videos/optimized/reading_book_landing_page_1_mobile.webm'
-              type='video/webm'
-              media='(max-width: 767px)'
-            />
+            {/* Mobile Source */}
             <source
               src='/videos/optimized/reading_book_landing_page_1_mobile.mp4'
               type='video/mp4'

@@ -44,17 +44,11 @@ async function optimizeVideo(
 ) {
   const { width, bitrate, crf } = config;
 
-  // FFmpeg command for MP4
-  const mp4Command = `ffmpeg -i "${inputPath}" -c:v libx264 -preset slow \
+  // FFmpeg command for MP4 with improved compression
+  const mp4Command = `ffmpeg -i "${inputPath}" -c:v libx264 -preset veryslow \
     -crf ${crf} -b:v ${bitrate} -maxrate ${bitrate} -bufsize ${bitrate} \
     -vf "scale=${width}:-2" -movflags +faststart \
-    -c:a aac -b:a 128k "${outputPath}.mp4"`;
-
-  // FFmpeg command for WebM with VP9
-  const webmCommand = `ffmpeg -i "${inputPath}" -c:v libvpx-vp9 \
-    -b:v ${bitrate} -maxrate ${bitrate} -bufsize ${bitrate} \
-    -vf "scale=${width}:-2" \
-    -c:a libopus -b:a 128k "${outputPath}.webm"`;
+    -c:a aac -b:a 96k "${outputPath}.mp4"`;
 
   try {
     console.log(`Optimizing ${path.basename(inputPath)}...`);
@@ -62,10 +56,6 @@ async function optimizeVideo(
     // Run MP4 conversion
     await execAsync(mp4Command);
     console.log(`Created optimized MP4: ${path.basename(outputPath)}.mp4`);
-
-    // Run WebM conversion
-    await execAsync(webmCommand);
-    console.log(`Created optimized WebM: ${path.basename(outputPath)}.webm`);
   } catch (error) {
     console.error(`Error optimizing ${inputPath}:`, error);
   }
