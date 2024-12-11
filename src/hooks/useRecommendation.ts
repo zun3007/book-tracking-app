@@ -3,12 +3,14 @@ import { supabase } from '../config/supabaseClient';
 import { Recommendation, RecommendationMetrics } from '../types/recommendation';
 import { differenceInHours } from 'date-fns';
 import { toast } from 'react-hot-toast';
+import { Book } from '../types/supabase';
 
 export function useRecommendation(userId: string | undefined) {
   const [recommendation, setRecommendation] = useState<Recommendation | null>(
     null
   );
-  const [metrics, setMetrics] = useState<RecommendationMetrics | null>(null);
+  // Future usage will be provided by the Data Analyst.
+  const metrics: RecommendationMetrics | null = null;
   const [isLoading, setIsLoading] = useState(true);
 
   const createNewRecommendation = useCallback(async () => {
@@ -168,7 +170,7 @@ export function useRecommendation(userId: string | undefined) {
   };
 }
 
-function calculateScore(book: any, userGenres: string[]): number {
+function calculateScore(book: Book, userGenres: string[]): number {
   let score = 50; // Base score
 
   // Genre match (30%)
@@ -185,7 +187,7 @@ function calculateScore(book: any, userGenres: string[]): number {
   return Math.min(100, score);
 }
 
-function generateReason(book: any, userGenres: string[]): string {
+function generateReason(book: Book, userGenres: string[]): string {
   const matchingGenres = book.genres.filter((g: string) =>
     userGenres.includes(g)
   );
