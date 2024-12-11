@@ -30,6 +30,7 @@ import { Store } from '../../types/store';
 import { fahasaStores } from './../../data/fahasaStores';
 import { toast } from 'react-hot-toast';
 import L from 'leaflet';
+import { Search, X, MapPin } from 'lucide-react';
 
 function getGoogleMapsUrl(
   address: string,
@@ -170,6 +171,8 @@ export default function UserDashboard() {
   const [sortedStores, setSortedStores] =
     useState<StoreWithDistance[]>(fahasaStores);
   const [isLoadingLocation, setIsLoadingLocation] = useState(true);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [filteredStores, setFilteredStores] = useState<StoreWithDistance[]>([]);
 
   useEffect(() => {
     const getUserLocation = () => {
@@ -216,6 +219,19 @@ export default function UserDashboard() {
 
     getUserLocation();
   }, []);
+
+  useEffect(() => {
+    // Filter stores based on search query
+    const filtered = sortedStores.filter((store) => {
+      const searchLower = searchQuery.toLowerCase();
+      return (
+        store.name.toLowerCase().includes(searchLower) ||
+        store.address.toLowerCase().includes(searchLower) ||
+        store.phone.includes(searchQuery)
+      );
+    });
+    setFilteredStores(filtered);
+  }, [searchQuery, sortedStores]);
 
   return (
     <div className='min-h-screen bg-slate-50 mt-6'>
@@ -460,7 +476,7 @@ export default function UserDashboard() {
 
       {/* Statistics Section */}
       <section className='py-24 bg-slate-50 dark:bg-slate-800/50'>
-        <div className='container mx-auto px-4'>
+        <div className='container mx-auto p-4'>
           <div className='text-center mb-20'>
             <motion.div
               initial={{ opacity: 0, y: 20 }}
@@ -737,16 +753,49 @@ export default function UserDashboard() {
                   <div className='relative'>
                     <input
                       type='text'
-                      placeholder='Search stores...'
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                      placeholder='Search by name, address or phone...'
                       className='w-full pl-10 pr-4 py-2 rounded-lg border border-slate-200 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none'
                     />
-                    <motion.span
-                      className='absolute left-3 top-1/2 -translate-y-1/2 text-slate-400'
-                      whileHover={{ scale: 1.1 }}
-                      whileTap={{ scale: 0.9 }}
+                    <div className='absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none'>
+                      <Search className='w-4 h-4 text-slate-400' />
+                    </div>
+                    {searchQuery && (
+                      <button
+                        onClick={() => setSearchQuery('')}
+                        className='absolute right-3 top-1/2 -translate-y-1/2 p-1 rounded-full hover:bg-slate-100 text-slate-400 hover:text-slate-600 transition-colors'
+                      >
+                        <X className='w-4 h-4' />
+                      </button>
+                    )}
+                  </div>
+                  {/* Sort options */}
+                  <div className='flex items-center gap-2 mt-3 text-sm'>
+                    <span className='text-slate-500'>Sort by:</span>
+                    <button
+                      onClick={() => {
+                        const sorted = [...sortedStores].sort(
+                          (a, b) =>
+                            (a.distance || Infinity) - (b.distance || Infinity)
+                        );
+                        setSortedStores(sorted);
+                      }}
+                      className='px-2 py-1 rounded bg-blue-50 text-blue-600 hover:bg-blue-100 transition-colors'
                     >
-                      🔍
-                    </motion.span>
+                      Distance
+                    </button>
+                    <button
+                      onClick={() => {
+                        const sorted = [...sortedStores].sort((a, b) =>
+                          a.name.localeCompare(b.name)
+                        );
+                        setSortedStores(sorted);
+                      }}
+                      className='px-2 py-1 rounded bg-blue-50 text-blue-600 hover:bg-blue-100 transition-colors'
+                    >
+                      Name
+                    </button>
                   </div>
                 </div>
 
@@ -763,8 +812,13 @@ export default function UserDashboard() {
                         className='w-6 h-6 border-2 border-blue-500 border-t-transparent rounded-full'
                       />
                     </div>
+                  ) : filteredStores.length === 0 ? (
+                    <div className='flex flex-col items-center justify-center h-32 text-slate-500'>
+                      <Search className='w-6 h-6 text-slate-400 mb-2' />
+                      <p>No stores found matching your search</p>
+                    </div>
                   ) : (
-                    sortedStores.map((store) => (
+                    filteredStores.map((store) => (
                       <motion.button
                         key={store.id}
                         variants={storeItemVariants}
