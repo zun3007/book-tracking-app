@@ -1,11 +1,14 @@
+import { Suspense, lazy } from 'react';
 import { useAppSelector } from '../../app/hooks';
 import { useRecommendation } from '../../hooks/useRecommendation';
 import { useUserStats } from '../../hooks/useUserStats';
 import { motion } from 'framer-motion';
-import HeroSection from './HeroSection';
-import FeaturesSection from './FeaturesSection';
-import StatsSection from './StatsSection';
-import StoreMapSection from './StoreMapSection';
+import LoadingSpinner from '../../components/ui/LoadingSpinner';
+
+const HeroSection = lazy(() => import('./HeroSection'));
+const FeaturesSection = lazy(() => import('./FeaturesSection'));
+const StatsSection = lazy(() => import('./StatsSection'));
+const StoreMapSection = lazy(() => import('./StoreMapSection'));
 
 export default function UserDashboard() {
   const user = useAppSelector((state) => state.auth.user);
@@ -18,15 +21,26 @@ export default function UserDashboard() {
 
   return (
     <div className='min-h-screen bg-slate-50 dark:bg-slate-900 mt-6'>
-      <HeroSection
-        user={user}
-        recommendation={recommendation}
-        recLoading={recLoading}
-        handleFeedback={handleFeedback}
-      />
-      <FeaturesSection />
-      <StatsSection stats={stats} isLoading={statsLoading} />
-      <StoreMapSection />
+      <Suspense fallback={<LoadingSpinner />}>
+        <HeroSection
+          user={user}
+          recommendation={recommendation}
+          recLoading={recLoading}
+          handleFeedback={handleFeedback}
+        />
+      </Suspense>
+
+      <Suspense fallback={<LoadingSpinner />}>
+        <FeaturesSection />
+      </Suspense>
+
+      <Suspense fallback={<LoadingSpinner />}>
+        <StatsSection stats={stats} isLoading={statsLoading} />
+      </Suspense>
+
+      <Suspense fallback={<LoadingSpinner />}>
+        <StoreMapSection />
+      </Suspense>
 
       {/* Copyright Footer */}
       <motion.footer
@@ -42,10 +56,7 @@ export default function UserDashboard() {
               className='text-slate-600 dark:text-slate-400 text-sm pb-6'
             >
               © {new Date().getFullYear()} Designed & Developed by{' '}
-              <span
-                className='font-semibold text-blue-600 dark:text-blue-400 
-                hover:text-blue-700 dark:hover:text-blue-300 transition-colors'
-              >
+              <span className='font-semibold text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 transition-colors'>
                 Zun
               </span>
             </motion.div>

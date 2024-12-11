@@ -1,4 +1,4 @@
-import { useLayoutEffect, useState, useEffect } from 'react';
+import { useLayoutEffect, useState, Suspense, lazy } from 'react';
 import { useParams } from 'react-router-dom';
 import { useAppDispatch, useAppSelector } from '../../app/hooks';
 import {
@@ -12,9 +12,10 @@ import { bookService } from '../../services/bookService';
 import { motion, AnimatePresence } from 'framer-motion';
 import { supabase } from '../../utils/supabaseClient';
 import { toast } from 'react-hot-toast';
-import BookDetails from './BookDetails';
-import CommentsSection from './CommentsSection';
 import { Loader2 } from 'lucide-react';
+
+const BookDetails = lazy(() => import('./BookDetails'));
+const CommentsSection = lazy(() => import('./CommentsSection'));
 
 type Comment = {
   id: number;
@@ -258,50 +259,54 @@ export default function BookDescription() {
             </div>
 
             {/* Book Details Card */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              className='bg-white dark:bg-gray-800 rounded-2xl shadow-xl 
-                overflow-hidden border border-gray-100 dark:border-gray-700'
-            >
-              <BookDetails
-                book={book}
-                favorites={favorites}
-                handleRatingChange={handleRatingChange}
-                handleToggleFavorite={handleToggleFavorite}
-                user={user}
-              />
-            </motion.div>
+            <Suspense fallback={<LoadingSpinner />}>
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                className='bg-white dark:bg-gray-800 rounded-2xl shadow-xl 
+                  overflow-hidden border border-gray-100 dark:border-gray-700'
+              >
+                <BookDetails
+                  book={book}
+                  favorites={favorites}
+                  handleRatingChange={handleRatingChange}
+                  handleToggleFavorite={handleToggleFavorite}
+                  user={user}
+                />
+              </motion.div>
+            </Suspense>
 
             {/* Comments Section */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.2 }}
-              className='bg-white dark:bg-gray-800 rounded-2xl shadow-xl 
-                overflow-hidden border border-gray-100 dark:border-gray-700 pb-8'
-            >
-              <div className='p-6 border-b border-gray-100 dark:border-gray-700'>
-                <h2 className='text-2xl font-bold text-gray-900 dark:text-white'>
-                  Discussion
-                </h2>
-                <p className='text-gray-600 dark:text-gray-300 mt-1'>
-                  Share your thoughts about the book
-                </p>
-              </div>
+            <Suspense fallback={<LoadingSpinner />}>
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.2 }}
+                className='bg-white dark:bg-gray-800 rounded-2xl shadow-xl 
+                  overflow-hidden border border-gray-100 dark:border-gray-700 pb-8'
+              >
+                <div className='p-6 border-b border-gray-100 dark:border-gray-700'>
+                  <h2 className='text-2xl font-bold text-gray-900 dark:text-white'>
+                    Discussion
+                  </h2>
+                  <p className='text-gray-600 dark:text-gray-300 mt-1'>
+                    Share your thoughts about the book
+                  </p>
+                </div>
 
-              <CommentsSection
-                comments={comments}
-                profiles={profiles}
-                user={user}
-                bookId={bookId}
-                handleCommentSubmit={handleCommentSubmit}
-                handleTagInput={handleTagInput}
-                handleTagSelect={handleTagSelect}
-                taggedUsers={taggedUsers}
-                showSuggestions={showSuggestions}
-              />
-            </motion.div>
+                <CommentsSection
+                  comments={comments}
+                  profiles={profiles}
+                  user={user}
+                  bookId={bookId}
+                  handleCommentSubmit={handleCommentSubmit}
+                  handleTagInput={handleTagInput}
+                  handleTagSelect={handleTagSelect}
+                  taggedUsers={taggedUsers}
+                  showSuggestions={showSuggestions}
+                />
+              </motion.div>
+            </Suspense>
           </motion.div>
         </div>
       </div>
