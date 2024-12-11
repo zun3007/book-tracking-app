@@ -84,13 +84,14 @@ function LandingPage() {
         <div className='absolute top-0 left-0 w-full h-full'>
           <video
             className='w-full h-full object-cover z-0 filter blur-sm brightness-90 dark:brightness-75'
-            preload='metadata'
+            preload='auto'
             playsInline
             autoPlay
             loop
             muted
             poster='/images/video-poster-1.webp'
             aria-label='Background video showing someone reading a book'
+            fetchPriority='high'
           >
             {/* Desktop Source */}
             <source
@@ -245,13 +246,18 @@ function LandingPage() {
         <div className='absolute top-0 left-0 w-full h-full'>
           <video
             className='w-full h-full object-cover z-0 filter blur-sm brightness-90 dark:brightness-75'
-            preload='metadata'
+            preload='none'
             playsInline
             autoPlay
             loop
             muted
             poster='/images/video-poster-2.webp'
             aria-label='Promotional video for StoryTrack showing reading experience'
+            ref={(el) => {
+              if (el && ctaInView) {
+                el.load();
+              }
+            }}
           >
             {/* Desktop Source */}
             <source
