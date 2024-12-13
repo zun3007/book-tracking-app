@@ -15,12 +15,73 @@
       content="Track your reading journey, manage your book collection, and discover new stories with StoryTrack - your personal digital library companion."
     />
 
-    <!-- Favicon -->
-    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
-    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
-    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
-    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
-    <link rel="manifest" href="/site.webmanifest" />
+    <!-- Vercel Edge Cache and CDN -->
+    <meta
+      name="vercel-cache"
+      content="s-maxage=31536000, stale-while-revalidate"
+    />
+
+    <!-- Free CDN Preconnect -->
+    <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin />
+    <link rel="preconnect" href="https://unpkg.com" crossorigin />
+    <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin />
+
+    <!-- DNS Prefetch -->
+    <link rel="dns-prefetch" href="https://cdn.jsdelivr.net" />
+    <link rel="dns-prefetch" href="https://unpkg.com" />
+    <link rel="dns-prefetch" href="https://cdnjs.cloudflare.com" />
+
+    <!-- Favicon with CDN -->
+    <link
+      rel="icon"
+      type="image/svg+xml"
+      href="https://book-tracking-app-ebon.vercel.app/vite.svg"
+    />
+    <link
+      rel="apple-touch-icon"
+      sizes="180x180"
+      href="https://book-tracking-app-ebon.vercel.app/apple-touch-icon.png"
+    />
+    <link
+      rel="icon"
+      type="image/png"
+      sizes="32x32"
+      href="https://book-tracking-app-ebon.vercel.app/favicon-32x32.png"
+    />
+    <link
+      rel="icon"
+      type="image/png"
+      sizes="16x16"
+      href="https://book-tracking-app-ebon.vercel.app/favicon-16x16.png"
+    />
+    <link
+      rel="manifest"
+      href="https://book-tracking-app-ebon.vercel.app/site.webmanifest"
+    />
+
+    <!-- Asset Configuration -->
+    <script>
+      // Using Vercel's Edge Network
+      window.ASSETS_URL = 'https://book-tracking-app-ebon.vercel.app';
+
+      // JSDelivr CDN with your GitHub repo
+      window.CDN_URL =
+        'https://cdn.jsdelivr.net/gh/zun3007/book-tracking-app@main/';
+
+      // Enable Vercel Analytics
+      window.va =
+        window.va ||
+        function () {
+          (window.vaq = window.vaq || []).push(arguments);
+        };
+    </script>
+
+    <!-- Resource Hints -->
+    <link rel="preload" href="/src/main.tsx" as="script" type="module" />
+    <link rel="modulepreload" href="/src/App.tsx" />
+
+    <!-- Vercel Analytics -->
+    <script defer src="/_vercel/insights/script.js"></script>
 
     <!-- Open Graph / Facebook -->
     <meta property="og:type" content="website" />
@@ -36,11 +97,17 @@
       property="og:description"
       content="Track your reading journey, manage your book collection, and discover new stories with StoryTrack - your personal digital library companion."
     />
-    <meta property="og:image" content="/og-image.jpg" />
+    <meta
+      property="og:image"
+      content="https://book-tracking-app-ebon.vercel.app/og-image.jpg"
+    />
 
     <!-- Twitter -->
     <meta property="twitter:card" content="summary_large_image" />
-    <meta property="twitter:url" content="https://storytrack.app/" />
+    <meta
+      property="twitter:url"
+      content="https://book-tracking-app-ebon.vercel.app/"
+    />
     <meta
       property="twitter:title"
       content="StoryTrack | Your Digital Reading Companion"
