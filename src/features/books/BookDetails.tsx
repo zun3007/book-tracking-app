@@ -161,11 +161,16 @@ export default function BookDetails({
         {/* Image Section */}
         <div className='lg:w-1/3'>
           <div className='sticky top-8'>
-            <div className='aspect-[2/3] rounded-xl overflow-hidden shadow-2xl ring-1 ring-gray-200 dark:ring-gray-800'>
+            <div className='aspect-[2/3] w-full max-w-md mx-auto rounded-xl overflow-hidden shadow-2xl ring-1 ring-gray-200 dark:ring-gray-800'>
               <OptimizedImage
                 src={book.thumbnail || '/placeholder-book.jpg'}
                 alt={book.title}
-                className='w-full h-full object-cover'
+                width={400}
+                height={600}
+                objectFit='cover'
+                className='w-full h-full'
+                priority={true}
+                placeholderColor='bg-gray-200 dark:bg-gray-700'
               />
             </div>
           </div>

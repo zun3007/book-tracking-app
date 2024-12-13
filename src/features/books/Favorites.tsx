@@ -320,6 +320,7 @@ export default function FavoritesPage() {
                   <BookCard
                     book={favorite.book}
                     index={index}
+                    size='medium'
                     onFavoriteToggle={handleFavoriteToggle}
                   />
                 </motion.div>

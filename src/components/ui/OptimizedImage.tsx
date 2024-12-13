@@ -115,10 +115,12 @@ export default function OptimizedImage({
       className={containerClasses}
       style={{
         width: width ? `${width}px` : '100%',
-        height: height ? `${height}px` : '100%',
+        height: height ? `${height}px` : 'auto',
+        aspectRatio: width && height ? `${width} / ${height}` : 'auto',
+        position: 'relative',
       }}
     >
-      <picture>
+      <picture className='block w-full h-full'>
         <source type='image/webp' srcSet={`${src}?format=webp`} />
         <motion.img
           ref={imgRef}
@@ -128,7 +130,14 @@ export default function OptimizedImage({
           onClick={onClick}
           loading={priority ? 'eager' : 'lazy'}
           className={imageClasses}
-          style={{ objectFit }}
+          style={{
+            objectFit,
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            width: '100%',
+            height: '100%',
+          }}
           initial={{ opacity: 0, scale: 1.02 }}
           animate={{
             opacity: isLoading ? 0 : 1,

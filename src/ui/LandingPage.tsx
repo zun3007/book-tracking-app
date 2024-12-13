@@ -2,6 +2,7 @@ import { useSpring, animated } from '@react-spring/web';
 import { useEffect, useRef } from 'react';
 import { useInView } from 'react-intersection-observer';
 import anime from 'animejs';
+import OptimizedImage from '../components/ui/OptimizedImage';
 
 function LandingPage() {
   const heroRef = useRef<HTMLDivElement>(null);
@@ -82,36 +83,38 @@ function LandingPage() {
       {/* Hero Section */}
       <section className='relative h-screen flex flex-col justify-center items-center px-4 sm:px-8 shadow-lg pt-20 mb-0'>
         <div className='absolute top-0 left-0 w-full h-full'>
-          <video
-            className='w-full h-full object-cover z-0 filter blur-sm brightness-90 dark:brightness-75'
-            preload='auto'
-            playsInline
-            autoPlay
-            loop
-            muted
-            poster='/images/video-poster-1.webp'
-            aria-label='Background video showing someone reading a book'
-            fetchPriority='high'
-          >
-            {/* Desktop Source */}
-            <source
-              src='/videos/optimized/reading_book_landing_page_desktop.mp4'
-              type='video/mp4'
-              media='(min-width: 768px)'
-            />
-            {/* Mobile Source */}
-            <source
-              src='/videos/optimized/reading_book_landing_page_mobile.mp4'
-              type='video/mp4'
-              media='(max-width: 767px)'
-            />
-            <img
-              src='/images/video-poster-1.webp'
-              alt='Video fallback showing someone reading a book'
-              className='w-full h-full object-cover'
-              loading='lazy'
-            />
-          </video>
+          <div className='aspect-video w-full h-full relative'>
+            <video
+              className='absolute inset-0 w-full h-full object-cover z-0 filter blur-sm brightness-90 dark:brightness-75'
+              preload='auto'
+              playsInline
+              autoPlay
+              loop
+              muted
+              poster='/images/video-poster-1.webp'
+              aria-label='Background video showing someone reading a book'
+              fetchPriority='high'
+            >
+              {/* Desktop Source */}
+              <source
+                src='/videos/optimized/reading_book_landing_page_desktop.mp4'
+                type='video/mp4'
+                media='(min-width: 768px)'
+              />
+              {/* Mobile Source */}
+              <source
+                src='/videos/optimized/reading_book_landing_page_mobile.mp4'
+                type='video/mp4'
+                media='(max-width: 767px)'
+              />
+              <img
+                src='/images/video-poster-1.webp'
+                alt='Video fallback showing someone reading a book'
+                className='w-full h-full object-cover'
+                loading='lazy'
+              />
+            </video>
+          </div>
         </div>
         <div className='absolute top-0 left-0 w-full h-full bg-black opacity-40 dark:opacity-50 z-0'></div>
         <div
@@ -184,6 +187,7 @@ function LandingPage() {
                   'Sort and categorize your books into virtual shelves effortlessly.',
                 icon: '📚',
                 image: '/images/feature_1.webp',
+                dimensions: { width: 640, height: 360 },
               },
               {
                 title: 'Set Reading Goals',
@@ -191,6 +195,7 @@ function LandingPage() {
                   'Stay motivated by tracking your reading progress and goals.',
                 icon: '🎯',
                 image: '/images/feature_2.webp',
+                dimensions: { width: 640, height: 360 },
               },
               {
                 title: 'Discover New Reads',
@@ -198,6 +203,7 @@ function LandingPage() {
                   'Get personalized book recommendations tailored to your preferences.',
                 icon: '✨',
                 image: '/images/feature_3.webp',
+                dimensions: { width: 640, height: 360 },
               },
             ].map((feature, idx) => (
               <animated.div
@@ -205,11 +211,17 @@ function LandingPage() {
                 style={featureAnimations[idx]}
                 className='p-4 sm:p-6 bg-white dark:bg-dark-800 rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 max-w-full sm:max-w-lg flex flex-col items-center border border-slate-200 dark:border-dark-700'
               >
-                <img
-                  src={feature.image}
-                  alt={feature.title}
-                  className='w-full h-32 sm:h-48 object-cover rounded-t-lg mb-4'
-                />
+                <div className='w-full max-w-md mx-auto rounded-t-lg overflow-hidden'>
+                  <OptimizedImage
+                    src={feature.image}
+                    alt={feature.title}
+                    width={feature.dimensions.width}
+                    height={feature.dimensions.height}
+                    objectFit='cover'
+                    priority={idx === 0}
+                    className='rounded-t-lg'
+                  />
+                </div>
                 <div className='text-3xl sm:text-4xl mb-2'>{feature.icon}</div>
                 <h3 className='text-xl sm:text-2xl font-bold mb-2 text-slate-900 dark:text-white'>
                   {feature.title}
@@ -224,13 +236,17 @@ function LandingPage() {
           {/* Sticky Anime Character */}
           <div className='sticky top-10 w-full md:w-1/3 h-[60vh] md:h-[90vh]'>
             <div
-              className='h-full transition-transform duration-300'
+              className='h-full w-full transition-transform duration-300 flex items-center justify-center'
               ref={characterRef}
             >
-              <img
+              <OptimizedImage
                 src='/images/anime_character.webp'
                 alt='Anime Character'
-                className='h-full object-contain filter dark:brightness-90'
+                width={800}
+                height={1200}
+                objectFit='contain'
+                className='max-h-[90%] w-auto filter dark:brightness-90 hover:scale-105 transition-transform duration-300'
+                priority={false}
               />
             </div>
           </div>
@@ -244,40 +260,42 @@ function LandingPage() {
         ref={ctaRef}
       >
         <div className='absolute top-0 left-0 w-full h-full'>
-          <video
-            className='w-full h-full object-cover z-0 filter blur-sm brightness-90 dark:brightness-75'
-            preload='none'
-            playsInline
-            autoPlay
-            loop
-            muted
-            poster='/images/video-poster-2.webp'
-            aria-label='Promotional video for StoryTrack showing reading experience'
-            ref={(el) => {
-              if (el && ctaInView) {
-                el.load();
-              }
-            }}
-          >
-            {/* Desktop Source */}
-            <source
-              src='/videos/optimized/reading_book_landing_page_1_desktop.mp4'
-              type='video/mp4'
-              media='(min-width: 768px)'
-            />
-            {/* Mobile Source */}
-            <source
-              src='/videos/optimized/reading_book_landing_page_1_mobile.mp4'
-              type='video/mp4'
-              media='(max-width: 767px)'
-            />
-            <img
-              src='/images/video-poster-2.webp'
-              alt='Video fallback showing reading experience'
-              className='w-full h-full object-contain'
-              loading='lazy'
-            />
-          </video>
+          <div className='aspect-video w-full h-full relative'>
+            <video
+              className='absolute inset-0 w-full h-full object-cover z-0 filter blur-sm brightness-90 dark:brightness-75'
+              preload='none'
+              playsInline
+              autoPlay
+              loop
+              muted
+              poster='/images/video-poster-2.webp'
+              aria-label='Promotional video for StoryTrack showing reading experience'
+              ref={(el) => {
+                if (el && ctaInView) {
+                  el.load();
+                }
+              }}
+            >
+              {/* Desktop Source */}
+              <source
+                src='/videos/optimized/reading_book_landing_page_1_desktop.mp4'
+                type='video/mp4'
+                media='(min-width: 768px)'
+              />
+              {/* Mobile Source */}
+              <source
+                src='/videos/optimized/reading_book_landing_page_1_mobile.mp4'
+                type='video/mp4'
+                media='(max-width: 767px)'
+              />
+              <img
+                src='/images/video-poster-2.webp'
+                alt='Video fallback showing reading experience'
+                className='w-full h-full object-contain'
+                loading='lazy'
+              />
+            </video>
+          </div>
         </div>
         <div className='absolute top-0 left-0 w-full h-full bg-black opacity-40 dark:opacity-50 z-0'></div>
         <div className='relative z-10 flex flex-col items-center text-center'>

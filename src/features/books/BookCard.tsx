@@ -9,6 +9,7 @@ import { supabase } from '../../config/supabaseClient';
 import { toast } from 'react-hot-toast';
 import OptimizedImage from '../../components/ui/OptimizedImage';
 import { animations } from '../../config/animations';
+import clsx from 'clsx';
 
 const statusConfig = {
   reading: {
@@ -33,12 +34,14 @@ interface BookCardProps {
   book: Book;
   index?: number;
   onFavoriteToggle?: () => void;
+  size?: 'tiny' | 'small' | 'medium' | 'large';
 }
 
 export default function BookCard({
   book,
   index = 0,
   onFavoriteToggle,
+  size = 'medium',
 }: BookCardProps) {
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
@@ -88,6 +91,15 @@ export default function BookCard({
     }
   };
 
+  const imageDimensions = {
+    tiny: { width: 200, height: 300 },
+    small: { width: 300, height: 450 },
+    medium: { width: 320, height: 480 },
+    large: { width: 400, height: 600 },
+  };
+
+  const { width, height } = imageDimensions[size];
+
   return (
     <motion.div
       layout
@@ -95,9 +107,15 @@ export default function BookCard({
       whileHover={animations.hover}
       whileTap={animations.tap}
       onClick={() => navigate(`/book/${book.id}`)}
-      className='group relative bg-white dark:bg-gray-800 rounded-xl shadow-sm hover:shadow-xl overflow-hidden cursor-pointer transition-all duration-300'
+      className={clsx(
+        'group relative bg-white dark:bg-gray-800 rounded-xl shadow-sm hover:shadow-xl overflow-hidden cursor-pointer transition-all duration-300',
+        size === 'tiny' && 'max-w-[200px]',
+        size === 'small' && 'max-w-[300px]',
+        size === 'medium' && 'max-w-[320px]',
+        size === 'large' && 'max-w-[400px]'
+      )}
     >
-      <div className='relative w-full pt-[140%] overflow-hidden'>
+      <div className='relative w-full pt-[150%] overflow-hidden'>
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
@@ -107,7 +125,12 @@ export default function BookCard({
           <OptimizedImage
             src={book.thumbnail || '/placeholder-book.jpg'}
             alt={book.title}
-            className='w-full h-full object-cover transform transition-transform duration-300 group-hover:scale-105'
+            width={width}
+            height={height}
+            objectFit='cover'
+            className='w-full h-full transform transition-transform duration-300 group-hover:scale-105'
+            priority={index < 4}
+            placeholderColor='bg-gray-200 dark:bg-gray-700'
           />
           <motion.div
             initial={{ opacity: 0 }}

@@ -442,10 +442,12 @@ export default function BookshelfPage() {
                       <BookCard
                         book={book}
                         index={index}
-                        showReadStatus
-                        onReadStatusChange={(newStatus) =>
-                          handleReadStatusChange(book, newStatus)
-                        }
+                        size='tiny'
+                        onFavoriteToggle={() => {
+                          if (user?.id) {
+                            dispatch(fetchFavorites(user.id));
+                          }
+                        }}
                       />
                     </motion.div>
                   ))}

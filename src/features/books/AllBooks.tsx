@@ -336,6 +336,7 @@ export default function AllBooks() {
                 <BookCard
                   book={book}
                   index={index}
+                  size='small'
                   onFavoriteToggle={() => {
                     if (user?.id) {
                       dispatch(fetchFavorites(user.id));
