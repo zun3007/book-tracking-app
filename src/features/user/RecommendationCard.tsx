@@ -98,13 +98,13 @@ export default function RecommendationCard({
       initial={{ opacity: 0, y: 40 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: 0.2 }}
-      className='mt-16 bg-white/90 dark:bg-slate-800/90 backdrop-blur-lg rounded-3xl p-8 max-w-2xl w-full 
+      className='mt-16 bg-white/90 dark:bg-slate-800/90 backdrop-blur-lg rounded-3xl p-4 sm:p-8 max-w-full sm:max-w-2xl w-full 
         shadow-xl hover:shadow-2xl transition-all border border-slate-200/50 dark:border-slate-700/50
         hover:border-slate-300 dark:hover:border-slate-600 transform hover:scale-[1.02] duration-300'
     >
-      <div className='flex gap-8'>
+      <div className='flex flex-col sm:flex-row gap-4 sm:gap-8'>
         {/* Book Cover */}
-        <div className='w-36 h-52 flex-shrink-0 overflow-hidden rounded-2xl shadow-lg group relative'>
+        <div className='w-full sm:w-36 h-52 flex-shrink-0 overflow-hidden rounded-2xl shadow-lg group relative'>
           <div
             className='absolute inset-0 bg-gradient-to-t from-black/50 to-transparent opacity-0 
             group-hover:opacity-100 transition-opacity duration-300 z-10'
@@ -115,14 +115,14 @@ export default function RecommendationCard({
             width={144}
             height={208}
             objectFit='cover'
-            className='w-full h-full transform group-hover:scale-110 transition-transform duration-300'
+            className='w-full h-full sm:w-auto sm:h-auto transform group-hover:scale-110 transition-transform duration-300'
             priority={true}
             placeholderColor='bg-slate-200 dark:bg-slate-700'
           />
         </div>
 
         {/* Book Details */}
-        <div className='flex-1 space-y-6'>
+        <div className='flex-1 space-y-4 sm:space-y-6'>
           <div className='flex items-start justify-between gap-4'>
             <div>
               <h3
