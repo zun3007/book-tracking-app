@@ -1,8 +1,8 @@
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import { interactiveIcons } from '../../config/icons';
-import { Book } from '../../types/book';
 import OptimizedImage from '../../components/ui/OptimizedImage';
+import { Book } from './../../types/index';
 
 interface RecommendationCardProps {
   recommendation: { book: Book } | null;
