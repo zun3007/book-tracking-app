@@ -168,7 +168,7 @@ export default function BookDetails({
                 width={400}
                 height={600}
                 objectFit='cover'
-                className='w-full h-full'
+                className='w-full h-auto'
                 priority={true}
                 placeholderColor='bg-gray-200 dark:bg-gray-700'
               />
@@ -180,16 +180,16 @@ export default function BookDetails({
         <div className='lg:w-2/3 space-y-8'>
           {/* Title and Author */}
           <div className='space-y-2'>
-            <h1 className='text-4xl font-bold text-gray-900 dark:text-gray-50 tracking-tight'>
+            <h1 className='text-3xl lg:text-4xl font-bold text-gray-900 dark:text-gray-50 tracking-tight'>
               {book.title}
             </h1>
-            <p className='text-xl text-gray-600 dark:text-gray-400'>
+            <p className='text-lg lg:text-xl text-gray-600 dark:text-gray-400'>
               by {book.authors?.join(', ')}
             </p>
           </div>
 
           {/* Rating and Favorites */}
-          <div className='flex flex-wrap items-center gap-6'>
+          <div className='flex flex-wrap items-center gap-4 sm:gap-6'>
             <div className='flex items-center gap-2 bg-gray-50 dark:bg-gray-800/50 rounded-lg p-2'>
               {[1, 2, 3, 4, 5].map((rating) => (
                 <button
@@ -266,7 +266,7 @@ export default function BookDetails({
           {/* Reading Progress */}
           <section
             aria-labelledby='reading-progress-title'
-            className='space-y-8 rounded-2xl bg-white/80 dark:bg-gray-800/40 p-8 shadow-lg ring-1 ring-gray-900/10 dark:ring-white/10 backdrop-blur-sm'
+            className='space-y-8 rounded-2xl bg-white/80 dark:bg-gray-800/40 p-6 sm:p-8 shadow-lg ring-1 ring-gray-900/10 dark:ring-white/10 backdrop-blur-sm'
           >
             <motion.header
               className='flex items-center gap-4'

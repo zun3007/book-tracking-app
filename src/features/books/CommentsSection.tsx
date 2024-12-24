@@ -444,11 +444,14 @@ export default function CommentsSection({ bookId }: CommentsSectionProps) {
   const totalPages = Math.ceil(comments.length / commentsPerPage);
 
   return (
-    <section className='mt-8 max-w-4xl mx-auto' aria-label='Comments section'>
+    <section
+      className='mt-8 max-w-4xl mx-auto px-4 sm:px-6 lg:px-8'
+      aria-label='Comments section'
+    >
       <motion.h2
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
-        className='text-2xl font-bold mb-6 text-gray-900 dark:text-gray-100 flex items-center gap-2'
+        className='text-2xl sm:text-3xl font-bold mb-6 text-gray-900 dark:text-gray-100 flex items-center gap-2'
       >
         <MessageSquare className='w-6 h-6' aria-hidden='true' />
         Comments
@@ -458,23 +461,25 @@ export default function CommentsSection({ bookId }: CommentsSectionProps) {
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className='mb-8 bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm border border-gray-200 dark:border-gray-700'
+          className='mb-8 bg-white dark:bg-gray-800 rounded-xl p-4 sm:p-6 shadow-sm border border-gray-200 dark:border-gray-700'
         >
           <RichTextEditor
             value={newComment}
             onChange={setNewComment}
             placeholder='Share your thoughts...'
           />
-          <motion.button
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.98 }}
-            onClick={handleCommentSubmit}
-            disabled={!newComment.trim()}
-            className='mt-4 px-6 py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-gray-800 font-medium'
-            aria-label='Post comment'
-          >
-            Post Comment
-          </motion.button>
+          <div className='mt-4 flex flex-col sm:flex-row sm:justify-end gap-2'>
+            <motion.button
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              onClick={handleCommentSubmit}
+              disabled={!newComment.trim()}
+              className='px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-gray-800 font-medium'
+              aria-label='Post comment'
+            >
+              Post Comment
+            </motion.button>
+          </div>
         </motion.div>
       )}
 
@@ -511,12 +516,12 @@ export default function CommentsSection({ bookId }: CommentsSectionProps) {
                   scale: 0.95,
                   transition: { duration: 0.2 },
                 }}
-                className='bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 border border-gray-200 dark:border-gray-700'
+                className='bg-white dark:bg-gray-800 rounded-xl shadow-sm p-4 sm:p-6 border border-gray-200 dark:border-gray-700'
                 aria-label={`Comment by ${profiles[comment.user_id] || 'Unknown User'}`}
               >
-                <div className='flex items-start space-x-3'>
+                <div className='flex flex-col sm:flex-row sm:items-start sm:space-x-3'>
                   <div className='flex-1'>
-                    <div className='flex items-center justify-between'>
+                    <div className='flex flex-col sm:flex-row sm:items-center sm:justify-between'>
                       <div className='flex items-center space-x-2'>
                         <span className='font-semibold text-gray-900 dark:text-gray-100'>
                           {profiles[comment.user_id] || 'Unknown User'}
@@ -530,7 +535,9 @@ export default function CommentsSection({ bookId }: CommentsSectionProps) {
                           })}
                         </time>
                       </div>
-                      <CommentActions comment={comment} />
+                      <div className='mt-2 sm:mt-0'>
+                        <CommentActions comment={comment} />
+                      </div>
                     </div>
                     {editingComment?.id === comment.id ? (
                       <div className='mt-4'>
@@ -539,7 +546,7 @@ export default function CommentsSection({ bookId }: CommentsSectionProps) {
                           onChange={setEditContent}
                           placeholder='Edit your comment...'
                         />
-                        <div className='mt-3 flex gap-2'>
+                        <div className='mt-3 flex flex-col sm:flex-row gap-2'>
                           <button
                             onClick={handleUpdateComment}
                             className='px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-gray-800 font-medium'
@@ -560,7 +567,7 @@ export default function CommentsSection({ bookId }: CommentsSectionProps) {
                         dangerouslySetInnerHTML={{ __html: comment.content }}
                       />
                     )}
-                    <div className='mt-4 flex items-center space-x-6 border-t dark:border-gray-700 pt-4'>
+                    <div className='mt-4 flex flex-col sm:flex-row sm:items-center sm:space-x-6 border-t dark:border-gray-700 pt-4'>
                       <motion.button
                         whileHover={{ scale: 1.05 }}
                         whileTap={{ scale: 0.95 }}
@@ -608,7 +615,7 @@ export default function CommentsSection({ bookId }: CommentsSectionProps) {
 
       {totalPages > 1 && (
         <nav
-          className='flex justify-center space-x-2 mt-8'
+          className='flex flex-wrap justify-center gap-2 mt-8'
           aria-label='Comments pagination'
         >
           {Array.from({ length: totalPages }, (_, i) => (
@@ -617,7 +624,7 @@ export default function CommentsSection({ bookId }: CommentsSectionProps) {
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
               onClick={() => setCurrentPage(i + 1)}
-              className={`px-4 py-2 rounded-lg transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-gray-800 font-medium ${
+              className={`px-3 py-1 rounded-lg transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-gray-800 font-medium ${
                 currentPage === i + 1
                   ? 'bg-blue-600 text-white'
                   : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600'

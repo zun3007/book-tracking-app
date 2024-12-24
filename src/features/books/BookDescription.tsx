@@ -256,11 +256,8 @@ export default function BookDescription() {
 
   return (
     <AnimatePresence mode='wait'>
-      <div
-        className='min-h-screen bg-gradient-to-b from-gray-50 to-gray-100 
-        dark:from-gray-900 dark:to-gray-800 py-12 mt-16'
-      >
-        <div className='container pt-8 mx-auto px-4 pb-12 max-w-6xl'>
+      <div className='min-h-screen bg-gradient-to-b from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800 py-8 sm:py-12'>
+        <div className='container mx-auto px-4 sm:px-6 lg:px-8 max-w-4xl'>
           <motion.div {...pageTransition} className='space-y-8'>
             {/* Back Button */}
             <motion.button
@@ -285,12 +282,12 @@ export default function BookDescription() {
             {/* Book Header */}
             <div className='text-center mb-8'>
               <h1
-                className='text-4xl font-bold text-gray-900 dark:text-white mb-2 
+                className='text-3xl sm:text-4xl font-bold text-gray-900 dark:text-white mb-2 
                 leading-tight'
               >
                 {book.title}
               </h1>
-              <p className='text-xl text-gray-600 dark:text-gray-300'>
+              <p className='text-xl sm:text-2xl text-gray-600 dark:text-gray-300'>
                 by {book.authors?.join(', ')}
               </p>
             </div>
@@ -322,8 +319,8 @@ export default function BookDescription() {
                 className='bg-white dark:bg-gray-800 rounded-2xl shadow-xl 
                   overflow-hidden border border-gray-100 dark:border-gray-700 pb-8'
               >
-                <div className='p-6 border-b border-gray-100 dark:border-gray-700'>
-                  <h2 className='text-2xl font-bold text-gray-900 dark:text-white'>
+                <div className='p-6 sm:p-8 border-b border-gray-100 dark:border-gray-700'>
+                  <h2 className='text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white'>
                     Discussion
                   </h2>
                   <p className='text-gray-600 dark:text-gray-300 mt-1'>

@@ -172,22 +172,24 @@ export default function AllBooks() {
           </h1>
 
           {/* Search Box */}
-          <div className='relative flex items-center'>
-            <input
-              type='text'
-              value={searchQuery}
-              placeholder='Search books by title, author...'
-              onChange={(e) => handleSearchChange(e.target.value)}
-              className='w-full px-12 py-3.5 rounded-xl border border-gray-200 
-                dark:border-gray-600 dark:bg-gray-700 dark:text-white 
-                placeholder-gray-400 dark:placeholder-gray-400
-                focus:ring-2 focus:ring-blue-500 focus:border-transparent 
-                transition-all duration-200 text-base
-                shadow-sm hover:border-gray-300 dark:hover:border-gray-500'
-              aria-label='Search books'
-            />
-            <Search className='absolute left-4 w-5 h-5 text-gray-400 dark:text-gray-400' />
-            <div className='absolute right-3'>
+          <div className='relative flex flex-col sm:flex-row items-center gap-4'>
+            <div className='relative w-full sm:w-auto flex-grow'>
+              <input
+                type='text'
+                value={searchQuery}
+                placeholder='Search books by title, author...'
+                onChange={(e) => handleSearchChange(e.target.value)}
+                className='w-full pl-12 pr-4 py-3.5 rounded-xl border border-gray-200 
+                  dark:border-gray-600 dark:bg-gray-700 dark:text-white 
+                  placeholder-gray-400 dark:placeholder-gray-400
+                  focus:ring-2 focus:ring-blue-500 focus:border-transparent 
+                  transition-all duration-200 text-base
+                  shadow-sm hover:border-gray-300 dark:hover:border-gray-500'
+                aria-label='Search books'
+              />
+              <Search className='absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400 dark:text-gray-400' />
+            </div>
+            <div className='sm:absolute sm:right-3'>
               <VoiceSearchButton
                 onSearch={handleVoiceSearch}
                 isSearching={isLoading}
@@ -247,7 +249,7 @@ export default function AllBooks() {
             <label className='text-sm font-semibold text-gray-700 dark:text-gray-200'>
               Filter by Rating
             </label>
-            <div className='flex items-center gap-3'>
+            <div className='flex flex-wrap items-center gap-3'>
               {[1, 2, 3, 4, 5].map((rating) => (
                 <button
                   key={rating}
@@ -283,7 +285,7 @@ export default function AllBooks() {
               onChange={(e) =>
                 handleSortChange(e.target.value as FilterState['sortBy'])
               }
-              className='w-full md:w-64 px-4 py-2.5 rounded-lg border border-gray-200 
+              className='w-full sm:w-64 px-4 py-2.5 rounded-lg border border-gray-200 
                 dark:border-gray-600 dark:bg-gray-700 dark:text-white 
                 focus:ring-2 focus:ring-blue-500 focus:border-transparent 
                 transition-all duration-200 bg-white dark:bg-gray-700
@@ -350,7 +352,7 @@ export default function AllBooks() {
 
         {/* Pagination Controls */}
         {!isLoading && books.length > 0 && (
-          <div className='flex justify-center items-center space-x-3 py-6 bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-100 dark:border-gray-700 px-4'>
+          <div className='flex flex-col sm:flex-row justify-center items-center space-y-3 sm:space-y-0 sm:space-x-3 py-6 bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-100 dark:border-gray-700 px-4'>
             <button
               onClick={() => handlePageChange(page - 1)}
               disabled={page === 1}
@@ -364,7 +366,7 @@ export default function AllBooks() {
             </button>
 
             {/* Page Numbers */}
-            <div className='flex space-x-2'>
+            <div className='flex flex-wrap justify-center space-x-2'>
               {(() => {
                 const totalPages = Math.ceil(totalBooks / itemsPerPage);
                 const pageNumbers = [];
