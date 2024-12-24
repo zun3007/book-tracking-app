@@ -177,9 +177,9 @@ function LandingPage() {
         </div>
 
         {/* Features Content */}
-        <div className='flex flex-col md:flex-row justify-between items-start gap-8 max-w-7xl mx-auto'>
+        <div className='flex flex-col md:flex-row justify-between items-start gap-8 max-w-7xl mx-auto px-4 sm:px-6'>
           {/* Features Grid */}
-          <div className='flex-1 space-y-8 sm:space-y-12'>
+          <div className='flex-1 space-y-8 sm:space-y-12 w-full'>
             {[
               {
                 title: 'Organize Your Books',
@@ -209,9 +209,9 @@ function LandingPage() {
               <animated.div
                 key={idx}
                 style={featureAnimations[idx]}
-                className='p-4 sm:p-6 bg-white dark:bg-dark-800 rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 max-w-full sm:max-w-lg flex flex-col items-center border border-slate-200 dark:border-dark-700'
+                className='p-4 sm:p-6 bg-white dark:bg-dark-800 rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 w-full mx-auto sm:max-w-[calc(100%-2rem)] md:max-w-lg flex flex-col items-center border border-slate-200 dark:border-dark-700'
               >
-                <div className='w-full max-w-md mx-auto rounded-t-lg overflow-hidden'>
+                <div className='w-full rounded-t-lg overflow-hidden aspect-[16/9] relative'>
                   <OptimizedImage
                     src={feature.image}
                     alt={feature.title}
@@ -219,14 +219,16 @@ function LandingPage() {
                     height={feature.dimensions.height}
                     objectFit='cover'
                     priority={idx === 0}
-                    className='rounded-t-lg'
+                    className='rounded-t-lg w-full sm:w-full h-full sm:h-full absolute inset-0 object-cover object-[85%_35%] sm:object-[60%_35%] transform hover:scale-105 transition-transform duration-500'
                   />
                 </div>
-                <div className='text-3xl sm:text-4xl mb-2'>{feature.icon}</div>
-                <h3 className='text-xl sm:text-2xl font-bold mb-2 text-slate-900 dark:text-white'>
+                <div className='text-3xl sm:text-4xl mb-2 mt-4'>
+                  {feature.icon}
+                </div>
+                <h3 className='text-xl sm:text-2xl font-bold mb-2 text-slate-900 dark:text-white text-center'>
                   {feature.title}
                 </h3>
-                <p className='text-base sm:text-lg text-slate-600 dark:text-slate-300 text-center'>
+                <p className='text-base sm:text-lg text-slate-600 dark:text-slate-300 text-center px-2 sm:px-4'>
                   {feature.description}
                 </p>
               </animated.div>
@@ -234,7 +236,7 @@ function LandingPage() {
           </div>
 
           {/* Sticky Anime Character */}
-          <div className='sticky top-10 w-full md:w-1/3 h-[60vh] md:h-[90vh]'>
+          <div className='sticky top-10 hidden md:block w-1/3 h-[90vh]'>
             <div
               className='h-full w-full transition-transform duration-300 flex items-center justify-center'
               ref={characterRef}
