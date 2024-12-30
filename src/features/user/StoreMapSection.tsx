@@ -407,7 +407,7 @@ export default function StoreMapSection() {
 
             {/* Map */}
             <div
-              className='flex-1 rounded-2xl overflow-hidden border border-slate-200/50 dark:border-slate-700/50 
+              className='lg:flex-1 rounded-2xl overflow-hidden border border-slate-200/50 dark:border-slate-700/50 
               bg-slate-100 dark:bg-slate-800 shadow-lg h-[600px]'
             >
               <MapContainer
