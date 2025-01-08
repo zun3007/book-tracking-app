@@ -156,8 +156,8 @@ export default function BookDetails({
   };
 
   return (
-    <div className='max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8'>
-      <div className='flex flex-col lg:flex-row gap-8'>
+    <div className='max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 mt-4 sm:mt-6 md:mt-8'>
+      <div className='flex flex-col lg:flex-row gap-6 sm:gap-8'>
         {/* Image Section */}
         <div className='lg:w-1/3'>
           <div className='sticky top-8'>
@@ -177,7 +177,7 @@ export default function BookDetails({
         </div>
 
         {/* Content Section */}
-        <div className='lg:w-2/3 space-y-8'>
+        <div className='lg:w-2/3 space-y-6 sm:space-y-8'>
           {/* Title and Author */}
           <div className='space-y-2'>
             <h1 className='text-3xl lg:text-4xl font-bold text-gray-900 dark:text-gray-50 tracking-tight'>

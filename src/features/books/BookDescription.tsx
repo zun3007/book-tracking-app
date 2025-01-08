@@ -256,9 +256,9 @@ export default function BookDescription() {
 
   return (
     <AnimatePresence mode='wait'>
-      <div className='min-h-screen bg-gradient-to-b from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800 py-8 sm:py-12'>
-        <div className='container mx-auto px-4 sm:px-6 lg:px-8 max-w-4xl'>
-          <motion.div {...pageTransition} className='space-y-8'>
+      <div className='min-h-screen bg-gradient-to-b from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800 py-4 sm:py-8 md:py-12 mt-8'>
+        <div className='container pt-4 mx-auto px-4 sm:px-6 lg:px-8 max-w-5xl'>
+          <motion.div {...pageTransition} className='space-y-4 sm:space-y-8'>
             {/* Back Button */}
             <motion.button
               onClick={() => navigate(-1)}
@@ -266,28 +266,29 @@ export default function BookDescription() {
               animate={{ opacity: 1, x: 0 }}
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
-              className='group flex items-center gap-2 px-4 py-2 rounded-xl 
+              className='group flex items-center gap-2 px-3 sm:px-4 py-2 rounded-xl 
                 bg-white dark:bg-gray-800 shadow-md hover:shadow-lg
                 border border-gray-200 dark:border-gray-700
                 text-gray-700 dark:text-gray-200
-                transition-all duration-200 ease-in-out'
+                transition-all duration-200 ease-in-out
+                text-sm sm:text-base'
             >
               <ArrowLeft
-                className='w-5 h-5 transition-transform duration-200 
+                className='w-4 h-4 sm:w-5 sm:h-5 transition-transform duration-200 
                 group-hover:-translate-x-1'
               />
               <span className='font-medium'>Back</span>
             </motion.button>
 
             {/* Book Header */}
-            <div className='text-center mb-8'>
+            <div className='text-center mb-4 sm:mb-8 px-2 sm:px-4'>
               <h1
-                className='text-3xl sm:text-4xl font-bold text-gray-900 dark:text-white mb-2 
+                className='text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-2 
                 leading-tight'
               >
                 {book.title}
               </h1>
-              <p className='text-xl sm:text-2xl text-gray-600 dark:text-gray-300'>
+              <p className='text-lg sm:text-xl md:text-2xl text-gray-600 dark:text-gray-300'>
                 by {book.authors?.join(', ')}
               </p>
             </div>
@@ -298,7 +299,8 @@ export default function BookDescription() {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 className='bg-white dark:bg-gray-800 rounded-2xl shadow-xl 
-                  overflow-hidden border border-gray-100 dark:border-gray-700'
+                  overflow-hidden border border-gray-100 dark:border-gray-700
+                  mx-auto'
               >
                 <BookDetails
                   book={book}
@@ -317,13 +319,14 @@ export default function BookDescription() {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.2 }}
                 className='bg-white dark:bg-gray-800 rounded-2xl shadow-xl 
-                  overflow-hidden border border-gray-100 dark:border-gray-700 pb-8'
+                  overflow-hidden border border-gray-100 dark:border-gray-700 
+                  pb-6 sm:pb-8'
               >
-                <div className='p-6 sm:p-8 border-b border-gray-100 dark:border-gray-700'>
-                  <h2 className='text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white'>
+                <div className='p-4 sm:p-6 md:p-8 border-b border-gray-100 dark:border-gray-700'>
+                  <h2 className='text-xl sm:text-2xl md:text-3xl font-bold text-gray-900 dark:text-white'>
                     Discussion
                   </h2>
-                  <p className='text-gray-600 dark:text-gray-300 mt-1'>
+                  <p className='text-sm sm:text-base text-gray-600 dark:text-gray-300 mt-1'>
                     Share your thoughts about the book
                   </p>
                 </div>
@@ -332,7 +335,7 @@ export default function BookDescription() {
                   comments={comments}
                   profiles={profiles}
                   user={user}
-                  bookId={bookId}
+                  bookId={bookId || ''}
                   handleCommentSubmit={handleCommentSubmit}
                   handleTagInput={handleTagInput}
                   handleTagSelect={handleTagSelect}

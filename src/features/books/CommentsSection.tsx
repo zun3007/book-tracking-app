@@ -445,15 +445,15 @@ export default function CommentsSection({ bookId }: CommentsSectionProps) {
 
   return (
     <section
-      className='mt-8 max-w-4xl mx-auto px-4 sm:px-6 lg:px-8'
+      className='mt-4 sm:mt-8 max-w-4xl mx-auto px-3 sm:px-6 lg:px-8'
       aria-label='Comments section'
     >
       <motion.h2
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
-        className='text-2xl sm:text-3xl font-bold mb-6 text-gray-900 dark:text-gray-100 flex items-center gap-2'
+        className='text-xl sm:text-2xl font-bold mb-4 sm:mb-6 text-gray-900 dark:text-gray-100 flex items-center gap-2'
       >
-        <MessageSquare className='w-6 h-6' aria-hidden='true' />
+        <MessageSquare className='w-5 h-5 sm:w-6 sm:h-6' aria-hidden='true' />
         Comments
       </motion.h2>
 
@@ -461,20 +461,25 @@ export default function CommentsSection({ bookId }: CommentsSectionProps) {
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className='mb-8 bg-white dark:bg-gray-800 rounded-xl p-4 sm:p-6 shadow-sm border border-gray-200 dark:border-gray-700'
+          className='mb-6 sm:mb-8 bg-white dark:bg-gray-800 rounded-xl p-3 sm:p-6 shadow-sm border border-gray-200 dark:border-gray-700'
         >
           <RichTextEditor
             value={newComment}
             onChange={setNewComment}
             placeholder='Share your thoughts...'
           />
-          <div className='mt-4 flex flex-col sm:flex-row sm:justify-end gap-2'>
+          <div className='mt-3 sm:mt-4 flex justify-end'>
             <motion.button
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
               onClick={handleCommentSubmit}
               disabled={!newComment.trim()}
-              className='px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-gray-800 font-medium'
+              className='w-full sm:w-auto px-4 py-2 bg-blue-600 text-white rounded-lg 
+                hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed 
+                transition-colors focus:outline-none focus-visible:ring-2 
+                focus-visible:ring-blue-500 focus-visible:ring-offset-2 
+                dark:focus-visible:ring-offset-gray-800 font-medium
+                text-sm sm:text-base'
               aria-label='Post comment'
             >
               Post Comment
@@ -487,7 +492,7 @@ export default function CommentsSection({ bookId }: CommentsSectionProps) {
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          className='flex justify-center py-8'
+          className='flex justify-center py-6 sm:py-8'
           role='status'
           aria-label='Loading comments'
         >
@@ -498,7 +503,7 @@ export default function CommentsSection({ bookId }: CommentsSectionProps) {
           variants={containerVariants}
           initial='hidden'
           animate='show'
-          className='space-y-6'
+          className='space-y-4 sm:space-y-6'
           role='feed'
           aria-label='Comments list'
         >
@@ -516,31 +521,33 @@ export default function CommentsSection({ bookId }: CommentsSectionProps) {
                   scale: 0.95,
                   transition: { duration: 0.2 },
                 }}
-                className='bg-white dark:bg-gray-800 rounded-xl shadow-sm p-4 sm:p-6 border border-gray-200 dark:border-gray-700'
+                className='bg-white dark:bg-gray-800 rounded-xl shadow-sm p-3 sm:p-6 
+                  border border-gray-200 dark:border-gray-700'
                 aria-label={`Comment by ${profiles[comment.user_id] || 'Unknown User'}`}
               >
-                <div className='flex flex-col sm:flex-row sm:items-start sm:space-x-3'>
+                <div className='flex flex-col space-y-3 sm:space-y-0 sm:flex-row sm:items-start sm:space-x-3'>
                   <div className='flex-1'>
-                    <div className='flex flex-col sm:flex-row sm:items-center sm:justify-between'>
-                      <div className='flex items-center space-x-2'>
-                        <span className='font-semibold text-gray-900 dark:text-gray-100'>
+                    <div className='flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-4'>
+                      <div className='flex items-center gap-2 flex-wrap'>
+                        <span className='font-semibold text-gray-900 dark:text-gray-100 text-sm sm:text-base'>
                           {profiles[comment.user_id] || 'Unknown User'}
                         </span>
                         <time
                           dateTime={comment.created_at}
-                          className='text-sm text-gray-500 dark:text-gray-400'
+                          className='text-xs sm:text-sm text-gray-500 dark:text-gray-400'
                         >
                           {formatDistanceToNow(new Date(comment.created_at), {
                             addSuffix: true,
                           })}
                         </time>
                       </div>
-                      <div className='mt-2 sm:mt-0'>
+                      <div className='self-end sm:self-auto'>
                         <CommentActions comment={comment} />
                       </div>
                     </div>
+
                     {editingComment?.id === comment.id ? (
-                      <div className='mt-4'>
+                      <div className='mt-3 sm:mt-4'>
                         <RichTextEditor
                           value={editContent}
                           onChange={setEditContent}
@@ -549,13 +556,17 @@ export default function CommentsSection({ bookId }: CommentsSectionProps) {
                         <div className='mt-3 flex flex-col sm:flex-row gap-2'>
                           <button
                             onClick={handleUpdateComment}
-                            className='px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-gray-800 font-medium'
+                            className='px-4 py-2 bg-blue-600 text-white rounded-lg 
+                              hover:bg-blue-700 transition-colors text-sm sm:text-base'
                           >
                             Save
                           </button>
                           <button
                             onClick={() => setEditingComment(null)}
-                            className='px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-gray-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-gray-800 font-medium'
+                            className='px-4 py-2 bg-gray-200 dark:bg-gray-700 
+                              text-gray-700 dark:text-gray-300 rounded-lg 
+                              hover:bg-gray-300 dark:hover:bg-gray-600 
+                              transition-colors text-sm sm:text-base'
                           >
                             Cancel
                           </button>
@@ -563,46 +574,44 @@ export default function CommentsSection({ bookId }: CommentsSectionProps) {
                       </div>
                     ) : (
                       <div
-                        className='mt-3 text-gray-700 dark:text-gray-300 prose dark:prose-invert max-w-none'
+                        className='mt-3 text-sm sm:text-base text-gray-700 dark:text-gray-300 
+                          prose dark:prose-invert max-w-none'
                         dangerouslySetInnerHTML={{ __html: comment.content }}
                       />
                     )}
-                    <div className='mt-4 flex flex-col sm:flex-row sm:items-center sm:space-x-6 border-t dark:border-gray-700 pt-4'>
+
+                    <div className='mt-4 flex flex-wrap gap-3 sm:gap-6 border-t dark:border-gray-700 pt-3 sm:pt-4'>
                       <motion.button
                         whileHover={{ scale: 1.05 }}
                         whileTap={{ scale: 0.95 }}
                         onClick={() => handleLikeToggle(comment.id)}
-                        className={`flex items-center space-x-2 ${
+                        className={`flex items-center gap-1.5 sm:gap-2 text-sm sm:text-base ${
                           likedComments.has(comment.id)
                             ? 'text-red-500 dark:text-red-400'
                             : 'text-gray-500 dark:text-gray-400 hover:text-red-500 dark:hover:text-red-400'
-                        } transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-red-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-gray-800 rounded-lg px-2 py-1`}
+                        } transition-colors`}
                         aria-pressed={likedComments.has(comment.id)}
-                        aria-label={
-                          likedComments.has(comment.id)
-                            ? 'Unlike comment'
-                            : 'Like comment'
-                        }
                       >
                         <Heart
-                          size={18}
+                          size={16}
                           className={
                             likedComments.has(comment.id) ? 'fill-current' : ''
                           }
-                          aria-hidden='true'
                         />
-                        <span className='text-sm font-medium'>
+                        <span className='font-medium'>
                           {likedComments.has(comment.id) ? 'Liked' : 'Like'}
                         </span>
                       </motion.button>
+
                       <motion.button
                         whileHover={{ scale: 1.05 }}
                         whileTap={{ scale: 0.95 }}
-                        className='flex items-center space-x-2 text-gray-500 dark:text-gray-400 hover:text-blue-500 dark:hover:text-blue-400 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-gray-800 rounded-lg px-2 py-1'
-                        aria-label='Reply to comment'
+                        className='flex items-center gap-1.5 sm:gap-2 text-sm sm:text-base
+                          text-gray-500 dark:text-gray-400 hover:text-blue-500 
+                          dark:hover:text-blue-400 transition-colors'
                       >
-                        <MessageCircle size={18} aria-hidden='true' />
-                        <span className='text-sm font-medium'>Reply</span>
+                        <MessageCircle size={16} />
+                        <span className='font-medium'>Reply</span>
                       </motion.button>
                     </div>
                   </div>
@@ -615,7 +624,7 @@ export default function CommentsSection({ bookId }: CommentsSectionProps) {
 
       {totalPages > 1 && (
         <nav
-          className='flex flex-wrap justify-center gap-2 mt-8'
+          className='flex flex-wrap justify-center gap-2 mt-6 sm:mt-8'
           aria-label='Comments pagination'
         >
           {Array.from({ length: totalPages }, (_, i) => (
@@ -624,11 +633,13 @@ export default function CommentsSection({ bookId }: CommentsSectionProps) {
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
               onClick={() => setCurrentPage(i + 1)}
-              className={`px-3 py-1 rounded-lg transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-gray-800 font-medium ${
-                currentPage === i + 1
-                  ? 'bg-blue-600 text-white'
-                  : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600'
-              }`}
+              className={`w-8 h-8 sm:w-10 sm:h-10 rounded-lg transition-colors 
+                text-sm sm:text-base font-medium
+                ${
+                  currentPage === i + 1
+                    ? 'bg-blue-600 text-white'
+                    : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600'
+                }`}
               aria-current={currentPage === i + 1 ? 'page' : undefined}
               aria-label={`Page ${i + 1}`}
             >
