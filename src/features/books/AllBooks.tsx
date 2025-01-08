@@ -4,7 +4,7 @@ import { fetchAllBooks, fetchFavorites } from './bookSlice';
 import { motion, AnimatePresence } from 'framer-motion';
 import BookCard from './BookCard';
 import VoiceSearchButton from '../../components/VoiceSearchButton';
-import { Search } from 'lucide-react';
+import { Search, ChevronLeft, ChevronRight } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import Fuse from 'fuse.js';
 import { useDebounce } from '@uidotdev/usehooks';
@@ -352,21 +352,22 @@ export default function AllBooks() {
 
         {/* Pagination Controls */}
         {!isLoading && books.length > 0 && (
-          <div className='flex flex-col sm:flex-row justify-center items-center space-y-3 sm:space-y-0 sm:space-x-3 py-6 bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-100 dark:border-gray-700 px-4'>
+          <div className='flex justify-center items-center space-x-3 py-6 bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-100 dark:border-gray-700 px-4'>
             <button
               onClick={() => handlePageChange(page - 1)}
               disabled={page === 1}
-              className='px-4 py-2 rounded-lg border border-gray-200 dark:border-gray-600 
+              className='p-2 rounded-lg border border-gray-200 dark:border-gray-600 
                 disabled:opacity-50 disabled:cursor-not-allowed 
                 hover:bg-gray-50 dark:hover:bg-gray-700 
                 text-gray-700 dark:text-gray-300
-                transition-all duration-200 font-medium'
+                transition-all duration-200'
+              aria-label='Previous page'
             >
-              Previous
+              <ChevronLeft className='w-5 h-5' />
             </button>
 
             {/* Page Numbers */}
-            <div className='flex flex-wrap justify-center space-x-2'>
+            <div className='flex items-center space-x-2'>
               {(() => {
                 const totalPages = Math.ceil(totalBooks / itemsPerPage);
                 const pageNumbers = [];
@@ -381,7 +382,7 @@ export default function AllBooks() {
                       <button
                         key={i}
                         onClick={() => handlePageChange(i)}
-                        className={`px-4 py-2 rounded-lg font-medium transition-all duration-200 ${
+                        className={`w-10 h-10 rounded-lg font-medium transition-all duration-200 ${
                           page === i
                             ? 'bg-blue-500 text-white shadow-md hover:bg-blue-600'
                             : 'border border-gray-200 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700'
@@ -411,13 +412,14 @@ export default function AllBooks() {
             <button
               onClick={() => handlePageChange(page + 1)}
               disabled={page >= Math.ceil(totalBooks / itemsPerPage)}
-              className='px-4 py-2 rounded-lg border border-gray-200 dark:border-gray-600 
+              className='p-2 rounded-lg border border-gray-200 dark:border-gray-600 
                 disabled:opacity-50 disabled:cursor-not-allowed 
                 hover:bg-gray-50 dark:hover:bg-gray-700 
                 text-gray-700 dark:text-gray-300
-                transition-all duration-200 font-medium'
+                transition-all duration-200'
+              aria-label='Next page'
             >
-              Next
+              <ChevronRight className='w-5 h-5' />
             </button>
           </div>
         )}
