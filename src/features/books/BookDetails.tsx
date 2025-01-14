@@ -302,14 +302,15 @@ export default function BookDetails({
                   const isActive = currentStatus === status;
                   const colorClasses = {
                     gray: {
-                      bg: 'bg-gradient-to-br from-gray-100 to-gray-50 dark:from-gray-800 dark:to-gray-800/50',
-                      border: 'border-gray-200 dark:border-gray-700',
-                      text: 'text-gray-700 dark:text-gray-200',
-                      hover: 'hover:border-gray-300 dark:hover:border-gray-600',
+                      bg: 'bg-gradient-to-br from-slate-100 to-slate-50 dark:from-slate-800 dark:to-slate-800/50',
+                      border: 'border-slate-300 dark:border-slate-600',
+                      text: 'text-slate-800 dark:text-slate-200',
+                      hover:
+                        'hover:border-slate-400 dark:hover:border-slate-500',
                       active: {
-                        bg: 'bg-gradient-to-br from-gray-200 to-gray-100 dark:from-gray-700 dark:to-gray-800',
-                        text: 'text-gray-900 dark:text-white',
-                        icon: 'text-gray-700 dark:text-gray-200',
+                        bg: 'bg-gradient-to-br from-slate-200 to-slate-100 dark:from-slate-700 dark:to-slate-800',
+                        text: 'text-slate-900 dark:text-white',
+                        icon: 'text-slate-800 dark:text-slate-200',
                       },
                     },
                     blue: {
