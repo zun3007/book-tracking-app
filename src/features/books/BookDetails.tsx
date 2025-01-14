@@ -137,7 +137,7 @@ export default function BookDetails({
             <span>{readingStatusConfig[status].emoji}</span>
             <span>
               {status === 'none'
-                ? 'Added to reading list'
+                ? 'See you again 👋'
                 : status === 'reading'
                   ? 'Happy reading!'
                   : 'Congratulations on finishing!'}
@@ -345,7 +345,7 @@ export default function BookDetails({
                           status as keyof typeof readingStatusConfig
                         )
                       }
-                      disabled={isUpdating || !user}
+                      disabled={isUpdating || !user || isActive}
                       role='radio'
                       aria-checked={isActive}
                       aria-label={`Mark as ${config.label}`}
@@ -355,21 +355,25 @@ export default function BookDetails({
                         focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-gray-900
                         ${
                           isActive
-                            ? `${colorClasses[config.color].border} ${colorClasses[config.color].bg} focus-visible:ring-${config.color}-500/50`
+                            ? `${colorClasses[config.color].border} ${colorClasses[config.color].bg} focus-visible:ring-${config.color}-500/50 cursor-default`
                             : 'border-gray-200 dark:border-gray-700 hover:bg-gray-50/80 dark:hover:bg-gray-800/30 focus-visible:ring-gray-500/50'
                         }
                         disabled:opacity-60 disabled:cursor-not-allowed
                         hover:shadow-lg hover:scale-[1.02]
                         transform-gpu backdrop-blur-[2px]
-                        ${!user ? 'cursor-not-allowed' : 'cursor-pointer'}
+                        ${!user ? 'cursor-not-allowed' : isActive ? 'cursor-default' : 'cursor-pointer'}
                       `}
                       initial={{ opacity: 0, y: 20 }}
                       animate={{ opacity: 1, y: 0 }}
                       whileHover={
-                        !isUpdating && user ? config.animation.hover : undefined
+                        !isUpdating && user && !isActive
+                          ? config.animation.hover
+                          : undefined
                       }
                       whileTap={
-                        !isUpdating && user ? config.animation.tap : undefined
+                        !isUpdating && user && !isActive
+                          ? config.animation.tap
+                          : undefined
                       }
                     >
                       {/* Background gradient */}
